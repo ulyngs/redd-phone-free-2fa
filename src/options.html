@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReDD 2FA — Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+    <div class="options-container">
+        <div class="options-header">
+            <h1>ReDD 2FA</h1>
+            <p class="subtitle">Backup & Restore</p>
+        </div>
+
+        <div class="options-section">
+            <h2>Export Backup</h2>
+            <p class="section-desc">Create an encrypted backup of all your accounts. You'll need to enter your master
+                passphrase first, then choose a password for the backup file.</p>
+
+            <div class="form-group">
+                <label for="master-passphrase">Master passphrase</label>
+                <input type="password" id="master-passphrase" placeholder="Your master passphrase" autocomplete="off">
+            </div>
+            <button id="unlock-for-export" class="btn-primary" style="margin-bottom: 16px;">Unlock</button>
+
+            <div id="export-section" style="display: none;">
+                <div class="form-group">
+                    <label for="export-password">Backup password</label>
+                    <input type="password" id="export-password" placeholder="Password for this backup file"
+                        autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="export-password-confirm">Confirm backup password</label>
+                    <input type="password" id="export-password-confirm" placeholder="Confirm password"
+                        autocomplete="off">
+                </div>
+                <p id="export-error" class="error-text" style="display: none;"></p>
+                <div class="btn-row">
+                    <button id="export-encrypted-btn" class="btn-primary">Export Encrypted Backup</button>
+                    <button id="export-plain-btn" class="btn-secondary">Export Plain URIs</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="options-section">
+            <h2>Import Backup</h2>
+            <p class="section-desc">Restore accounts from a backup file. Supports encrypted JSON backups and plain
+                otpauth:// URI text files.</p>
+
+            <div id="import-unlock-section">
+                <div class="form-group">
+                    <label for="import-master-passphrase">Master passphrase</label>
+                    <input type="password" id="import-master-passphrase" placeholder="Your master passphrase"
+                        autocomplete="off">
+                </div>
+                <button id="unlock-for-import" class="btn-primary" style="margin-bottom: 16px;">Unlock</button>
+            </div>
+
+            <div id="import-section" style="display: none;">
+                <div class="form-group">
+                    <label for="import-file">Select backup file</label>
+                    <input type="file" id="import-file" accept=".json,.txt">
+                </div>
+                <div id="import-password-group" class="form-group" style="display: none;">
+                    <label for="import-password">Backup password</label>
+                    <input type="password" id="import-password" placeholder="Password used during export"
+                        autocomplete="off">
+                </div>
+                <p id="import-error" class="error-text" style="display: none;"></p>
+                <p id="import-success" class="success-text" style="display: none;"></p>
+                <button id="import-btn" class="btn-primary">Import</button>
+            </div>
+        </div>
+
+        <footer>
+            Made with ❤️ by <a href="https://reddfocus.org" target="_blank">reddfocus.org</a>
+        </footer>
+    </div>
+    <script src="options.js"></script>
+</body>
+
+</html>
