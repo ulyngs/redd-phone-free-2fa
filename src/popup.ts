@@ -49,14 +49,7 @@ const settingsDropdown = $('settings-dropdown');
 // Modal
 const accountModalOverlay = $('account-modal-overlay');
 const modalTitle = $('modal-title');
-const tabUri = $('tab-uri');
-const tabManual = $('tab-manual');
-const uriPanel = $('uri-panel');
-const manualPanel = $('manual-panel');
-const uriInput = $('uri-input') as HTMLTextAreaElement;
-const uriFeedback = $('uri-feedback');
-const manualIssuer = $('manual-issuer') as HTMLInputElement;
-const manualAccount = $('manual-account') as HTMLInputElement;
+const manualLabel = $('manual-label') as HTMLInputElement;
 const manualSecret = $('manual-secret') as HTMLInputElement;
 const secretValidation = $('secret-validation');
 const modalError = $('modal-error');
@@ -234,26 +227,6 @@ function initEventListeners() {
     $('modal-cancel-btn').addEventListener('click', closeAccountModal);
     modalSaveBtn.addEventListener('click', handleSaveAccount);
 
-    // Tab switching
-    tabUri.addEventListener('click', () => switchTab('uri'));
-    tabManual.addEventListener('click', () => switchTab('manual'));
-
-    // URI real-time parsing
-    uriInput.addEventListener('input', () => {
-        const parsed = parseOtpauthURI(uriInput.value.trim());
-        if (uriInput.value.trim().length === 0) {
-            hideElement(uriFeedback);
-        } else if (parsed) {
-            uriFeedback.className = 'feedback-text valid';
-            uriFeedback.textContent = `✓ ${parsed.issuer || 'Unknown'} — ${parsed.accountName}`;
-            showElement(uriFeedback);
-        } else {
-            uriFeedback.className = 'feedback-text invalid';
-            uriFeedback.textContent = 'Invalid otpauth:// URI';
-            showElement(uriFeedback);
-        }
-    });
-
     // Secret validation
     manualSecret.addEventListener('input', () => {
         const val = manualSecret.value.trim();
@@ -261,11 +234,11 @@ function initEventListeners() {
             hideElement(secretValidation);
         } else if (validateBase32(val)) {
             secretValidation.className = 'feedback-text valid';
-            secretValidation.textContent = '✓ Valid Base32 secret';
+            secretValidation.textContent = '✓ Valid secret key';
             showElement(secretValidation);
         } else {
             secretValidation.className = 'feedback-text invalid';
-            secretValidation.textContent = 'Invalid Base32 — use letters A-Z and digits 2-7';
+            secretValidation.textContent = 'Invalid key — use letters A-Z and digits 2-7';
             showElement(secretValidation);
         }
     });
@@ -571,19 +544,14 @@ function openAccountModal(editId?: string) {
         const account = accounts.find(a => a.id === editId);
         if (!account) return;
         modalTitle.textContent = 'Edit Account';
-        switchTab('manual');
-        manualIssuer.value = account.issuer;
-        manualAccount.value = account.accountName;
+        manualLabel.value = account.issuer || account.accountName;
         manualSecret.value = account.secret;
     } else {
         modalTitle.textContent = 'Add Account';
-        switchTab('uri');
     }
 
     accountModalOverlay.style.display = 'flex';
-    if (!editId) {
-        uriInput.focus();
-    }
+    manualLabel.focus();
 }
 
 function closeAccountModal() {
@@ -592,66 +560,37 @@ function closeAccountModal() {
 }
 
 function resetModal() {
-    uriInput.value = '';
-    manualIssuer.value = '';
-    manualAccount.value = '';
+    manualLabel.value = '';
     manualSecret.value = '';
-    hideElement(uriFeedback);
     hideElement(secretValidation);
     hideElement(modalError);
-}
-
-function switchTab(tab: 'uri' | 'manual') {
-    tabUri.classList.toggle('active', tab === 'uri');
-    tabManual.classList.toggle('active', tab === 'manual');
-    uriPanel.style.display = tab === 'uri' ? 'block' : 'none';
-    manualPanel.style.display = tab === 'manual' ? 'block' : 'none';
 }
 
 async function handleSaveAccount() {
     const key = getSessionKey();
     if (!key) return;
 
-    let account: Account;
+    const label = manualLabel.value.trim();
+    const secret = manualSecret.value.trim();
 
-    // Determine if we're using URI or manual tab
-    const isUriTab = tabUri.classList.contains('active');
-
-    if (isUriTab && !editingAccountId) {
-        const parsed = parseOtpauthURI(uriInput.value.trim());
-        if (!parsed) {
-            showElement(modalError, 'Invalid otpauth:// URI. Please check and try again.');
-            return;
-        }
-        account = {
-            id: generateId(),
-            ...parsed,
-        };
-    } else {
-        // Manual entry
-        const issuer = manualIssuer.value.trim();
-        const accountName = manualAccount.value.trim();
-        const secret = manualSecret.value.trim();
-
-        if (!accountName) {
-            showElement(modalError, 'Account name is required.');
-            return;
-        }
-        if (!secret || !validateBase32(secret)) {
-            showElement(modalError, 'A valid Base32 secret is required (at least 16 characters, A-Z and 2-7).');
-            return;
-        }
-
-        account = {
-            id: editingAccountId || generateId(),
-            issuer: issuer || '',
-            accountName,
-            secret: normalizeSecret(secret),
-            algorithm: 'SHA1',
-            digits: 6,
-            period: 30,
-        };
+    if (!label) {
+        showElement(modalError, 'Label is required.');
+        return;
     }
+    if (!secret || !validateBase32(secret)) {
+        showElement(modalError, 'A valid secret key is required (letters A-Z and digits 2-7).');
+        return;
+    }
+
+    const account: Account = {
+        id: editingAccountId || generateId(),
+        issuer: label,
+        accountName: label,
+        secret: normalizeSecret(secret),
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+    };
 
     // Save
     if (editingAccountId) {
