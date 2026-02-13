@@ -10,7 +10,7 @@
 // ========================================
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
-function base32Decode(input: string): Uint8Array {
+function base32Decode(input) {
     const cleaned = input.replace(/[\s=-]+/g, '').toUpperCase();
     const length = cleaned.length;
 
@@ -39,7 +39,7 @@ function base32Decode(input: string): Uint8Array {
 // HMAC-based One-Time Password (HOTP)
 // ========================================
 
-function getAlgorithm(algo: string): string {
+function getAlgorithm(algo) {
     switch (algo.toUpperCase()) {
         case 'SHA256': return 'SHA-256';
         case 'SHA512': return 'SHA-512';
@@ -48,11 +48,7 @@ function getAlgorithm(algo: string): string {
     }
 }
 
-async function hmacDigest(
-    algorithm: string,
-    keyBytes: Uint8Array,
-    message: Uint8Array
-): Promise<ArrayBuffer> {
+async function hmacDigest(algorithm, keyBytes, message) {
     const cryptoKey = await crypto.subtle.importKey(
         'raw',
         keyBytes,
@@ -63,7 +59,7 @@ async function hmacDigest(
     return crypto.subtle.sign('HMAC', cryptoKey, message);
 }
 
-function intToBytes(num: number): Uint8Array {
+function intToBytes(num) {
     const bytes = new Uint8Array(8);
     for (let i = 7; i >= 0; i--) {
         bytes[i] = num & 0xff;
@@ -72,7 +68,7 @@ function intToBytes(num: number): Uint8Array {
     return bytes;
 }
 
-function dynamicTruncate(hmacResult: Uint8Array, digits: number): string {
+function dynamicTruncate(hmacResult, digits) {
     const offset = hmacResult[hmacResult.length - 1] & 0x0f;
     const code =
         ((hmacResult[offset] & 0x7f) << 24) |
@@ -92,12 +88,7 @@ function dynamicTruncate(hmacResult: Uint8Array, digits: number): string {
  * Generate a TOTP code for the given secret.
  * Uses Web Crypto API for HMAC — fully async.
  */
-export async function generateTOTP(
-    secret: string,
-    digits: number = 6,
-    period: number = 30,
-    algorithm: string = 'SHA1'
-): Promise<string> {
+export async function generateTOTP(secret, digits = 6, period = 30, algorithm = 'SHA1') {
     try {
         const keyBytes = base32Decode(secret);
         const time = Math.floor(Date.now() / 1000);
@@ -115,7 +106,7 @@ export async function generateTOTP(
 /**
  * Get remaining seconds in the current TOTP period.
  */
-export function getRemainingSeconds(period: number = 30): number {
+export function getRemainingSeconds(period = 30) {
     const now = Math.floor(Date.now() / 1000);
     return period - (now % period);
 }
@@ -123,7 +114,7 @@ export function getRemainingSeconds(period: number = 30): number {
 /**
  * Validate a Base32-encoded secret string.
  */
-export function validateBase32(secret: string): boolean {
+export function validateBase32(secret) {
     if (!secret || secret.length === 0) return false;
     const cleaned = secret.replace(/[\s-]+/g, '').toUpperCase();
     return /^[A-Z2-7]+=*$/.test(cleaned) && cleaned.length >= 16;
@@ -132,7 +123,7 @@ export function validateBase32(secret: string): boolean {
 /**
  * Clean and normalize a Base32 secret.
  */
-export function normalizeSecret(secret: string): string {
+export function normalizeSecret(secret) {
     return secret.replace(/[\s-]+/g, '').toUpperCase().replace(/=+$/, '');
 }
 
@@ -140,15 +131,10 @@ export function normalizeSecret(secret: string): string {
  * Parse an otpauth:// URI into account components.
  *
  * Format: otpauth://totp/ISSUER:ACCOUNT?secret=SECRET&issuer=ISSUER&algorithm=SHA1&digits=6&period=30
+ *
+ * @returns {{ issuer: string, accountName: string, secret: string, algorithm: string, digits: number, period: number } | null}
  */
-export function parseOtpauthURI(uri: string): {
-    issuer: string;
-    accountName: string;
-    secret: string;
-    algorithm: 'SHA1' | 'SHA256' | 'SHA512';
-    digits: 6 | 8;
-    period: number;
-} | null {
+export function parseOtpauthURI(uri) {
     try {
         const url = new URL(uri);
 
@@ -175,13 +161,13 @@ export function parseOtpauthURI(uri: string): {
             issuer = issuerParam;
         }
 
-        const algorithmParam = url.searchParams.get('algorithm')?.toUpperCase() || 'SHA1';
-        const algorithm = (['SHA1', 'SHA256', 'SHA512'].includes(algorithmParam)
+        const algorithmParam = (url.searchParams.get('algorithm') || 'SHA1').toUpperCase();
+        const algorithm = ['SHA1', 'SHA256', 'SHA512'].includes(algorithmParam)
             ? algorithmParam
-            : 'SHA1') as 'SHA1' | 'SHA256' | 'SHA512';
+            : 'SHA1';
 
         const digitsParam = parseInt(url.searchParams.get('digits') || '6', 10);
-        const digits = (digitsParam === 8 ? 8 : 6) as 6 | 8;
+        const digits = digitsParam === 8 ? 8 : 6;
 
         const period = parseInt(url.searchParams.get('period') || '30', 10);
 
@@ -201,14 +187,7 @@ export function parseOtpauthURI(uri: string): {
 /**
  * Build an otpauth:// URI from account data.
  */
-export function buildOtpauthURI(account: {
-    issuer: string;
-    accountName: string;
-    secret: string;
-    algorithm?: string;
-    digits?: number;
-    period?: number;
-}): string {
+export function buildOtpauthURI(account) {
     const label = account.issuer
         ? `${encodeURIComponent(account.issuer)}:${encodeURIComponent(account.accountName)}`
         : encodeURIComponent(account.accountName);

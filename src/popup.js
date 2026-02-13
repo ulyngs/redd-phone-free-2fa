@@ -5,24 +5,23 @@
  * TOTP code generation, modals, search, clipboard, and settings.
  */
 
-import browser from './browser';
-import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret, buildOtpauthURI } from './totp';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings } from './storage';
-import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes } from './session';
-import type { Account, Settings } from './types';
+import browser from './browser.js';
+import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret, buildOtpauthURI } from './totp.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings } from './storage.js';
+import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes } from './session.js';
 
 // ========================================
 // State
 // ========================================
-let accounts: Account[] = [];
-let settings: Settings;
-let totpInterval: ReturnType<typeof setInterval> | null = null;
-let editingAccountId: string | null = null;
+let accounts = [];
+let settings;
+let totpInterval = null;
+let editingAccountId = null;
 
 // ========================================
 // DOM refs
 // ========================================
-const $ = (id: string) => document.getElementById(id)!;
+const $ = (id) => document.getElementById(id);
 
 // Screens
 const setupScreen = $('setup-screen');
@@ -30,18 +29,18 @@ const lockScreen = $('lock-screen');
 const mainScreen = $('main-screen');
 
 // Setup
-const setupPassphraseInput = $('setup-passphrase') as HTMLInputElement;
-const setupPassphraseConfirm = $('setup-passphrase-confirm') as HTMLInputElement;
+const setupPassphraseInput = $('setup-passphrase');
+const setupPassphraseConfirm = $('setup-passphrase-confirm');
 const setupError = $('setup-error');
-const setupBtn = $('setup-btn') as HTMLButtonElement;
+const setupBtn = $('setup-btn');
 
 // Lock
-const unlockPassphraseInput = $('unlock-passphrase') as HTMLInputElement;
+const unlockPassphraseInput = $('unlock-passphrase');
 const unlockError = $('unlock-error');
-const unlockBtn = $('unlock-btn') as HTMLButtonElement;
+const unlockBtn = $('unlock-btn');
 
 // Main
-const searchInput = $('search-input') as HTMLInputElement;
+const searchInput = $('search-input');
 const accountList = $('account-list');
 const emptyState = $('empty-state');
 const settingsDropdown = $('settings-dropdown');
@@ -49,11 +48,11 @@ const settingsDropdown = $('settings-dropdown');
 // Modal
 const accountModalOverlay = $('account-modal-overlay');
 const modalTitle = $('modal-title');
-const manualLabel = $('manual-label') as HTMLInputElement;
-const manualSecret = $('manual-secret') as HTMLInputElement;
+const manualLabel = $('manual-label');
+const manualSecret = $('manual-secret');
 const secretValidation = $('secret-validation');
 const modalError = $('modal-error');
-const modalSaveBtn = $('modal-save-btn') as HTMLButtonElement;
+const modalSaveBtn = $('modal-save-btn');
 
 // Delete modal
 const deleteModalOverlay = $('delete-modal-overlay');
@@ -61,15 +60,15 @@ const deleteAccountName = $('delete-account-name');
 
 // Export modal
 const exportModalOverlay = $('export-modal-overlay');
-const exportPassword = $('export-password') as HTMLInputElement;
-const exportPasswordConfirm = $('export-password-confirm') as HTMLInputElement;
+const exportPassword = $('export-password');
+const exportPasswordConfirm = $('export-password-confirm');
 const exportError = $('export-error');
 
 // Import modal
 const importModalOverlay = $('import-modal-overlay');
-const importFile = $('import-file') as HTMLInputElement;
+const importFile = $('import-file');
 const importPasswordSection = $('import-password-section');
-const importPassword = $('import-password') as HTMLInputElement;
+const importPassword = $('import-password');
 const importError = $('import-error');
 const importSuccess = $('import-success');
 
@@ -80,8 +79,8 @@ const plainExportModalOverlay = $('plain-export-modal-overlay');
 const toast = $('toast');
 
 // Settings
-const themeSelect = $('theme-select') as HTMLSelectElement;
-const autoLockSelect = $('auto-lock-select') as HTMLSelectElement;
+const themeSelect = $('theme-select');
+const autoLockSelect = $('auto-lock-select');
 
 // ========================================
 // Initialization
@@ -100,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Listen for session lock messages from background
-browser.runtime.onMessage.addListener((msg: any) => {
+browser.runtime.onMessage.addListener((msg) => {
     if (msg.type === 'SESSION_LOCKED') {
         lock();
         showScreen('lock');
@@ -113,7 +112,7 @@ browser.runtime.onMessage.addListener((msg: any) => {
 // ========================================
 // Screen management
 // ========================================
-function showScreen(screen: 'setup' | 'lock' | 'main') {
+function showScreen(screen) {
     setupScreen.style.display = screen === 'setup' ? 'block' : 'none';
     lockScreen.style.display = screen === 'lock' ? 'block' : 'none';
     mainScreen.style.display = screen === 'main' ? 'block' : 'none';
@@ -128,7 +127,7 @@ function showScreen(screen: 'setup' | 'lock' | 'main') {
 // ========================================
 // Theme
 // ========================================
-function applyTheme(theme: 'system' | 'light' | 'dark') {
+function applyTheme(theme) {
     document.body.classList.remove('dark-mode');
     if (theme === 'dark') {
         document.body.classList.add('dark-mode');
@@ -190,7 +189,7 @@ function initEventListeners() {
 
     themeSelect.value = settings.theme;
     themeSelect.addEventListener('change', async () => {
-        settings.theme = themeSelect.value as Settings['theme'];
+        settings.theme = themeSelect.value;
         applyTheme(settings.theme);
         await saveSettings(settings);
     });
@@ -281,8 +280,8 @@ function initEventListeners() {
     // Toggle visibility buttons
     document.querySelectorAll('.toggle-visibility').forEach((btn) => {
         btn.addEventListener('click', () => {
-            const targetId = (btn as HTMLElement).dataset.target!;
-            const input = $(targetId) as HTMLInputElement;
+            const targetId = btn.dataset.target;
+            const input = $(targetId);
             input.type = input.type === 'password' ? 'text' : 'password';
         });
     });
@@ -411,11 +410,11 @@ async function renderAccounts() {
     // Attach click handlers
     accountList.querySelectorAll('.account-card').forEach((card) => {
         card.addEventListener('click', (e) => {
-            const target = e.target as HTMLElement;
+            const target = e.target;
             // Don't copy if clicking the more menu or its items
             if (target.closest('.account-more')) return;
-            const id = (card as HTMLElement).dataset.id!;
-            copyCode(id, card as HTMLElement);
+            const id = card.dataset.id;
+            copyCode(id, card);
         });
     });
 
@@ -423,10 +422,10 @@ async function renderAccounts() {
     accountList.querySelectorAll('.more-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const id = (btn as HTMLElement).dataset.id!;
+            const id = btn.dataset.id;
             // Close any other open menus
             accountList.querySelectorAll('.more-menu.open').forEach(m => {
-                if ((m as HTMLElement).dataset.id !== id) m.classList.remove('open');
+                if (m.dataset.id !== id) m.classList.remove('open');
             });
             const menu = accountList.querySelector(`.more-menu[data-id="${id}"]`);
             if (menu) menu.classList.toggle('open');
@@ -436,7 +435,7 @@ async function renderAccounts() {
     accountList.querySelectorAll('.edit-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const id = (btn as HTMLElement).dataset.id!;
+            const id = btn.dataset.id;
             closeAllMoreMenus();
             openAccountModal(id);
         });
@@ -445,7 +444,7 @@ async function renderAccounts() {
     accountList.querySelectorAll('.delete-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const id = (btn as HTMLElement).dataset.id!;
+            const id = btn.dataset.id;
             closeAllMoreMenus();
             openDeleteModal(id);
         });
@@ -482,10 +481,10 @@ function stopTOTPRefresh() {
 async function updateCodes() {
     const elements = accountList.querySelectorAll('.account-code');
     for (const el of elements) {
-        const secret = (el as HTMLElement).dataset.secret!;
-        const digits = parseInt((el as HTMLElement).dataset.digits || '6', 10);
-        const period = parseInt((el as HTMLElement).dataset.period || '30', 10);
-        const algorithm = (el as HTMLElement).dataset.algorithm || 'SHA1';
+        const secret = el.dataset.secret;
+        const digits = parseInt(el.dataset.digits || '6', 10);
+        const period = parseInt(el.dataset.period || '30', 10);
+        const algorithm = el.dataset.algorithm || 'SHA1';
         const remaining = getRemainingSeconds(period);
 
         // Only update when a new code is generated (at period boundary)
@@ -498,26 +497,26 @@ async function updateCodes() {
 
 function updateProgressRings() {
     accountList.querySelectorAll('.progress-ring__fill').forEach((circle) => {
-        const period = parseInt((circle as SVGElement).dataset.period || '30', 10);
+        const period = parseInt(circle.dataset.period || '30', 10);
         const remaining = getRemainingSeconds(period);
         const circumference = 2 * Math.PI * 10;
         const progress = remaining / period;
         const offset = circumference * (1 - progress);
 
-        (circle as SVGCircleElement).style.strokeDashoffset = String(offset);
+        circle.style.strokeDashoffset = String(offset);
 
         // Color based on remaining time
         if (remaining <= 5) {
-            (circle as SVGCircleElement).style.stroke = 'var(--ring-critical)';
+            circle.style.stroke = 'var(--ring-critical)';
         } else if (remaining <= 10) {
-            (circle as SVGCircleElement).style.stroke = 'var(--ring-warn)';
+            circle.style.stroke = 'var(--ring-warn)';
         } else {
-            (circle as SVGCircleElement).style.stroke = '';
+            circle.style.stroke = '';
         }
     });
 
     accountList.querySelectorAll('.progress-ring__text').forEach((text) => {
-        const period = parseInt((text as SVGElement).dataset.period || '30', 10);
+        const period = parseInt(text.dataset.period || '30', 10);
         const remaining = getRemainingSeconds(period);
         text.textContent = String(remaining);
     });
@@ -526,7 +525,7 @@ function updateProgressRings() {
 // ========================================
 // Clipboard
 // ========================================
-async function copyCode(accountId: string, cardElement: HTMLElement) {
+async function copyCode(accountId, cardElement) {
     const account = accounts.find(a => a.id === accountId);
     if (!account) return;
 
@@ -558,7 +557,7 @@ async function copyCode(accountId: string, cardElement: HTMLElement) {
 // ========================================
 // Account Modal
 // ========================================
-function openAccountModal(editId?: string) {
+function openAccountModal(editId) {
     editingAccountId = editId || null;
     resetModal();
 
@@ -604,7 +603,7 @@ async function handleSaveAccount() {
         return;
     }
 
-    const account: Account = {
+    const account = {
         id: editingAccountId || generateId(),
         issuer: label,
         accountName: label,
@@ -631,9 +630,9 @@ async function handleSaveAccount() {
 // ========================================
 // Delete
 // ========================================
-let deletingAccountId: string | null = null;
+let deletingAccountId = null;
 
-function openDeleteModal(id: string) {
+function openDeleteModal(id) {
     const account = accounts.find(a => a.id === id);
     if (!account) return;
     deletingAccountId = id;
@@ -678,8 +677,7 @@ async function handleExport() {
     }
 
     try {
-        // Import crypto functions directly
-        const { generateSalt, deriveKey, encrypt } = await import('./crypto');
+        const { generateSalt, deriveKey, encrypt } = await import('./crypto.js');
         const salt = generateSalt();
         const exportKey = await deriveKey(pw, salt);
         const plaintext = JSON.stringify(accounts);
@@ -747,11 +745,11 @@ async function handleImport() {
                     showElement(importError, 'Please enter the backup password.');
                     return;
                 }
-                const { deriveKey: dk, decrypt: dec } = await import('./crypto');
+                const { deriveKey: dk, decrypt: dec } = await import('./crypto.js');
                 const importKey = await dk(pw, data.salt);
                 try {
                     const plaintext = await dec(data.iv, data.ciphertext, importKey);
-                    const imported = JSON.parse(plaintext) as Account[];
+                    const imported = JSON.parse(plaintext);
                     await importMerge(imported, key);
                 } catch {
                     showElement(importError, 'Wrong password or corrupted backup.');
@@ -759,7 +757,7 @@ async function handleImport() {
                 }
             } else {
                 // Try as plain account array
-                const imported = data as Account[];
+                const imported = data;
                 if (!Array.isArray(imported)) {
                     showElement(importError, 'Invalid backup file format.');
                     return;
@@ -768,12 +766,12 @@ async function handleImport() {
             }
         } else {
             // Plain text — otpauth:// URIs
-            const lines = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.startsWith('otpauth://'));
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.startsWith('otpauth://'));
             if (lines.length === 0) {
                 showElement(importError, 'No valid otpauth:// URIs found.');
                 return;
             }
-            const imported: Account[] = [];
+            const imported = [];
             for (const line of lines) {
                 const parsed = parseOtpauthURI(line);
                 if (parsed) {
@@ -795,7 +793,7 @@ async function handleImport() {
     }
 }
 
-async function importMerge(imported: Account[], key: CryptoKey) {
+async function importMerge(imported, key) {
     const existingSecrets = new Set(accounts.map(a => a.secret));
     const newAccounts = imported.filter(a => !existingSecrets.has(a.secret));
     // Ensure unique IDs
@@ -811,16 +809,16 @@ async function importMerge(imported: Account[], key: CryptoKey) {
 // ========================================
 // Helpers
 // ========================================
-function showElement(el: HTMLElement, text?: string) {
+function showElement(el, text) {
     if (text) el.textContent = text;
     el.style.display = 'block';
 }
 
-function hideElement(el: HTMLElement) {
+function hideElement(el) {
     el.style.display = 'none';
 }
 
-function showToast(message: string) {
+function showToast(message) {
     toast.textContent = message;
     toast.style.display = 'block';
     setTimeout(() => {
@@ -828,31 +826,31 @@ function showToast(message: string) {
     }, 2000);
 }
 
-function formatCode(code: string): string {
+function formatCode(code) {
     if (code.length === 6) return code.slice(0, 3) + ' ' + code.slice(3);
     if (code.length === 8) return code.slice(0, 4) + ' ' + code.slice(4);
     return code;
 }
 
-function generateId(): string {
+function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
 
-function dateStamp(): string {
+function dateStamp() {
     return new Date().toISOString().slice(0, 10);
 }
 
-function escapeHtml(str: string): string {
+function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-function getInitials(name: string): string {
+function getInitials(name) {
     return name.slice(0, 2).toUpperCase();
 }
 
-function getColorForIssuer(issuer: string): string {
+function getColorForIssuer(issuer) {
     const colors = [
         '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
         '#ec4899', '#f43f5e', '#ef4444', '#f97316',
@@ -866,7 +864,7 @@ function getColorForIssuer(issuer: string): string {
     return colors[Math.abs(hash) % colors.length];
 }
 
-function downloadFile(content: string, filename: string, mimeType: string) {
+function downloadFile(content, filename, mimeType) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

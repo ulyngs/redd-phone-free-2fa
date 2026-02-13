@@ -4,22 +4,21 @@
  * Handles backup/restore on the full options page.
  */
 
-import browser from './browser';
-import { unlockWithPassphrase, loadAccounts, saveAccounts } from './storage';
-import { generateSalt, deriveKey, encrypt, decrypt } from './crypto';
-import { parseOtpauthURI, buildOtpauthURI } from './totp';
-import type { Account } from './types';
+import browser from './browser.js';
+import { unlockWithPassphrase, loadAccounts, saveAccounts } from './storage.js';
+import { generateSalt, deriveKey, encrypt, decrypt } from './crypto.js';
+import { parseOtpauthURI, buildOtpauthURI } from './totp.js';
 
-const $ = (id: string) => document.getElementById(id)!;
+const $ = (id) => document.getElementById(id);
 
-let sessionKey: CryptoKey | null = null;
-let accounts: Account[] = [];
+let sessionKey = null;
+let accounts = [];
 
 // ========================================
 // Export Section
 // ========================================
 $('unlock-for-export').addEventListener('click', async () => {
-    const passphrase = ($('master-passphrase') as HTMLInputElement).value;
+    const passphrase = $('master-passphrase').value;
     if (!passphrase) return;
 
     const key = await unlockWithPassphrase(passphrase);
@@ -31,13 +30,13 @@ $('unlock-for-export').addEventListener('click', async () => {
     sessionKey = key;
     accounts = await loadAccounts(key);
     $('export-section').style.display = 'block';
-    ($('unlock-for-export') as HTMLButtonElement).textContent = '✓ Unlocked';
-    ($('unlock-for-export') as HTMLButtonElement).disabled = true;
+    $('unlock-for-export').textContent = '✓ Unlocked';
+    $('unlock-for-export').disabled = true;
 });
 
 $('export-encrypted-btn').addEventListener('click', async () => {
-    const pw = ($('export-password') as HTMLInputElement).value;
-    const pwConfirm = ($('export-password-confirm') as HTMLInputElement).value;
+    const pw = $('export-password').value;
+    const pwConfirm = $('export-password-confirm').value;
     const errorEl = $('export-error');
 
     if (pw.length < 8) {
@@ -89,7 +88,7 @@ $('export-plain-btn').addEventListener('click', () => {
 // Import Section
 // ========================================
 $('unlock-for-import').addEventListener('click', async () => {
-    const passphrase = ($('import-master-passphrase') as HTMLInputElement).value;
+    const passphrase = $('import-master-passphrase').value;
     if (!passphrase) return;
 
     const key = await unlockWithPassphrase(passphrase);
@@ -104,8 +103,8 @@ $('unlock-for-import').addEventListener('click', async () => {
     $('import-unlock-section').style.display = 'none';
 });
 
-($('import-file') as HTMLInputElement).addEventListener('change', () => {
-    const file = ($('import-file') as HTMLInputElement).files?.[0];
+$('import-file').addEventListener('change', () => {
+    const file = $('import-file').files?.[0];
     if (file && file.name.endsWith('.json')) {
         $('import-password-group').style.display = 'block';
     } else {
@@ -116,7 +115,7 @@ $('unlock-for-import').addEventListener('click', async () => {
 $('import-btn').addEventListener('click', async () => {
     if (!sessionKey) return;
 
-    const file = ($('import-file') as HTMLInputElement).files?.[0];
+    const file = $('import-file').files?.[0];
     const errorEl = $('import-error');
     const successEl = $('import-success');
 
@@ -133,7 +132,7 @@ $('import-btn').addEventListener('click', async () => {
             const data = JSON.parse(text);
 
             if (data.format === 'redd-2fa-backup') {
-                const pw = ($('import-password') as HTMLInputElement).value;
+                const pw = $('import-password').value;
                 if (!pw) {
                     errorEl.textContent = 'Please enter the backup password.';
                     errorEl.style.display = 'block';
@@ -142,7 +141,7 @@ $('import-btn').addEventListener('click', async () => {
                 const importKey = await deriveKey(pw, data.salt);
                 try {
                     const plaintext = await decrypt(data.iv, data.ciphertext, importKey);
-                    const imported = JSON.parse(plaintext) as Account[];
+                    const imported = JSON.parse(plaintext);
                     await mergeAndSave(imported);
                 } catch {
                     errorEl.textContent = 'Wrong password or corrupted backup.';
@@ -150,7 +149,7 @@ $('import-btn').addEventListener('click', async () => {
                     return;
                 }
             } else if (Array.isArray(data)) {
-                await mergeAndSave(data as Account[]);
+                await mergeAndSave(data);
             } else {
                 errorEl.textContent = 'Invalid backup format.';
                 errorEl.style.display = 'block';
@@ -158,8 +157,8 @@ $('import-btn').addEventListener('click', async () => {
             }
         } else {
             // Plain text URIs
-            const lines = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.startsWith('otpauth://'));
-            const imported: Account[] = [];
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.startsWith('otpauth://'));
+            const imported = [];
             for (const line of lines) {
                 const parsed = parseOtpauthURI(line);
                 if (parsed) {
@@ -183,7 +182,7 @@ $('import-btn').addEventListener('click', async () => {
     }
 });
 
-async function mergeAndSave(imported: Account[]) {
+async function mergeAndSave(imported) {
     if (!sessionKey) return;
     const existingSecrets = new Set(accounts.map(a => a.secret));
     const newAccounts = imported.filter(a => !existingSecrets.has(a.secret));
@@ -195,15 +194,15 @@ async function mergeAndSave(imported: Account[]) {
 // ========================================
 // Helpers
 // ========================================
-function generateId(): string {
+function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
 
-function dateStamp(): string {
+function dateStamp() {
     return new Date().toISOString().slice(0, 10);
 }
 
-function downloadFile(content: string, filename: string, mimeType: string) {
+function downloadFile(content, filename, mimeType) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -212,5 +211,6 @@ function downloadFile(content: string, filename: string, mimeType: string) {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Revoke after a short delay to ensure download has started
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
 }

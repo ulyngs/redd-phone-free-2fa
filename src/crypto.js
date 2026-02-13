@@ -14,7 +14,7 @@ const IV_LENGTH = 12;
 const KEY_LENGTH = 256;
 
 /** Convert ArrayBuffer to Base64 string */
-function bufferToBase64(buffer: ArrayBuffer): string {
+function bufferToBase64(buffer) {
     const bytes = new Uint8Array(buffer);
     let binary = '';
     for (let i = 0; i < bytes.length; i++) {
@@ -24,7 +24,7 @@ function bufferToBase64(buffer: ArrayBuffer): string {
 }
 
 /** Convert Base64 string to ArrayBuffer */
-function base64ToBuffer(base64: string): ArrayBuffer {
+function base64ToBuffer(base64) {
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
@@ -34,23 +34,23 @@ function base64ToBuffer(base64: string): ArrayBuffer {
 }
 
 /** Encode a string to UTF-8 bytes */
-function encodeText(text: string): Uint8Array {
+function encodeText(text) {
     return new TextEncoder().encode(text);
 }
 
 /** Decode UTF-8 bytes to string */
-function decodeText(buffer: ArrayBuffer): string {
+function decodeText(buffer) {
     return new TextDecoder().decode(buffer);
 }
 
 /** Generate a cryptographically random salt */
-export function generateSalt(): string {
+export function generateSalt() {
     const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH));
     return bufferToBase64(salt.buffer);
 }
 
 /** Generate a random IV for AES-GCM */
-function generateIV(): Uint8Array {
+function generateIV() {
     return crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 }
 
@@ -58,10 +58,7 @@ function generateIV(): Uint8Array {
  * Derive an AES-256-GCM key from a passphrase using PBKDF2.
  * Returns a CryptoKey that can be used for encrypt/decrypt.
  */
-export async function deriveKey(
-    passphrase: string,
-    saltBase64: string
-): Promise<CryptoKey> {
+export async function deriveKey(passphrase, saltBase64) {
     const salt = base64ToBuffer(saltBase64);
     const keyMaterial = await crypto.subtle.importKey(
         'raw',
@@ -92,10 +89,7 @@ export async function deriveKey(
  * Encrypt a plaintext string using AES-256-GCM.
  * Returns { iv, ciphertext } as Base64 strings.
  */
-export async function encrypt(
-    plaintext: string,
-    key: CryptoKey
-): Promise<{ iv: string; ciphertext: string }> {
+export async function encrypt(plaintext, key) {
     const iv = generateIV();
     const encoded = encodeText(plaintext);
 
@@ -115,11 +109,7 @@ export async function encrypt(
  * Decrypt an AES-256-GCM ciphertext.
  * Returns the plaintext string.
  */
-export async function decrypt(
-    ivBase64: string,
-    ciphertextBase64: string,
-    key: CryptoKey
-): Promise<string> {
+export async function decrypt(ivBase64, ciphertextBase64, key) {
     const iv = base64ToBuffer(ivBase64);
     const ciphertext = base64ToBuffer(ciphertextBase64);
 
@@ -138,10 +128,7 @@ export async function decrypt(
  * storing the passphrase itself — we derive a separate key and encrypt
  * a known sentinel value.
  */
-export async function createPassphraseHash(
-    passphrase: string,
-    saltBase64: string
-): Promise<string> {
+export async function createPassphraseHash(passphrase, saltBase64) {
     // Derive a verification-specific key using a different salt prefix
     const verifySalt = saltBase64 + ':verify';
     const keyMaterial = await crypto.subtle.importKey(
@@ -169,11 +156,7 @@ export async function createPassphraseHash(
 /**
  * Verify a passphrase against a stored hash.
  */
-export async function verifyPassphrase(
-    passphrase: string,
-    saltBase64: string,
-    storedHash: string
-): Promise<boolean> {
+export async function verifyPassphrase(passphrase, saltBase64, storedHash) {
     const hash = await createPassphraseHash(passphrase, saltBase64);
     return hash === storedHash;
 }

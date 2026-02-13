@@ -5,19 +5,26 @@
  * All data is stored as a single encrypted JSON blob.
  */
 
-import browser from './browser';
-import { encrypt, decrypt, generateSalt, createPassphraseHash, deriveKey, verifyPassphrase } from './crypto';
-import type { Account, EncryptedBlob, StoredMeta, Settings, DEFAULT_SETTINGS } from './types';
+import browser from './browser.js';
+import { encrypt, decrypt, generateSalt, createPassphraseHash, deriveKey, verifyPassphrase } from './crypto.js';
 
 const STORAGE_KEY_DATA = 'redd2fa_data';
 const STORAGE_KEY_META = 'redd2fa_meta';
 const STORAGE_KEY_SETTINGS = 'redd2fa_settings';
 const SCHEMA_VERSION = 1;
 
+/** Default settings */
+export const DEFAULT_SETTINGS = {
+    autoLockMinutes: 5,
+    clipboardClearSeconds: 15,
+    theme: 'system',
+    fetchIcons: false,
+};
+
 /**
  * Check if this is the first launch (no meta stored).
  */
-export async function isFirstLaunch(): Promise<boolean> {
+export async function isFirstLaunch() {
     const result = await browser.storage.local.get(STORAGE_KEY_META);
     return !result[STORAGE_KEY_META];
 }
@@ -26,13 +33,13 @@ export async function isFirstLaunch(): Promise<boolean> {
  * Set up encryption for the first time with a new passphrase.
  * Generates salt, derives key, stores empty encrypted accounts.
  */
-export async function setupPassphrase(passphrase: string): Promise<CryptoKey> {
+export async function setupPassphrase(passphrase) {
     const salt = generateSalt();
     const key = await deriveKey(passphrase, salt);
     const passphraseHash = await createPassphraseHash(passphrase, salt);
 
     // Store meta
-    const meta: StoredMeta = {
+    const meta = {
         salt,
         passphraseHash,
         version: SCHEMA_VERSION,
@@ -49,9 +56,9 @@ export async function setupPassphrase(passphrase: string): Promise<CryptoKey> {
  * Attempt to unlock with a passphrase.
  * Returns the derived CryptoKey if successful, null otherwise.
  */
-export async function unlockWithPassphrase(passphrase: string): Promise<CryptoKey | null> {
+export async function unlockWithPassphrase(passphrase) {
     const result = await browser.storage.local.get(STORAGE_KEY_META);
-    const meta = result[STORAGE_KEY_META] as StoredMeta | undefined;
+    const meta = result[STORAGE_KEY_META];
 
     if (!meta) return null;
 
@@ -64,7 +71,7 @@ export async function unlockWithPassphrase(passphrase: string): Promise<CryptoKe
 /**
  * Save accounts (encrypted) to storage.
  */
-export async function saveAccounts(accounts: Account[], key: CryptoKey): Promise<void> {
+export async function saveAccounts(accounts, key) {
     const plaintext = JSON.stringify(accounts);
     const encrypted = await encrypt(plaintext, key);
     await browser.storage.local.set({ [STORAGE_KEY_DATA]: encrypted });
@@ -73,15 +80,15 @@ export async function saveAccounts(accounts: Account[], key: CryptoKey): Promise
 /**
  * Load and decrypt accounts from storage.
  */
-export async function loadAccounts(key: CryptoKey): Promise<Account[]> {
+export async function loadAccounts(key) {
     const result = await browser.storage.local.get(STORAGE_KEY_DATA);
-    const blob = result[STORAGE_KEY_DATA] as EncryptedBlob | undefined;
+    const blob = result[STORAGE_KEY_DATA];
 
     if (!blob) return [];
 
     try {
         const plaintext = await decrypt(blob.iv, blob.ciphertext, key);
-        return JSON.parse(plaintext) as Account[];
+        return JSON.parse(plaintext);
     } catch {
         throw new Error('Failed to decrypt accounts. Wrong passphrase?');
     }
@@ -90,9 +97,9 @@ export async function loadAccounts(key: CryptoKey): Promise<Account[]> {
 /**
  * Load settings from storage.
  */
-export async function loadSettings(): Promise<Settings> {
+export async function loadSettings() {
     const result = await browser.storage.local.get(STORAGE_KEY_SETTINGS);
-    const stored = result[STORAGE_KEY_SETTINGS] as Partial<Settings> | undefined;
+    const stored = result[STORAGE_KEY_SETTINGS];
     return {
         autoLockMinutes: stored?.autoLockMinutes ?? 5,
         clipboardClearSeconds: stored?.clipboardClearSeconds ?? 15,
@@ -104,34 +111,30 @@ export async function loadSettings(): Promise<Settings> {
 /**
  * Save settings to storage.
  */
-export async function saveSettings(settings: Settings): Promise<void> {
+export async function saveSettings(settings) {
     await browser.storage.local.set({ [STORAGE_KEY_SETTINGS]: settings });
 }
 
 /**
  * Get the stored meta (for export/backup purposes).
  */
-export async function getStoredMeta(): Promise<StoredMeta | null> {
+export async function getStoredMeta() {
     const result = await browser.storage.local.get(STORAGE_KEY_META);
-    return (result[STORAGE_KEY_META] as StoredMeta) || null;
+    return result[STORAGE_KEY_META] || null;
 }
 
 /**
  * Get the raw encrypted blob (for backup/export).
  */
-export async function getRawEncryptedData(): Promise<EncryptedBlob | null> {
+export async function getRawEncryptedData() {
     const result = await browser.storage.local.get(STORAGE_KEY_DATA);
-    return (result[STORAGE_KEY_DATA] as EncryptedBlob) || null;
+    return result[STORAGE_KEY_DATA] || null;
 }
 
 /**
  * Import accounts, merging or replacing existing ones.
  */
-export async function importAccounts(
-    accounts: Account[],
-    key: CryptoKey,
-    replace: boolean = false
-): Promise<void> {
+export async function importAccounts(accounts, key, replace = false) {
     if (replace) {
         await saveAccounts(accounts, key);
     } else {
@@ -145,7 +148,7 @@ export async function importAccounts(
 /**
  * Check if the extension has any data stored at all.
  */
-export async function hasData(): Promise<boolean> {
+export async function hasData() {
     const result = await browser.storage.local.get([STORAGE_KEY_META, STORAGE_KEY_DATA]);
     return !!(result[STORAGE_KEY_META] && result[STORAGE_KEY_DATA]);
 }

@@ -9,15 +9,13 @@
  * - Chrome/Edge:    expose `chrome.*` (which returns Promises in MV3)
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // Use the native `browser` global if it exists (Firefox, Safari),
 // otherwise fall back to `chrome` (Chrome, Edge).
-const _browser: any =
-    typeof (globalThis as any).browser !== 'undefined'
-        ? (globalThis as any).browser
-        : typeof (globalThis as any).chrome !== 'undefined'
-            ? (globalThis as any).chrome
+const _browser =
+    typeof globalThis.browser !== 'undefined'
+        ? globalThis.browser
+        : typeof globalThis.chrome !== 'undefined'
+            ? globalThis.chrome
             : undefined;
 
 export default _browser;

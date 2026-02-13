@@ -6,10 +6,10 @@
  * - Session lock messages
  */
 
-import browser from './browser';
+import browser from './browser.js';
 
 // Listen for alarm events (clipboard clearing)
-browser.alarms.onAlarm.addListener((alarm: any) => {
+browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'clear-clipboard') {
         // Write empty string to clipboard to clear it
         // We use offscreen document or fallback approaches
@@ -18,7 +18,7 @@ browser.alarms.onAlarm.addListener((alarm: any) => {
 });
 
 // Listen for messages from popup
-browser.runtime.onMessage.addListener((message: any, _sender: any, _sendResponse: any) => {
+browser.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     if (message.type === 'CLEAR_CLIPBOARD') {
         // Schedule clipboard clear alarm
         const delayMs = message.delayMs || 15000;
@@ -40,7 +40,7 @@ browser.runtime.onMessage.addListener((message: any, _sender: any, _sendResponse
  * In MV3 service workers, we can't directly access navigator.clipboard,
  * so we send a message to any open popup to handle it.
  */
-async function clearClipboard(): Promise<void> {
+async function clearClipboard() {
     try {
         // Try to send to popup to clear clipboard
         await browser.runtime.sendMessage({ type: 'DO_CLEAR_CLIPBOARD' });

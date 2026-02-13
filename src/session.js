@@ -5,18 +5,18 @@
  * The key is never persisted — only held in memory while unlocked.
  */
 
-import browser from './browser';
+import browser from './browser.js';
 
 /** In-memory session state */
-let sessionKey: CryptoKey | null = null;
-let lastActivity: number = Date.now();
-let autoLockMinutes: number = 5;
-let lockCheckInterval: ReturnType<typeof setInterval> | null = null;
+let sessionKey = null;
+let lastActivity = Date.now();
+let autoLockMinutes = 5;
+let lockCheckInterval = null;
 
 /**
  * Store the derived key in memory (unlock).
  */
-export function setSessionKey(key: CryptoKey): void {
+export function setSessionKey(key) {
     sessionKey = key;
     lastActivity = Date.now();
     startAutoLockTimer();
@@ -25,21 +25,21 @@ export function setSessionKey(key: CryptoKey): void {
 /**
  * Get the current session key.
  */
-export function getSessionKey(): CryptoKey | null {
+export function getSessionKey() {
     return sessionKey;
 }
 
 /**
  * Check if the session is unlocked.
  */
-export function isUnlocked(): boolean {
+export function isUnlocked() {
     return sessionKey !== null;
 }
 
 /**
  * Lock the session — wipe the key from memory.
  */
-export function lock(): void {
+export function lock() {
     sessionKey = null;
     stopAutoLockTimer();
 }
@@ -47,21 +47,21 @@ export function lock(): void {
 /**
  * Record user activity to reset the auto-lock timer.
  */
-export function touchActivity(): void {
+export function touchActivity() {
     lastActivity = Date.now();
 }
 
 /**
  * Set the auto-lock timeout duration.
  */
-export function setAutoLockMinutes(minutes: number): void {
+export function setAutoLockMinutes(minutes) {
     autoLockMinutes = minutes;
 }
 
 /**
  * Start the auto-lock check interval.
  */
-function startAutoLockTimer(): void {
+function startAutoLockTimer() {
     stopAutoLockTimer();
     if (autoLockMinutes <= 0) return; // 0 = never auto-lock
 
@@ -82,7 +82,7 @@ function startAutoLockTimer(): void {
 /**
  * Stop the auto-lock check interval.
  */
-function stopAutoLockTimer(): void {
+function stopAutoLockTimer() {
     if (lockCheckInterval) {
         clearInterval(lockCheckInterval);
         lockCheckInterval = null;
