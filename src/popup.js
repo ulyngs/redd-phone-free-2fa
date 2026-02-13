@@ -7,8 +7,9 @@
 
 
 import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret, buildOtpauthURI } from './totp.js';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings } from './storage.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
+import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 
 // ========================================
 // State
@@ -17,6 +18,7 @@ let accounts = [];
 let settings;
 let totpInterval = null;
 let editingAccountId = null;
+let pendingPassphrase = null; // held briefly for biometric registration
 
 // ========================================
 // DOM refs
@@ -38,6 +40,13 @@ const setupBtn = $('setup-btn');
 const unlockPassphraseInput = $('unlock-passphrase');
 const unlockError = $('unlock-error');
 const unlockBtn = $('unlock-btn');
+const biometricUnlockBtn = $('biometric-unlock-btn');
+const biometricError = $('biometric-error');
+const passphraseDivider = $('passphrase-divider');
+
+// Biometric prompt
+const biometricPromptOverlay = $('biometric-prompt-overlay');
+const biometricToggleBtn = $('biometric-toggle-btn');
 
 // Main
 const searchInput = $('search-input');
@@ -89,13 +98,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     settings = await loadSettings();
     applyTheme(settings.theme);
     initEventListeners();
-    setOnLockCallback(() => showScreen('lock'));
+    initBiometricListeners();
+    setOnLockCallback(() => { showScreen('lock'); setupLockScreen(); });
 
     if (await isFirstLaunch()) {
         showScreen('setup');
     } else {
         showScreen('lock');
-        unlockPassphraseInput.focus();
+        await setupLockScreen();
     }
 });
 
@@ -174,6 +184,7 @@ function initEventListeners() {
     // Settings
     $('settings-btn').addEventListener('click', () => {
         settingsDropdown.style.display = settingsDropdown.style.display === 'none' ? 'block' : 'none';
+        if (settingsDropdown.style.display === 'block') updateBiometricToggle();
     });
     $('settings-close-btn').addEventListener('click', () => {
         settingsDropdown.style.display = 'none';
@@ -298,6 +309,9 @@ async function handleSetup() {
         accounts = [];
         showScreen('main');
         renderAccounts();
+
+        // Offer biometric setup after first passphrase creation
+        await promptBiometricSetup(passphrase);
     } catch (err) {
         showElement(setupError, 'Setup failed. Please try again.');
         setupBtn.disabled = false;
@@ -331,12 +345,147 @@ async function handleUnlock() {
         hideElement(unlockError);
         showScreen('main');
         renderAccounts();
+
+        // Offer biometric setup if not already configured
+        const existingBiometric = await loadBiometricData();
+        if (!existingBiometric) {
+            await promptBiometricSetup(passphrase);
+        }
     } catch (err) {
         showElement(unlockError, 'Failed to unlock. Please try again.');
     }
 
     unlockBtn.disabled = false;
     unlockBtn.textContent = 'Unlock';
+}
+
+// ========================================
+// Biometric
+// ========================================
+
+/**
+ * Configure the lock screen — show Touch ID button if biometric is set up.
+ */
+async function setupLockScreen() {
+    const biometricData = await loadBiometricData();
+    if (biometricData) {
+        biometricUnlockBtn.style.display = 'flex';
+        passphraseDivider.style.display = 'flex';
+    } else {
+        biometricUnlockBtn.style.display = 'none';
+        passphraseDivider.style.display = 'none';
+        unlockPassphraseInput.focus();
+    }
+    hideElement(biometricError);
+}
+
+/**
+ * Prompt user to enable biometric unlock (if available and not already set up).
+ */
+async function promptBiometricSetup(passphrase) {
+    try {
+        const available = await isBiometricAvailable();
+        if (!available) return;
+
+        pendingPassphrase = passphrase;
+        biometricPromptOverlay.style.display = 'flex';
+    } catch {
+        // Biometric not available — silently skip
+    }
+}
+
+/**
+ * Handle biometric unlock from the lock screen.
+ */
+async function handleBiometricUnlock() {
+    try {
+        biometricUnlockBtn.disabled = true;
+        hideElement(biometricError);
+
+        const biometricData = await loadBiometricData();
+        if (!biometricData) return;
+
+        const passphrase = await authenticateBiometric(biometricData);
+        const key = await unlockWithPassphrase(passphrase);
+        if (!key) {
+            showElement(biometricError, 'Biometric data outdated. Please use your passphrase.');
+            return;
+        }
+
+        setSessionKey(key);
+        setAutoLockMinutes(settings.autoLockMinutes);
+        accounts = await loadAccounts(key);
+        hideElement(biometricError);
+        showScreen('main');
+        renderAccounts();
+    } catch (err) {
+        showElement(biometricError, 'Touch ID failed. Try again or use your passphrase.');
+    } finally {
+        biometricUnlockBtn.disabled = false;
+    }
+}
+
+/**
+ * Register biometric listeners.
+ */
+function initBiometricListeners() {
+    biometricUnlockBtn.addEventListener('click', handleBiometricUnlock);
+
+    $('biometric-enable-btn').addEventListener('click', async () => {
+        try {
+            if (!pendingPassphrase) return;
+            const data = await registerBiometric(pendingPassphrase);
+            await saveBiometricData(data);
+            pendingPassphrase = null;
+            biometricPromptOverlay.style.display = 'none';
+            showToast('Touch ID enabled!');
+            updateBiometricToggle();
+        } catch (err) {
+            pendingPassphrase = null;
+            biometricPromptOverlay.style.display = 'none';
+            showToast('Touch ID not available on this device.');
+        }
+    });
+
+    $('biometric-skip-btn').addEventListener('click', () => {
+        pendingPassphrase = null;
+        biometricPromptOverlay.style.display = 'none';
+    });
+
+    biometricToggleBtn.addEventListener('click', async () => {
+        const biometricData = await loadBiometricData();
+        if (biometricData) {
+            await clearBiometricData();
+            showToast('Touch ID disabled.');
+            updateBiometricToggle();
+        } else {
+            // To re-enable, user needs to lock and unlock with passphrase
+            showToast('Lock and unlock with passphrase to re-enable Touch ID.');
+        }
+    });
+}
+
+/**
+ * Update the biometric toggle button text in settings.
+ */
+async function updateBiometricToggle() {
+    try {
+        const available = await isBiometricAvailable();
+        if (!available) {
+            biometricToggleBtn.style.display = 'none';
+            return;
+        }
+        const biometricData = await loadBiometricData();
+        biometricToggleBtn.style.display = 'block';
+        biometricToggleBtn.textContent = biometricData ? 'Disable Touch ID' : 'Enable Touch ID';
+        if (biometricData) {
+            biometricToggleBtn.classList.add('settings-action-danger');
+        } else {
+            biometricToggleBtn.classList.remove('settings-action-danger');
+        }
+    } catch {
+        biometricToggleBtn.style.display = 'none';
+    }
 }
 
 // ========================================

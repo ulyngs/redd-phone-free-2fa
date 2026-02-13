@@ -146,6 +146,28 @@ export async function importAccounts(accounts, key, replace = false) {
 }
 
 /**
+ * Save biometric credential data (credential ID + PRF salt + encrypted passphrase).
+ */
+export async function saveBiometricData(data) {
+    await browser.storage.local.set({ redd2fa_biometric: data });
+}
+
+/**
+ * Load biometric credential data. Returns null if not set.
+ */
+export async function loadBiometricData() {
+    const result = await browser.storage.local.get('redd2fa_biometric');
+    return result.redd2fa_biometric || null;
+}
+
+/**
+ * Clear biometric data (disable biometric unlock).
+ */
+export async function clearBiometricData() {
+    await browser.storage.local.remove('redd2fa_biometric');
+}
+
+/**
  * Check if the extension has any data stored at all.
  */
 export async function hasData() {
