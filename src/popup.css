@@ -174,9 +174,9 @@ body {
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--accent-primary);
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .logo-header h1 {
@@ -282,14 +282,17 @@ body {
 
 .toggle-visibility {
   position: absolute;
-  right: 6px;
-  bottom: 6px;
+  right: 5px;
+  bottom: 3px;
   padding: 4px;
   border: none;
   background: none;
   cursor: pointer;
   color: var(--icon-color);
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .toggle-visibility:hover {
@@ -580,42 +583,86 @@ body {
   dominant-baseline: central;
 }
 
-/* Account card actions (edit/delete) — shown on hover */
-.account-actions {
-  display: none;
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  gap: 2px;
+/* Ellipsis more menu */
+.account-more {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: 4px;
 }
 
-.account-card:hover .account-actions {
-  display: flex;
-}
-
-.account-action-btn {
-  width: 24px;
-  height: 24px;
+.more-btn {
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: none;
   border-radius: 4px;
   background: none;
-  color: var(--text-muted);
+  color: var(--text-subtle);
   cursor: pointer;
+  font-size: 1.2em;
+  font-weight: 700;
+  line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.12s ease;
+  opacity: 0;
 }
 
-.account-action-btn:hover {
+.account-card:hover .more-btn {
+  opacity: 1;
+}
+
+.more-btn:hover {
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
+  opacity: 1;
 }
 
-.account-action-btn svg {
-  width: 14px;
-  height: 14px;
+.more-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 2px;
+  min-width: 100px;
+  background-color: var(--modal-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.more-menu.open {
+  display: block;
+}
+
+.more-menu-item {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  font-size: 0.82em;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.more-menu-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.more-menu-item.delete-btn {
+  color: var(--btn-danger-bg);
+}
+
+.more-menu-item.delete-btn:hover {
+  background-color: rgba(239, 68, 68, 0.08);
 }
 
 /* ========================================
@@ -818,40 +865,7 @@ body {
   margin-top: 16px;
 }
 
-/* ========================================
-   Tab Bar
-   ======================================== */
-.tab-bar {
-  display: flex;
-  gap: 0;
-  margin-bottom: 14px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
 
-.tab-btn {
-  flex: 1;
-  padding: 7px 12px;
-  font-size: 0.82em;
-  font-weight: 500;
-  font-family: inherit;
-  color: var(--text-muted);
-  background-color: var(--bg-tertiary);
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.tab-btn.active {
-  color: var(--text-primary);
-  background-color: var(--bg-secondary);
-  font-weight: 600;
-}
-
-.tab-btn:hover:not(.active) {
-  background-color: var(--bg-hover);
-}
 
 /* ========================================
    Feedback & Error Text
@@ -926,6 +940,7 @@ body {
     opacity: 0;
     transform: translateX(-50%) translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);

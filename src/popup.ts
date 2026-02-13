@@ -869,14 +869,12 @@ function getColorForIssuer(issuer: string): string {
 function downloadFile(content: string, filename: string, mimeType: string) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
-    browser.downloads.download({
-        url,
-        filename,
-        saveAs: true,
-    }).then(() => {
-        // Revoke after a short delay to ensure download has started
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-    }).catch(() => {
-        URL.revokeObjectURL(url);
-    });
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Revoke after a short delay to ensure download has started
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
