@@ -397,13 +397,12 @@ async function renderAccounts() {
             <text class="progress-ring__text" x="13" y="13" data-period="${account.period}"></text>
           </svg>
         </div>
-        <div class="account-actions">
-          <button class="account-action-btn edit-btn" data-id="${account.id}" title="Edit">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="account-action-btn delete-btn" data-id="${account.id}" title="Delete">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
+        <div class="account-more">
+          <button class="more-btn" data-id="${account.id}" title="More options">⋮</button>
+          <div class="more-menu" data-id="${account.id}">
+            <button class="more-menu-item edit-btn" data-id="${account.id}">Edit</button>
+            <button class="more-menu-item delete-btn" data-id="${account.id}">Delete</button>
+          </div>
         </div>
       </div>
     `;
@@ -413,10 +412,24 @@ async function renderAccounts() {
     accountList.querySelectorAll('.account-card').forEach((card) => {
         card.addEventListener('click', (e) => {
             const target = e.target as HTMLElement;
-            // Don't copy if clicking edit/delete buttons
-            if (target.closest('.account-action-btn')) return;
+            // Don't copy if clicking the more menu or its items
+            if (target.closest('.account-more')) return;
             const id = (card as HTMLElement).dataset.id!;
             copyCode(id, card as HTMLElement);
+        });
+    });
+
+    // Ellipsis menu toggle
+    accountList.querySelectorAll('.more-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = (btn as HTMLElement).dataset.id!;
+            // Close any other open menus
+            accountList.querySelectorAll('.more-menu.open').forEach(m => {
+                if ((m as HTMLElement).dataset.id !== id) m.classList.remove('open');
+            });
+            const menu = accountList.querySelector(`.more-menu[data-id="${id}"]`);
+            if (menu) menu.classList.toggle('open');
         });
     });
 
@@ -424,6 +437,7 @@ async function renderAccounts() {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = (btn as HTMLElement).dataset.id!;
+            closeAllMoreMenus();
             openAccountModal(id);
         });
     });
@@ -432,12 +446,20 @@ async function renderAccounts() {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = (btn as HTMLElement).dataset.id!;
+            closeAllMoreMenus();
             openDeleteModal(id);
         });
     });
 
     updateProgressRings();
 }
+
+function closeAllMoreMenus() {
+    document.querySelectorAll('.more-menu.open').forEach(m => m.classList.remove('open'));
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', () => closeAllMoreMenus());
 
 // ========================================
 // TOTP refresh loop
@@ -847,11 +869,14 @@ function getColorForIssuer(issuer: string): string {
 function downloadFile(content: string, filename: string, mimeType: string) {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    browser.downloads.download({
+        url,
+        filename,
+        saveAs: true,
+    }).then(() => {
+        // Revoke after a short delay to ensure download has started
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }).catch(() => {
+        URL.revokeObjectURL(url);
+    });
 }
