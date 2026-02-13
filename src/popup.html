@@ -63,11 +63,12 @@
        ======================================== -->
   <div id="lock-screen" style="display: none;">
     <div class="screen-container">
-      <div class="logo-header">
-        <img class="logo-icon" src="icons/icon-128.png" alt="ReDD 2FA">
-        <h1>ReDD 2FA</h1>
+      <div class="top-bar top-bar-no-border">
+        <div class="top-title-group">
+          <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
+          <h2 class="top-title">ReDD 2FA</h2>
+        </div>
       </div>
-      <p class="subtitle">Enter your passphrase to unlock.</p>
 
       <!-- Biometric unlock button (shown if biometric is set up) -->
       <button id="biometric-unlock-btn" class="btn-biometric" style="display: none;">
@@ -108,7 +109,6 @@
   <div id="main-screen" style="display: none;">
     <!-- Top Bar -->
     <div class="top-bar">
-      <h2 class="top-title">ReDD 2FA</h2>
       <div class="top-actions">
         <button id="add-account-btn" class="icon-btn" title="Add account">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -165,7 +165,7 @@
       </button>
       <h3>SETTINGS</h3>
       <div class="settings-item">
-        <label for="theme-select">Theme</label>
+        <label for="theme-select">Light / dark theme</label>
         <select id="theme-select" class="settings-select">
           <option value="system">Auto</option>
           <option value="light">Light</option>
@@ -183,14 +183,24 @@
         </select>
       </div>
       <div class="settings-divider"></div>
-      <button id="biometric-toggle-btn" class="settings-action" style="display: none;"></button>
-      <div class="settings-divider"></div>
       <button id="export-btn" class="settings-action">Export backup</button>
       <button id="import-btn" class="settings-action">Import backup</button>
-      <button id="export-plain-btn" class="settings-action">Export as URIs (unencrypted)</button>
+      <button id="migration-toggle" class="settings-collapsible">
+        Migrating to another 2FA app?
+        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div id="migration-content" class="settings-collapsible-content" style="display: none;">
+        <p>To move your accounts, tap the <strong>⋮</strong> menu on any account, choose <strong>Edit</strong>, and copy
+          the secret key into your new app.</p>
+      </div>
       <div class="settings-divider"></div>
+      <button id="biometric-toggle-btn" class="settings-action" style="display: none;"></button>
       <button id="lock-btn" class="settings-action settings-action-danger">Lock now</button>
     </div>
+
   </div>
 
   <!-- ========================================
@@ -289,20 +299,7 @@
     </div>
   </div>
 
-  <!-- ========================================
-       Plain Export Warning Modal
-       ======================================== -->
-  <div id="plain-export-modal-overlay" class="modal-overlay" style="display: none;">
-    <div class="modal modal-small">
-      <h3>⚠️ Export Unencrypted URIs</h3>
-      <p class="delete-warning">This will export all your secrets as plain text. Anyone with this file can access your
-        accounts. Only use this for migrating to another authenticator app.</p>
-      <div class="modal-actions">
-        <button id="plain-export-cancel-btn" class="btn-secondary">Cancel</button>
-        <button id="plain-export-confirm-btn" class="btn-danger">Export Plain Text</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- ========================================
        Biometric Enable Prompt Modal
@@ -318,6 +315,10 @@
       </div>
     </div>
   </div>
+
+  <footer class="popup-footer">
+    Made with ❤️ by <a href="https://reddfocus.org" target="_blank">reddfocus.org</a>
+  </footer>
 
   <!-- Toast notification -->
   <div id="toast" class="toast" style="display: none;"></div>

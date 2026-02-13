@@ -6,7 +6,7 @@
  */
 
 
-import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret, buildOtpauthURI } from './totp.js';
+import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
 import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
@@ -81,8 +81,6 @@ const importPassword = $('import-password');
 const importError = $('import-error');
 const importSuccess = $('import-success');
 
-// Plain export modal
-const plainExportModalOverlay = $('plain-export-modal-overlay');
 
 // Toast
 const toast = $('toast');
@@ -219,9 +217,12 @@ function initEventListeners() {
         settingsDropdown.style.display = 'none';
         openImportModal();
     });
-    $('export-plain-btn').addEventListener('click', () => {
-        settingsDropdown.style.display = 'none';
-        plainExportModalOverlay.style.display = 'flex';
+    $('migration-toggle').addEventListener('click', () => {
+        const content = $('migration-content');
+        const chevron = $('migration-toggle').querySelector('.chevron-icon');
+        const isOpen = content.style.display !== 'none';
+        content.style.display = isOpen ? 'none' : 'block';
+        chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
 
     // Account modal
@@ -274,11 +275,6 @@ function initEventListeners() {
         }
     });
 
-    // Plain export modal
-    $('plain-export-cancel-btn').addEventListener('click', () => {
-        plainExportModalOverlay.style.display = 'none';
-    });
-    $('plain-export-confirm-btn').addEventListener('click', handlePlainExport);
 
     // Toggle visibility buttons
     document.querySelectorAll('.toggle-visibility').forEach((btn) => {
@@ -521,10 +517,16 @@ async function renderAccounts() {
 
         return `
       <div class="account-card" data-id="${account.id}" title="Click to copy code">
+        <div class="account-more">
+          <button class="more-btn" data-id="${account.id}" title="More options">⋮</button>
+          <div class="more-menu" data-id="${account.id}">
+            <button class="more-menu-item edit-btn" data-id="${account.id}">Edit</button>
+            <button class="more-menu-item delete-btn" data-id="${account.id}">Delete</button>
+          </div>
+        </div>
         <div class="account-icon" style="background-color: ${color}">${initials}</div>
         <div class="account-info">
           <div class="account-issuer">${escapeHtml(account.issuer || 'Unknown')}</div>
-          <div class="account-name">${escapeHtml(account.accountName)}</div>
         </div>
         <div class="account-code-section">
           <span class="account-code" data-secret="${account.secret}" data-digits="${account.digits}" data-period="${account.period}" data-algorithm="${account.algorithm}">${formattedCode}</span>
@@ -536,13 +538,6 @@ async function renderAccounts() {
               data-period="${account.period}"/>
             <text class="progress-ring__text" x="13" y="13" data-period="${account.period}"></text>
           </svg>
-        </div>
-        <div class="account-more">
-          <button class="more-btn" data-id="${account.id}" title="More options">⋮</button>
-          <div class="more-menu" data-id="${account.id}">
-            <button class="more-menu-item edit-btn" data-id="${account.id}">Edit</button>
-            <button class="more-menu-item delete-btn" data-id="${account.id}">Delete</button>
-          </div>
         </div>
       </div>
     `;
@@ -833,12 +828,7 @@ async function handleExport() {
     }
 }
 
-function handlePlainExport() {
-    const uris = accounts.map(a => buildOtpauthURI(a)).join('\n');
-    downloadFile(uris, `redd-2fa-uris-${dateStamp()}.txt`, 'text/plain');
-    plainExportModalOverlay.style.display = 'none';
-    showToast('URIs exported (unencrypted)');
-}
+
 
 // ========================================
 // Import

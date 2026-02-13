@@ -143,7 +143,7 @@ html {
 
 body {
   width: 360px;
-  min-height: 300px;
+  min-height: 340px;
   margin: 0;
   padding: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -160,7 +160,7 @@ body {
    Screen Containers
    ======================================== */
 .screen-container {
-  padding: 24px 20px;
+  padding: 12px 24px;
   text-align: center;
 }
 
@@ -183,6 +183,24 @@ body {
   font-size: 1.3em;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.top-title {
+  font-size: 1em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.top-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.top-logo {
+  width: 22px;
+  height: 22px;
 }
 
 .subtitle {
@@ -399,26 +417,35 @@ body {
 }
 
 /* ========================================
+   Main Screen
+   ======================================== */
+#main-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 11px 7px;
+}
+
+/* ========================================
    Top Bar
    ======================================== */
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 8px 16px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 0px 16px 8px 0px;
 }
 
-.top-title {
-  margin: 0;
-  font-size: 1.05em;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+.top-bar-no-border {
+  border-bottom: none;
 }
+
 
 .top-actions {
   display: flex;
   gap: 6px;
+  margin-left: 14px;
+  margin-top: 8px;
 }
 
 /* ========================================
@@ -466,7 +493,7 @@ body {
    Account List
    ======================================== */
 .account-list {
-  padding: 4px 12px 12px 12px;
+  padding: 4px 12px 12px 14px;
 }
 
 .account-card {
@@ -518,18 +545,9 @@ body {
   font-size: 0.82em;
   font-weight: 600;
   color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.account-name {
-  font-size: 0.75em;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 
 /* TOTP Code */
 .account-code-section {
@@ -584,7 +602,7 @@ body {
 .account-more {
   position: relative;
   flex-shrink: 0;
-  margin-left: 4px;
+  margin-right: -4px;
 }
 
 .more-btn {
@@ -603,24 +621,18 @@ body {
   align-items: center;
   justify-content: center;
   transition: all 0.12s ease;
-  opacity: 0;
-}
-
-.account-card:hover .more-btn {
-  opacity: 1;
 }
 
 .more-btn:hover {
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  opacity: 1;
 }
 
 .more-menu {
   display: none;
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   margin-top: 2px;
   min-width: 100px;
   background-color: var(--modal-bg);
@@ -764,7 +776,6 @@ body {
   border: none;
   cursor: pointer;
   border-radius: 4px;
-  padding-left: 8px;
   transition: background-color 0.12s ease;
 }
 
@@ -822,7 +833,7 @@ body {
 
 .modal {
   width: 100%;
-  max-width: 340px;
+  max-width: 320px;
   max-height: 90vh;
   overflow-y: auto;
   background-color: var(--modal-bg);
@@ -1036,4 +1047,70 @@ body {
   color: var(--text-secondary);
   margin: 8px 0 16px 0;
   line-height: 1.5;
+}
+
+/* ========================================
+   Settings Collapsible
+   ======================================== */
+.settings-collapsible {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 0.85em;
+  font-family: inherit;
+  font-weight: 500;
+  text-align: left;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.settings-collapsible:hover {
+  color: var(--text-primary);
+}
+
+.settings-collapsible .chevron-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.settings-collapsible-content {
+  padding: 0 0 8px 0;
+}
+
+.settings-collapsible-content p {
+  margin: 0;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+.popup-footer {
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 0.78em;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+}
+
+.popup-footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.popup-footer a:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
 }

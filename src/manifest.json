@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "ReDD 2FA: No-Phone Authentication",
+    "name": "ReDD 2FA: Phone-Free Authentication",
     "description": "Minimalist, offline-only TOTP authenticator. Secure, encrypted, and simple.",
     "version": "1.0.0",
     "icons": {
