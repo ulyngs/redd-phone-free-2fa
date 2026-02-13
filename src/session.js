@@ -5,13 +5,19 @@
  * The key is never persisted — only held in memory while unlocked.
  */
 
-import browser from './browser.js';
-
 /** In-memory session state */
 let sessionKey = null;
 let lastActivity = Date.now();
 let autoLockMinutes = 5;
 let lockCheckInterval = null;
+let onLockCallback = null;
+
+/**
+ * Register a callback to be called when the session auto-locks.
+ */
+export function setOnLockCallback(cb) {
+    onLockCallback = cb;
+}
 
 /**
  * Store the derived key in memory (unlock).
@@ -69,12 +75,7 @@ function startAutoLockTimer() {
         const elapsed = (Date.now() - lastActivity) / 1000 / 60;
         if (elapsed >= autoLockMinutes) {
             lock();
-            // Notify any open popups that we've locked
-            try {
-                browser.runtime.sendMessage({ type: 'SESSION_LOCKED' }).catch(() => { });
-            } catch {
-                // Popup may not be open
-            }
+            if (onLockCallback) onLockCallback();
         }
     }, 10_000); // Check every 10 seconds
 }

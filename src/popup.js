@@ -5,10 +5,10 @@
  * TOTP code generation, modals, search, clipboard, and settings.
  */
 
-import browser from './browser.js';
+
 import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret, buildOtpauthURI } from './totp.js';
 import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings } from './storage.js';
-import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes } from './session.js';
+import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 
 // ========================================
 // State
@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     settings = await loadSettings();
     applyTheme(settings.theme);
     initEventListeners();
+    setOnLockCallback(() => showScreen('lock'));
 
     if (await isFirstLaunch()) {
         showScreen('setup');
@@ -98,16 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Listen for session lock messages from background
-browser.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'SESSION_LOCKED') {
-        lock();
-        showScreen('lock');
-    }
-    if (msg.type === 'DO_CLEAR_CLIPBOARD') {
-        navigator.clipboard.writeText('').catch(() => { });
-    }
-});
+
 
 // ========================================
 // Screen management
@@ -538,17 +530,6 @@ async function copyCode(accountId, cardElement) {
         // Flash card
         cardElement.classList.add('copied');
         setTimeout(() => cardElement.classList.remove('copied'), 600);
-
-        // Schedule clipboard clear via background
-        browser.runtime.sendMessage({
-            type: 'CLEAR_CLIPBOARD',
-            delayMs: (settings.clipboardClearSeconds || 15) * 1000,
-        }).catch(() => {
-            // Fallback: clear from popup directly
-            setTimeout(() => {
-                navigator.clipboard.writeText('').catch(() => { });
-            }, (settings.clipboardClearSeconds || 15) * 1000);
-        });
     } catch {
         showToast('Failed to copy');
     }

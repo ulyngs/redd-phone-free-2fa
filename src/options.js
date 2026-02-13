@@ -4,7 +4,6 @@
  * Handles backup/restore on the full options page.
  */
 
-import browser from './browser.js';
 import { unlockWithPassphrase, loadAccounts, saveAccounts } from './storage.js';
 import { generateSalt, deriveKey, encrypt, decrypt } from './crypto.js';
 import { parseOtpauthURI, buildOtpauthURI } from './totp.js';
