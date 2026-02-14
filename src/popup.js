@@ -328,16 +328,12 @@ function initEventListeners() {
     document.addEventListener('click', () => touchActivity());
     document.addEventListener('keydown', () => touchActivity());
 
-    // Open external links in the current tab (not a new tab)
+    // Open external links in a new tab
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
         if (link && link.href.startsWith('http')) {
             e.preventDefault();
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs[0]) {
-                    chrome.tabs.update(tabs[0].id, { url: link.href });
-                }
-            });
+            window.open(link.href, '_blank');
         }
     });
 }
