@@ -225,8 +225,8 @@
           the secret key into your new app.</p>
       </div>
       <div class="settings-divider"></div>
-      <button id="biometric-toggle-btn" class="settings-action" style="display: none;"></button>
       <button id="change-passphrase-btn" class="settings-action">Change passphrase</button>
+      <button id="biometric-toggle-btn" class="settings-action" style="display: none;"></button>
       <button id="lock-btn" class="settings-action settings-action-danger">Lock now</button>
     </div>
 
@@ -290,7 +290,15 @@
               click "Sign in another way"/"I can't use my
               Microsoft Authenticator app right now" → Use a verification code.</em></p>
         </div>
-        <input type="text" id="manual-secret" placeholder="e.g. JBSWY3DPEHPK3PXP" autocomplete="off" spellcheck="false">
+        <input type="password" id="manual-secret" placeholder="e.g. JBSWY3DPEHPK3PXP" autocomplete="off"
+          spellcheck="false">
+        <button type="button" class="toggle-visibility" data-target="manual-secret" title="Show/hide secret key">
+          <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
         <p id="secret-validation" class="feedback-text" style="display: none;"></p>
       </div>
 

@@ -731,6 +731,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 10px;
   font-size: 0.9em;
 }
@@ -767,15 +768,18 @@ body {
 }
 
 .settings-hint {
+  width: 100%;
   font-size: 0.78em;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   margin: 4px 0 0 0;
+  text-align: right;
+  font-style: italic;
 }
 
 .settings-divider {
   height: 1px;
   background-color: var(--border-color);
-  margin: 12px 0;
+  margin: 6px 0;
 }
 
 .settings-action {
@@ -1102,7 +1106,7 @@ body {
 .settings-collapsible-content p {
   margin: 0;
   font-size: 0.82em;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 

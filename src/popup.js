@@ -819,6 +819,7 @@ function closeAccountModal() {
 function resetModal() {
     manualLabel.value = '';
     manualSecret.value = '';
+    manualSecret.type = 'password';
     hideElement(secretValidation);
     hideElement(modalError);
 }
