@@ -370,9 +370,20 @@ async function handleSetup() {
 // ========================================
 // Unlock handler
 // ========================================
+let failedAttempts = 0;
+let lockoutUntil = 0;
+
 async function handleUnlock() {
     const passphrase = unlockPassphraseInput.value;
     if (!passphrase) return;
+
+    // Check lockout
+    const now = Date.now();
+    if (now < lockoutUntil) {
+        const remaining = Math.ceil((lockoutUntil - now) / 1000);
+        showElement(unlockError, `Too many failed attempts. Try again in ${remaining}s.`);
+        return;
+    }
 
     unlockBtn.disabled = true;
     unlockBtn.textContent = 'Unlocking...';
@@ -380,12 +391,28 @@ async function handleUnlock() {
     try {
         const key = await unlockWithPassphrase(passphrase);
         if (!key) {
-            showElement(unlockError, 'Incorrect passphrase.');
+            failedAttempts++;
+            // Progressive lockout: 5s after 5 failures, 30s after 10, 5min after 15
+            if (failedAttempts >= 15) {
+                lockoutUntil = Date.now() + 5 * 60 * 1000;
+                showElement(unlockError, 'Too many failed attempts. Locked for 5 minutes.');
+            } else if (failedAttempts >= 10) {
+                lockoutUntil = Date.now() + 30 * 1000;
+                showElement(unlockError, 'Too many failed attempts. Locked for 30 seconds.');
+            } else if (failedAttempts >= 5) {
+                lockoutUntil = Date.now() + 5 * 1000;
+                showElement(unlockError, 'Too many failed attempts. Locked for 5 seconds.');
+            } else {
+                showElement(unlockError, 'Incorrect passphrase.');
+            }
             unlockBtn.disabled = false;
             unlockBtn.textContent = 'Unlock';
             return;
         }
 
+        // Success — reset counter
+        failedAttempts = 0;
+        lockoutUntil = 0;
         setSessionKey(key);
         setAutoLockMinutes(settings.autoLockMinutes);
         accounts = await loadAccounts(key);
