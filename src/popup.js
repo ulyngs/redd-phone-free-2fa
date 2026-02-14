@@ -20,8 +20,6 @@ let totpInterval = null;
 let editingAccountId = null;
 let pendingPassphrase = null; // held briefly for biometric registration
 
-// Firefox detection — Firefox closes popups on WebAuthn dialogs
-const isFirefox = /Firefox\//.test(navigator.userAgent);
 
 // ========================================
 // DOM refs
@@ -105,54 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (await isFirstLaunch()) {
         showScreen('setup');
     } else {
-        // Check if we're returning from a tab-based biometric flow (Firefox)
-        const handled = await checkPendingBiometric();
-        if (!handled) {
-            showScreen('lock');
-            await setupLockScreen();
-        }
+        showScreen('lock');
+        await setupLockScreen();
     }
 });
-
-/**
- * Check for pending biometric results from tab-based flow (Firefox).
- * Returns true if a pending result was handled.
- */
-async function checkPendingBiometric() {
-    try {
-        const result = await browser.storage.local.get(['redd2fa_biometric_pending', 'redd2fa_biometric_passphrase']);
-        if (!result.redd2fa_biometric_pending) return false;
-
-        // Clean up pending flags immediately
-        await browser.storage.local.remove(['redd2fa_biometric_pending', 'redd2fa_biometric_passphrase']);
-
-        if (result.redd2fa_biometric_pending === 'registered') {
-            // Registration completed in tab — biometric data is already saved
-            showToast('Touch ID enabled!');
-            showScreen('lock');
-            await setupLockScreen();
-            return true;
-        }
-
-        if (result.redd2fa_biometric_pending === 'unlocked' && result.redd2fa_biometric_passphrase) {
-            // Unlock completed in tab — passphrase is base64-encoded
-            const passphrase = atob(result.redd2fa_biometric_passphrase);
-            const key = await unlockWithPassphrase(passphrase);
-            if (key) {
-                setSessionKey(key);
-                setAutoLockMinutes(settings.autoLockMinutes);
-                accounts = await loadAccounts(key);
-                showScreen('main');
-                renderAccounts();
-                return true;
-            }
-        }
-    } catch {
-        // Ignore errors, fall through to normal lock screen
-    }
-    return false;
-}
-
 
 
 // ========================================
@@ -224,6 +178,7 @@ function initEventListeners() {
     // Add account
     $('add-account-btn').addEventListener('click', () => openAccountModal());
     $('empty-add-btn').addEventListener('click', () => openAccountModal());
+
 
     // Settings
     $('settings-btn').addEventListener('click', () => {
@@ -540,12 +495,6 @@ async function handleBiometricUnlock() {
         const biometricData = await loadBiometricData();
         if (!biometricData) return;
 
-        // Firefox: open tab-based flow (popup closes on WebAuthn dialog)
-        if (isFirefox) {
-            const url = browser.runtime.getURL('biometric-auth.html?action=unlock');
-            await browser.tabs.create({ url });
-            return; // popup will close; checkPendingBiometric handles result on reopen
-        }
 
         const passphrase = await authenticateBiometric(biometricData);
         const key = await unlockWithPassphrase(passphrase);
@@ -577,16 +526,6 @@ function initBiometricListeners() {
         try {
             if (!pendingPassphrase) return;
 
-            // Firefox: open tab-based flow (popup closes on WebAuthn dialog)
-            if (isFirefox) {
-                const encoded = btoa(pendingPassphrase);
-                pendingPassphrase = null;
-                if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
-                biometricPromptOverlay.style.display = 'none';
-                const url = browser.runtime.getURL(`biometric-auth.html?action=register&passphrase=${encodeURIComponent(encoded)}`);
-                await browser.tabs.create({ url });
-                return; // popup will close; checkPendingBiometric handles result on reopen
-            }
 
             const data = await registerBiometric(pendingPassphrase);
             await saveBiometricData(data);
