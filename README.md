@@ -9,11 +9,11 @@ Part of the [reddfocus.org](https://reddfocus.org) family of productivity tools.
 ### Security
 - **Strong encryption** — AES-256-GCM via Web Crypto API with PBKDF2 key derivation (600,000 iterations, SHA-256)
 - **Local-only** — never makes network requests; all data stays on your device
-- **Minimal permissions** — only requests `storage`; no host permissions, no remote code
+- **Minimal permissions** — only requests `storage` and `tabs`; no host permissions, no remote code
 - **Master passphrase** — all account data encrypted at rest; decrypted only while unlocked
 - **Passphrase never stored** — only a verification hash is persisted
 - **Memory safety** — derived key is held in memory only while unlocked; wiped on lock or popup close
-- **Auto-lock** — configurable inactivity timeout (1, 5, 15, or 30 minutes); also locks when popup closes
+- **Auto-lock** — configurable inactivity timeout (1, 5, 15, 30 minutes, or never)
 - **Brute-force protection** — progressive lockout after failed unlock attempts (5s → 30s → 5min)
 - **Clipboard auto-clear** — copied codes are removed from clipboard after 30 seconds
 - **Constant-time comparison** — passphrase hash verification uses XOR-based comparison to prevent timing attacks
@@ -25,7 +25,7 @@ Part of the [reddfocus.org](https://reddfocus.org) family of productivity tools.
 - Biometric data is automatically cleared when passphrase is changed
 
 ### Usability
-- **Cross-browser** — Chrome, Firefox, Edge, and Safari (Manifest V3)
+- **Cross-browser** — Chrome, Firefox, and Edge (Manifest V3)
 - **Dark / light mode** — auto-detects system preference, or set manually
 - **Search & filter** — search accounts by name or issuer
 - **Copy on click** — tap any account card to copy its current code
@@ -44,6 +44,64 @@ Part of the [reddfocus.org](https://reddfocus.org) family of productivity tools.
 5. TOTP codes are generated using HMAC-SHA1/256/512 per RFC 6238 — entirely via Web Crypto API
 6. On lock (manual, auto-lock timeout, or popup close), the key is wiped from memory
 
+```mermaid
+flowchart TB
+    subgraph User
+        click["Click extension icon"]
+        passphrase["Enter passphrase"]
+        touchid["Touch ID / Windows Hello"]
+    end
+
+    subgraph background.js
+        tab["Open / focus extension tab"]
+    end
+
+    subgraph popup.js
+        ui["UI controller"]
+        lock_screen["Lock screen"]
+        main_screen["Account list + TOTP codes"]
+    end
+
+    subgraph crypto.js
+        pbkdf2["PBKDF2 key derivation\n(600k iterations, SHA-256)"]
+        aesgcm["AES-256-GCM\nencrypt / decrypt"]
+    end
+
+    subgraph session.js
+        memkey["In-memory CryptoKey"]
+        autolock["Auto-lock timer"]
+    end
+
+    subgraph biometric.js
+        webauthn["WebAuthn PRF / credential-gated"]
+        hkdf["HKDF → AES-256-GCM\npassphrase wrapping"]
+    end
+
+    subgraph totp.js
+        hmac["HMAC-SHA1/256/512\n(Web Crypto API)"]
+        truncate["Dynamic truncation\n→ 6/8-digit code"]
+    end
+
+    subgraph storage.js
+        store["browser.storage.local"]
+        blob["Encrypted JSON blob\n(accounts, meta, settings)"]
+    end
+
+    click --> tab --> ui
+    passphrase --> pbkdf2 --> memkey
+    touchid --> webauthn --> hkdf --> passphrase
+
+    memkey --> aesgcm
+    aesgcm <--> blob
+    blob <--> store
+
+    memkey --> main_screen
+    main_screen --> hmac --> truncate --> main_screen
+
+    autolock -- "timeout" --> lock_screen
+    lock_screen -- "key wiped" --> memkey
+```
+
 ## Loading the Extension
 
 No build step required — the extension runs as vanilla ES modules.
@@ -60,13 +118,6 @@ No build step required — the extension runs as vanilla ES modules.
 1. Go to `about:debugging#/runtime/this-firefox`
 2. Click "Load Temporary Add-on"
 3. Select `src/manifest.json`
-
-### Safari
-
-1. Run `xcrun safari-web-extension-converter src/` to generate an Xcode project
-2. Open the generated Xcode project
-3. Build and run in Xcode
-4. Enable the extension in Safari → Settings → Extensions
 
 ## Security Model
 
@@ -95,16 +146,18 @@ No build step required — the extension runs as vanilla ES modules.
 ```
 src/
 ├── manifest.json       # Extension manifest (MV3)
-├── popup.html          # Main popup UI
+├── popup.html          # Main UI (opens in a tab)
 ├── popup.css           # Styles (light/dark themes)
-├── popup.js            # Popup controller (UI, events, TOTP refresh)
+├── popup.js            # UI controller (events, TOTP refresh)
+├── background.js       # Service worker (tab management)
 ├── crypto.js           # Encryption/decryption (AES-GCM, PBKDF2)
 ├── totp.js             # TOTP engine (Base32, HMAC, RFC 6238)
 ├── storage.js          # Encrypted storage manager
 ├── session.js          # In-memory session & auto-lock
 ├── biometric.js        # WebAuthn PRF biometric unlock
 ├── browser.js          # Minimal browser API shim
-├── options.html        # Options page (backup/restore)
+├── options.html        # Options page
+├── options.css         # Options page styles
 ├── options.js          # Options page controller
 └── icons/              # Extension icons
 ```
