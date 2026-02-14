@@ -606,38 +606,92 @@ async function renderAccounts() {
         filtered.map(a => generateTOTP(a.secret, a.digits, a.period, a.algorithm))
     );
 
-    accountList.innerHTML = filtered.map((account, i) => {
+    const fragment = document.createDocumentFragment();
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const circumference = 2 * Math.PI * 10;
+
+    filtered.forEach((account, i) => {
         const formattedCode = formatCode(codes[i]);
         const initials = getInitials(account.issuer || account.accountName);
         const color = getColorForIssuer(account.issuer);
 
-        return `
-      <div class="account-card" data-id="${account.id}" title="Click to copy code">
-        <div class="account-more">
-          <button class="more-btn" data-id="${account.id}" title="More options">⋮</button>
-          <div class="more-menu" data-id="${account.id}">
-            <button class="more-menu-item edit-btn" data-id="${account.id}">Edit</button>
-            <button class="more-menu-item delete-btn" data-id="${account.id}">Delete</button>
-          </div>
-        </div>
-        <div class="account-icon" style="background-color: ${color}">${initials}</div>
-        <div class="account-info">
-          <div class="account-issuer">${escapeHtml(account.issuer || 'Unknown')}</div>
-        </div>
-        <div class="account-code-section">
-          <span class="account-code" data-account-id="${account.id}">${formattedCode}</span>
-          <svg class="progress-ring" viewBox="0 0 26 26">
-            <circle class="progress-ring__track" cx="13" cy="13" r="10"/>
-            <circle class="progress-ring__fill" cx="13" cy="13" r="10"
-              stroke-dasharray="${2 * Math.PI * 10}"
-              stroke-dashoffset="0"
-              data-account-id="${account.id}"/>
-            <text class="progress-ring__text" x="13" y="13" data-account-id="${account.id}"></text>
-          </svg>
-        </div>
-      </div>
-    `;
-    }).join('');
+        const card = document.createElement('div');
+        card.className = 'account-card';
+        card.dataset.id = account.id;
+        card.title = 'Click to copy code';
+
+        // More menu
+        const more = document.createElement('div');
+        more.className = 'account-more';
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'more-btn';
+        moreBtn.dataset.id = account.id;
+        moreBtn.title = 'More options';
+        moreBtn.textContent = '⋮';
+        const menu = document.createElement('div');
+        menu.className = 'more-menu';
+        menu.dataset.id = account.id;
+        const editBtn = document.createElement('button');
+        editBtn.className = 'more-menu-item edit-btn';
+        editBtn.dataset.id = account.id;
+        editBtn.textContent = 'Edit';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'more-menu-item delete-btn';
+        deleteBtn.dataset.id = account.id;
+        deleteBtn.textContent = 'Delete';
+        menu.append(editBtn, deleteBtn);
+        more.append(moreBtn, menu);
+
+        // Icon
+        const icon = document.createElement('div');
+        icon.className = 'account-icon';
+        icon.style.backgroundColor = color;
+        icon.textContent = initials;
+
+        // Info
+        const info = document.createElement('div');
+        info.className = 'account-info';
+        const issuerEl = document.createElement('div');
+        issuerEl.className = 'account-issuer';
+        issuerEl.textContent = account.issuer || 'Unknown';
+        info.appendChild(issuerEl);
+
+        // Code section
+        const codeSection = document.createElement('div');
+        codeSection.className = 'account-code-section';
+        const codeSpan = document.createElement('span');
+        codeSpan.className = 'account-code';
+        codeSpan.dataset.accountId = account.id;
+        codeSpan.textContent = formattedCode;
+
+        const svg = document.createElementNS(SVG_NS, 'svg');
+        svg.setAttribute('class', 'progress-ring');
+        svg.setAttribute('viewBox', '0 0 26 26');
+        const track = document.createElementNS(SVG_NS, 'circle');
+        track.setAttribute('class', 'progress-ring__track');
+        track.setAttribute('cx', '13');
+        track.setAttribute('cy', '13');
+        track.setAttribute('r', '10');
+        const fill = document.createElementNS(SVG_NS, 'circle');
+        fill.setAttribute('class', 'progress-ring__fill');
+        fill.setAttribute('cx', '13');
+        fill.setAttribute('cy', '13');
+        fill.setAttribute('r', '10');
+        fill.setAttribute('stroke-dasharray', String(circumference));
+        fill.setAttribute('stroke-dashoffset', '0');
+        fill.dataset.accountId = account.id;
+        const text = document.createElementNS(SVG_NS, 'text');
+        text.setAttribute('class', 'progress-ring__text');
+        text.setAttribute('x', '13');
+        text.setAttribute('y', '13');
+        text.dataset.accountId = account.id;
+        svg.append(track, fill, text);
+        codeSection.append(codeSpan, svg);
+
+        card.append(more, icon, info, codeSection);
+        fragment.appendChild(card);
+    });
+    accountList.replaceChildren(fragment);
 
     // Attach click handlers
     accountList.querySelectorAll('.account-card').forEach((card) => {
