@@ -158,5 +158,17 @@ export async function createPassphraseHash(passphrase, saltBase64) {
  */
 export async function verifyPassphrase(passphrase, saltBase64, storedHash) {
     const hash = await createPassphraseHash(passphrase, saltBase64);
-    return hash === storedHash;
+    return constantTimeEqual(hash, storedHash);
+}
+
+/**
+ * Constant-time string comparison to prevent timing side-channel attacks.
+ */
+function constantTimeEqual(a, b) {
+    if (a.length !== b.length) return false;
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+    return result === 0;
 }
