@@ -430,6 +430,8 @@ async function setupLockScreen() {
 /**
  * Prompt user to enable biometric unlock (if available and not already set up).
  */
+let pendingPassphraseTimer = null;
+
 async function promptBiometricSetup(passphrase) {
     try {
         const available = await isBiometricAvailable();
@@ -437,6 +439,14 @@ async function promptBiometricSetup(passphrase) {
 
         pendingPassphrase = passphrase;
         biometricPromptOverlay.style.display = 'flex';
+
+        // Auto-clear passphrase from memory after 60s if user doesn't act
+        if (pendingPassphraseTimer) clearTimeout(pendingPassphraseTimer);
+        pendingPassphraseTimer = setTimeout(() => {
+            pendingPassphrase = null;
+            biometricPromptOverlay.style.display = 'none';
+            pendingPassphraseTimer = null;
+        }, 60_000);
     } catch {
         // Biometric not available — silently skip
     }
@@ -485,11 +495,13 @@ function initBiometricListeners() {
             const data = await registerBiometric(pendingPassphrase);
             await saveBiometricData(data);
             pendingPassphrase = null;
+            if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
             biometricPromptOverlay.style.display = 'none';
             showToast('Touch ID enabled!');
             updateBiometricToggle();
         } catch (err) {
             pendingPassphrase = null;
+            if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
             biometricPromptOverlay.style.display = 'none';
             showToast('Touch ID not available on this device.');
         }
@@ -497,6 +509,7 @@ function initBiometricListeners() {
 
     $('biometric-skip-btn').addEventListener('click', () => {
         pendingPassphrase = null;
+        if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
         biometricPromptOverlay.style.display = 'none';
     });
 
