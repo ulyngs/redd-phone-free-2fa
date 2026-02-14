@@ -1146,6 +1146,73 @@ body {
 }
 
 /* ========================================
+   Inline Help (e.g. Secret key help)
+   ======================================== */
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inline-help-toggle {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  font-size: 0.78em;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.inline-help-toggle:hover {
+  color: var(--text-primary);
+}
+
+.inline-help-toggle .chevron-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.inline-help-content {
+  padding: 8px 0 4px 0;
+}
+
+.inline-help-content p {
+  margin: 0 0 6px 0;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.inline-help-content ol {
+  margin: 0 0 6px 0;
+  padding-left: 18px;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.inline-help-content li {
+  margin-bottom: 4px;
+}
+
+.inline-help-content a {
+  color: #4b5563;
+  text-decoration: underline;
+}
+
+.inline-help-content a:hover {
+  text-decoration: none;
+}
+
+/* ========================================
    Footer
    ======================================== */
 .popup-footer {

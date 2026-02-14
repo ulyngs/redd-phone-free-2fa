@@ -232,10 +232,18 @@ function initEventListeners() {
         chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
 
+
     // Account modal
     $('modal-close-btn').addEventListener('click', closeAccountModal);
     $('modal-cancel-btn').addEventListener('click', closeAccountModal);
     modalSaveBtn.addEventListener('click', handleSaveAccount);
+    $('secret-help-toggle').addEventListener('click', () => {
+        const content = $('secret-help-content');
+        const chevron = $('secret-help-toggle').querySelector('.chevron-icon');
+        const isOpen = content.style.display !== 'none';
+        content.style.display = isOpen ? 'none' : 'block';
+        chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+    });
 
     // Secret validation
     manualSecret.addEventListener('input', () => {
@@ -295,6 +303,19 @@ function initEventListeners() {
     // Activity tracking
     document.addEventListener('click', () => touchActivity());
     document.addEventListener('keydown', () => touchActivity());
+
+    // Open external links in the current tab (not a new tab)
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (link && link.href.startsWith('http')) {
+            e.preventDefault();
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs[0]) {
+                    chrome.tabs.update(tabs[0].id, { url: link.href });
+                }
+            });
+        }
+    });
 }
 
 // ========================================

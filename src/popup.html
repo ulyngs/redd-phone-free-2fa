@@ -249,7 +249,33 @@
         <input type="text" id="manual-label" placeholder="e.g. GitHub, Google, Work email" autocomplete="off">
       </div>
       <div class="form-group">
-        <label for="manual-secret">Secret key</label>
+        <div class="label-row">
+          <label for="manual-secret">Secret key</label>
+          <button type="button" id="secret-help-toggle" class="inline-help-toggle">
+            Where do I find this?
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+        <div id="secret-help-content" class="inline-help-content" style="display: none;">
+          <p>Services usually show the secret key as a QR code — but a QR code is just a fancy way of displaying it.
+            There's always an option to reveal the key as text instead.</p>
+          <p><strong>For university Microsoft accounts:</strong></p>
+          <ol>
+            <li>Go to <a href="https://mysignins.microsoft.com/security-info"
+                target="_blank">mysignins.microsoft.com/security-info</a> and click <strong>Add sign-in method</strong>
+            </li>
+            <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication
+                app</strong> → Next → <strong>Can't scan the QR code?</strong> → copy the secret key</li>
+            <li>Paste the secret key here in ReDD 2FA, then copy one of the generated codes and give it to Microsoft —
+              done!</li>
+          </ol>
+          <p><em>Note: When you next time log in, your Microsoft acccount may still default to the Authenticator app —
+              click "Sign in another way"/"I can't use my
+              Microsoft Authenticator app right now" → Use a verification code.</em></p>
+        </div>
         <input type="text" id="manual-secret" placeholder="e.g. JBSWY3DPEHPK3PXP" autocomplete="off" spellcheck="false">
         <p id="secret-validation" class="feedback-text" style="display: none;"></p>
       </div>
