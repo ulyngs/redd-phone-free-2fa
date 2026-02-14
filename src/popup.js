@@ -702,19 +702,24 @@ function stopTOTPRefresh() {
     }
 }
 
+// Track last known TOTP counter per account to detect period rollovers
+const lastCounters = new Map();
+
 async function updateCodes() {
+    const nowSec = Math.floor(Date.now() / 1000);
     const elements = accountList.querySelectorAll('.account-code');
     for (const el of elements) {
         const account = accounts.find(a => a.id === el.dataset.accountId);
         if (!account) continue;
         const period = account.period || 30;
-        const remaining = getRemainingSeconds(period);
+        const counter = Math.floor(nowSec / period);
 
-        // Only update when a new code is generated (at period boundary)
-        if (remaining === period || remaining === period - 1) {
-            const code = await generateTOTP(account.secret, account.digits || 6, period, account.algorithm || 'SHA1');
-            el.textContent = formatCode(code);
-        }
+        // Only regenerate when the counter changes
+        if (lastCounters.get(account.id) === counter) continue;
+        lastCounters.set(account.id, counter);
+
+        const code = await generateTOTP(account.secret, account.digits || 6, period, account.algorithm || 'SHA1');
+        el.textContent = formatCode(code);
     }
 }
 
