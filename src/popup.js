@@ -224,6 +224,13 @@ function initEventListeners() {
         content.style.display = isOpen ? 'none' : 'block';
         chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
+    $('how-it-works-toggle').addEventListener('click', () => {
+        const content = $('how-it-works-content');
+        const chevron = $('how-it-works-toggle').querySelector('.chevron-icon');
+        const isOpen = content.style.display !== 'none';
+        content.style.display = isOpen ? 'none' : 'block';
+        chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+    });
 
     // Account modal
     $('modal-close-btn').addEventListener('click', closeAccountModal);

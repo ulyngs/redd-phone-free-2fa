@@ -14,9 +14,11 @@
        ======================================== -->
   <div id="setup-screen" style="display: none;">
     <div class="screen-container">
-      <div class="logo-header">
-        <img class="logo-icon" src="icons/icon-128.png" alt="ReDD 2FA">
-        <h1>ReDD 2FA</h1>
+      <div class="top-bar top-bar-no-border">
+        <div class="top-title-group">
+          <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
+          <h2 class="top-title">ReDD 2FA</h2>
+        </div>
       </div>
       <p class="subtitle">Create a master passphrase to encrypt your accounts.</p>
 
@@ -126,6 +128,29 @@
           </svg>
         </button>
       </div>
+      <button id="how-it-works-toggle" class="how-it-works-toggle">
+        How does it work?
+        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div id="how-it-works-content" class="how-it-works-content" style="display: none;">
+      <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
+        more secure, because a hacker cannot get into your accounts with your password alone.</p>
+      <p>The most common approach to 2FA is <strong>time-based one-time passwords</strong> (TOTP).
+        You get a secret key from the service you want to protect (e.g. your university Microsoft account), and pass
+        that to
+        the 2FA service (e.g., this extension). The 2FA service then generates a unique 6-digit code for you every 30
+        seconds. ReDD 2FA encrypts your secret keys with your master passphrase / touch ID, which never leaves your
+        device.
+      <p>ReDD 2FA is safe, secure, and open-source. It is developed by
+        computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
+        Kollnig, Henry Tari), as
+        part of the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
+        The code is available at <a href="https://github.com/ulyngs/redd-2fa">https://github.com/ulyngs/redd-2fa</a>.
+      </p>
     </div>
 
     <!-- Search Bar -->
