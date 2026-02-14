@@ -6,7 +6,7 @@ Part of the [reddfocus.org](https://reddfocus.org) family of productivity tools.
 
 ## Features
 
-- **Offline-only** — never makes network requests; fully local operation
+- **Local-only** — never makes network requests; fully local operation
 - **Encrypted storage** — AES-256-GCM encryption with PBKDF2 key derivation (600k iterations)
 - **Master passphrase** — all data encrypted at rest; unlock with your passphrase
 - **Auto-lock** — wipes decryption key from memory after inactivity

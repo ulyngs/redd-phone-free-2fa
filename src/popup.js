@@ -581,14 +581,14 @@ async function renderAccounts() {
           <div class="account-issuer">${escapeHtml(account.issuer || 'Unknown')}</div>
         </div>
         <div class="account-code-section">
-          <span class="account-code" data-secret="${account.secret}" data-digits="${account.digits}" data-period="${account.period}" data-algorithm="${account.algorithm}">${formattedCode}</span>
+          <span class="account-code" data-account-id="${account.id}">${formattedCode}</span>
           <svg class="progress-ring" viewBox="0 0 26 26">
             <circle class="progress-ring__track" cx="13" cy="13" r="10"/>
             <circle class="progress-ring__fill" cx="13" cy="13" r="10"
               stroke-dasharray="${2 * Math.PI * 10}"
               stroke-dashoffset="0"
-              data-period="${account.period}"/>
-            <text class="progress-ring__text" x="13" y="13" data-period="${account.period}"></text>
+              data-account-id="${account.id}"/>
+            <text class="progress-ring__text" x="13" y="13" data-account-id="${account.id}"></text>
           </svg>
         </div>
       </div>
@@ -669,15 +669,14 @@ function stopTOTPRefresh() {
 async function updateCodes() {
     const elements = accountList.querySelectorAll('.account-code');
     for (const el of elements) {
-        const secret = el.dataset.secret;
-        const digits = parseInt(el.dataset.digits || '6', 10);
-        const period = parseInt(el.dataset.period || '30', 10);
-        const algorithm = el.dataset.algorithm || 'SHA1';
+        const account = accounts.find(a => a.id === el.dataset.accountId);
+        if (!account) continue;
+        const period = account.period || 30;
         const remaining = getRemainingSeconds(period);
 
         // Only update when a new code is generated (at period boundary)
         if (remaining === period || remaining === period - 1) {
-            const code = await generateTOTP(secret, digits, period, algorithm);
+            const code = await generateTOTP(account.secret, account.digits || 6, period, account.algorithm || 'SHA1');
             el.textContent = formatCode(code);
         }
     }
@@ -685,7 +684,8 @@ async function updateCodes() {
 
 function updateProgressRings() {
     accountList.querySelectorAll('.progress-ring__fill').forEach((circle) => {
-        const period = parseInt(circle.dataset.period || '30', 10);
+        const account = accounts.find(a => a.id === circle.dataset.accountId);
+        const period = account?.period || 30;
         const remaining = getRemainingSeconds(period);
         const circumference = 2 * Math.PI * 10;
         const progress = remaining / period;
@@ -704,7 +704,8 @@ function updateProgressRings() {
     });
 
     accountList.querySelectorAll('.progress-ring__text').forEach((text) => {
-        const period = parseInt(text.dataset.period || '30', 10);
+        const account = accounts.find(a => a.id === text.dataset.accountId);
+        const period = account?.period || 30;
         const remaining = getRemainingSeconds(period);
         text.textContent = String(remaining);
     });
