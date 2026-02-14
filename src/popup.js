@@ -714,6 +714,8 @@ function updateProgressRings() {
 // ========================================
 // Clipboard
 // ========================================
+let clipboardClearTimer = null;
+
 async function copyCode(accountId, cardElement) {
     const account = accounts.find(a => a.id === accountId);
     if (!account) return;
@@ -727,6 +729,13 @@ async function copyCode(accountId, cardElement) {
         // Flash card
         cardElement.classList.add('copied');
         setTimeout(() => cardElement.classList.remove('copied'), 600);
+
+        // Auto-clear clipboard after 30 seconds
+        if (clipboardClearTimer) clearTimeout(clipboardClearTimer);
+        clipboardClearTimer = setTimeout(() => {
+            navigator.clipboard.writeText('').catch(() => { });
+            clipboardClearTimer = null;
+        }, 30_000);
     } catch {
         showToast('Failed to copy');
     }
