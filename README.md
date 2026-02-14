@@ -47,47 +47,53 @@ Part of the [reddfocus.org](https://reddfocus.org) family of productivity tools.
 ```mermaid
 flowchart TB
     subgraph User
-        click["Click extension icon"]
+        click_icon["Click extension icon"]
         passphrase["Enter passphrase"]
         touchid["Touch ID / Windows Hello"]
     end
 
-    subgraph background.js
+    subgraph "background.js"
         tab["Open / focus extension tab"]
     end
 
-    subgraph popup.js
+    subgraph "popup.js"
         ui["UI controller"]
         lock_screen["Lock screen"]
         main_screen["Account list + TOTP codes"]
     end
 
-    subgraph crypto.js
-        pbkdf2["PBKDF2 key derivation\n(600k iterations, SHA-256)"]
-        aesgcm["AES-256-GCM\nencrypt / decrypt"]
+    subgraph "crypto.js"
+        pbkdf2["PBKDF2 key derivation
+(600k iterations, SHA-256)"]
+        aesgcm["AES-256-GCM
+encrypt / decrypt"]
     end
 
-    subgraph session.js
+    subgraph "session.js"
         memkey["In-memory CryptoKey"]
         autolock["Auto-lock timer"]
     end
 
-    subgraph biometric.js
+    subgraph "biometric.js"
         webauthn["WebAuthn PRF / credential-gated"]
-        hkdf["HKDF → AES-256-GCM\npassphrase wrapping"]
+        hkdf["HKDF then AES-256-GCM
+passphrase wrapping"]
     end
 
-    subgraph totp.js
-        hmac["HMAC-SHA1/256/512\n(Web Crypto API)"]
-        truncate["Dynamic truncation\n→ 6/8-digit code"]
+    subgraph "totp.js"
+        hmac["HMAC-SHA1/256/512
+(Web Crypto API)"]
+        truncate["Dynamic truncation
+to 6/8-digit code"]
     end
 
-    subgraph storage.js
+    subgraph "storage.js"
         store["browser.storage.local"]
-        blob["Encrypted JSON blob\n(accounts, meta, settings)"]
+        blob["Encrypted JSON blob
+(accounts, meta, settings)"]
     end
 
-    click --> tab --> ui
+    click_icon --> tab --> ui
     passphrase --> pbkdf2 --> memkey
     touchid --> webauthn --> hkdf --> passphrase
 
