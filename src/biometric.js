@@ -1,11 +1,15 @@
 /**
- * ReDD 2FA — Biometric unlock via WebAuthn PRF
+ * ReDD 2FA — Biometric unlock via WebAuthn
  *
- * Uses the WebAuthn PRF extension to derive a key from Touch ID / Windows Hello.
- * That key encrypts the passphrase, which is stored in chrome.storage.local.
- * The passphrase can only be decrypted when biometric auth succeeds.
+ * Two modes:
+ *   1. PRF mode (Chrome 118+, Edge 118+): derives a key from the biometric
+ *      gesture itself — the key never exists in storage.
+ *   2. Credential-gated mode (Firefox, Safari): a random wrapping key is
+ *      stored alongside the credential data, but can only be *used* after
+ *      a successful WebAuthn assertion (Touch ID / Windows Hello).
  *
- * Supported: Chrome 118+, Edge 118+, Firefox 139+ (macOS 15+)
+ * The mode is chosen automatically at registration time based on browser
+ * support.  Existing data without a `mode` field is treated as PRF.
  */
 
 // ========================================
@@ -14,7 +18,6 @@
 
 /**
  * Check if platform authenticator (Touch ID / Windows Hello) is available.
- * Note: PRF support can only be confirmed during credential creation.
  */
 export async function isBiometricAvailable() {
     if (!window.PublicKeyCredential) return false;
@@ -26,13 +29,14 @@ export async function isBiometricAvailable() {
 }
 
 /**
- * Register a biometric credential and encrypt the passphrase with the PRF-derived key.
- * Returns the data to store, or throws if PRF is not supported.
+ * Register a biometric credential and encrypt the passphrase.
+ * Tries PRF first; falls back to credential-gated mode.
+ * Returns the data to store.
  */
 export async function registerBiometric(passphrase) {
     const prfSalt = crypto.getRandomValues(new Uint8Array(32));
 
-    // Create credential with PRF extension
+    // Create credential requesting PRF
     const credential = await navigator.credentials.create({
         publicKey: {
             challenge: crypto.getRandomValues(new Uint8Array(32)),
@@ -60,44 +64,65 @@ export async function registerBiometric(passphrase) {
     });
 
     const prfResults = credential.getClientExtensionResults()?.prf;
-    if (!prfResults?.enabled) {
-        throw new Error('Biometric unlock is not supported on this device.');
-    }
 
-    // Get PRF output — available from registration or via follow-up authentication
-    let prfOutput;
-    if (prfResults.results?.first) {
-        prfOutput = new Uint8Array(prfResults.results.first);
-    } else {
-        // Some authenticators only return PRF output during authentication
-        const assertion = await navigator.credentials.get({
-            publicKey: {
-                challenge: crypto.getRandomValues(new Uint8Array(32)),
-                allowCredentials: [{ id: credential.rawId, type: 'public-key' }],
-                userVerification: 'required',
-                extensions: {
-                    prf: { eval: { first: prfSalt.buffer } },
+    // ── PRF supported ─────────────────────────────────────────────
+    if (prfResults?.enabled) {
+        let prfOutput;
+        if (prfResults.results?.first) {
+            prfOutput = new Uint8Array(prfResults.results.first);
+        } else {
+            // Some authenticators only return PRF output during authentication
+            const assertion = await navigator.credentials.get({
+                publicKey: {
+                    challenge: crypto.getRandomValues(new Uint8Array(32)),
+                    allowCredentials: [{ id: credential.rawId, type: 'public-key' }],
+                    userVerification: 'required',
+                    extensions: {
+                        prf: { eval: { first: prfSalt.buffer } },
+                    },
                 },
-            },
-        });
-        const authPrf = assertion.getClientExtensionResults()?.prf?.results?.first;
-        if (!authPrf) throw new Error('Failed to obtain PRF output.');
-        prfOutput = new Uint8Array(authPrf);
+            });
+            const authPrf = assertion.getClientExtensionResults()?.prf?.results?.first;
+            if (!authPrf) throw new Error('Failed to obtain PRF output.');
+            prfOutput = new Uint8Array(authPrf);
+        }
+
+        const wrappingKey = await deriveWrappingKey(prfOutput);
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ciphertext = await crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv },
+            wrappingKey,
+            new TextEncoder().encode(passphrase),
+        );
+
+        return {
+            mode: 'prf',
+            credentialId: bufferToBase64(credential.rawId),
+            prfSalt: bufferToBase64(prfSalt),
+            iv: bufferToBase64(iv),
+            ciphertext: bufferToBase64(ciphertext),
+        };
     }
 
-    // Encrypt the passphrase with the PRF-derived key
-    const wrappingKey = await deriveWrappingKey(prfOutput);
+    // ── Credential-gated fallback ─────────────────────────────────
+    // PRF not available — encrypt passphrase with a random key that
+    // is stored locally.  Security gate: the stored data is only
+    // used after a successful WebAuthn assertion (Touch ID).
+    const rawKey = crypto.getRandomValues(new Uint8Array(32));
+    const wrappingKey = await crypto.subtle.importKey(
+        'raw', rawKey, { name: 'AES-GCM' }, false, ['encrypt'],
+    );
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(passphrase);
     const ciphertext = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv },
         wrappingKey,
-        encoded,
+        new TextEncoder().encode(passphrase),
     );
 
     return {
+        mode: 'credential',
         credentialId: bufferToBase64(credential.rawId),
-        prfSalt: bufferToBase64(prfSalt),
+        wrappingKey: bufferToBase64(rawKey),
         iv: bufferToBase64(iv),
         ciphertext: bufferToBase64(ciphertext),
     };
@@ -109,6 +134,19 @@ export async function registerBiometric(passphrase) {
  */
 export async function authenticateBiometric(storedData) {
     const credentialId = base64ToBuffer(storedData.credentialId);
+    const mode = storedData.mode || 'prf'; // backwards compatibility
+
+    if (mode === 'prf') {
+        return authenticatePRF(storedData, credentialId);
+    }
+    return authenticateCredentialGated(storedData, credentialId);
+}
+
+// ========================================
+// Authentication strategies
+// ========================================
+
+async function authenticatePRF(storedData, credentialId) {
     const prfSalt = base64ToBuffer(storedData.prfSalt);
 
     const assertion = await navigator.credentials.get({
@@ -125,23 +163,42 @@ export async function authenticateBiometric(storedData) {
     const prfOutput = assertion.getClientExtensionResults()?.prf?.results?.first;
     if (!prfOutput) throw new Error('Biometric authentication failed.');
 
-    // Decrypt passphrase
     const wrappingKey = await deriveWrappingKey(new Uint8Array(prfOutput));
-    const iv = base64ToBuffer(storedData.iv);
-    const ciphertext = base64ToBuffer(storedData.ciphertext);
+    return decryptPassphrase(wrappingKey, storedData);
+}
 
-    const decrypted = await crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },
-        wrappingKey,
-        ciphertext,
+async function authenticateCredentialGated(storedData, credentialId) {
+    // WebAuthn assertion — requires Touch ID / Windows Hello
+    await navigator.credentials.get({
+        publicKey: {
+            challenge: crypto.getRandomValues(new Uint8Array(32)),
+            allowCredentials: [{ id: credentialId, type: 'public-key' }],
+            userVerification: 'required',
+        },
+    });
+
+    // Assertion succeeded → user is verified, decrypt with stored key
+    const rawKey = base64ToBuffer(storedData.wrappingKey);
+    const wrappingKey = await crypto.subtle.importKey(
+        'raw', rawKey, { name: 'AES-GCM' }, false, ['decrypt'],
     );
-
-    return new TextDecoder().decode(decrypted);
+    return decryptPassphrase(wrappingKey, storedData);
 }
 
 // ========================================
 // Internal helpers
 // ========================================
+
+async function decryptPassphrase(wrappingKey, storedData) {
+    const iv = base64ToBuffer(storedData.iv);
+    const ciphertext = base64ToBuffer(storedData.ciphertext);
+    const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        wrappingKey,
+        ciphertext,
+    );
+    return new TextDecoder().decode(decrypted);
+}
 
 /**
  * Derive a 256-bit AES-GCM key from the PRF output using HKDF.
