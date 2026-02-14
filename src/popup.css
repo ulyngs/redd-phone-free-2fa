@@ -757,6 +757,12 @@ body {
   border-color: var(--border-hover);
 }
 
+.settings-hint {
+  font-size: 0.78em;
+  color: var(--text-secondary);
+  margin: 4px 0 0 0;
+}
+
 .settings-divider {
   height: 1px;
   background-color: var(--border-color);
