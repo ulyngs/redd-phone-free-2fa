@@ -7,7 +7,7 @@
 
 
 import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData } from './storage.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 
@@ -207,6 +207,14 @@ function initEventListeners() {
         settingsDropdown.style.display = 'none';
         showScreen('lock');
     });
+
+    // Change passphrase
+    $('change-passphrase-btn').addEventListener('click', () => {
+        settingsDropdown.style.display = 'none';
+        openChangePassphraseModal();
+    });
+    $('change-passphrase-cancel-btn').addEventListener('click', closeChangePassphraseModal);
+    $('change-passphrase-confirm-btn').addEventListener('click', handleChangePassphrase);
 
     // Export/Import
     $('export-btn').addEventListener('click', () => {
@@ -879,6 +887,63 @@ async function handleDeleteAccount() {
     deletingAccountId = null;
     renderAccounts();
     showToast('Account deleted');
+}
+
+// ========================================
+// Change Passphrase
+// ========================================
+function openChangePassphraseModal() {
+    $('current-passphrase').value = '';
+    $('new-passphrase').value = '';
+    $('new-passphrase-confirm').value = '';
+    hideElement($('change-passphrase-error'));
+    $('change-passphrase-overlay').style.display = 'flex';
+    $('current-passphrase').focus();
+}
+
+function closeChangePassphraseModal() {
+    $('change-passphrase-overlay').style.display = 'none';
+}
+
+async function handleChangePassphrase() {
+    const current = $('current-passphrase').value;
+    const newPw = $('new-passphrase').value;
+    const newPwConfirm = $('new-passphrase-confirm').value;
+    const errorEl = $('change-passphrase-error');
+
+    if (!current) {
+        showElement(errorEl, 'Please enter your current passphrase.');
+        return;
+    }
+
+    // Verify current passphrase
+    const key = await unlockWithPassphrase(current);
+    if (!key) {
+        showElement(errorEl, 'Current passphrase is incorrect.');
+        return;
+    }
+
+    if (newPw.length < 8) {
+        showElement(errorEl, 'New passphrase must be at least 8 characters.');
+        return;
+    }
+    if (newPw !== newPwConfirm) {
+        showElement(errorEl, 'New passphrases do not match.');
+        return;
+    }
+
+    try {
+        const newKey = await changePassphrase(accounts, newPw);
+        setSessionKey(newKey);
+
+        // Clear biometric data — it wraps the old passphrase
+        await clearBiometricData();
+
+        closeChangePassphraseModal();
+        showToast('Passphrase changed successfully');
+    } catch {
+        showElement(errorEl, 'Failed to change passphrase. Please try again.');
+    }
 }
 
 // ========================================

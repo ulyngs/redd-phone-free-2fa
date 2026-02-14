@@ -69,6 +69,25 @@ export async function unlockWithPassphrase(passphrase) {
 }
 
 /**
+ * Change the master passphrase. Re-encrypts all accounts with a new key.
+ * Returns the new CryptoKey.
+ */
+export async function changePassphrase(accounts, newPassphrase) {
+    const salt = generateSalt();
+    const newKey = await deriveKey(newPassphrase, salt);
+    const passphraseHash = await createPassphraseHash(newPassphrase, salt);
+
+    // Update meta with new salt and hash
+    const meta = { salt, passphraseHash, version: SCHEMA_VERSION };
+    await browser.storage.local.set({ [STORAGE_KEY_META]: meta });
+
+    // Re-encrypt accounts with the new key
+    await saveAccounts(accounts, newKey);
+
+    return newKey;
+}
+
+/**
  * Save accounts (encrypted) to storage.
  */
 export async function saveAccounts(accounts, key) {
