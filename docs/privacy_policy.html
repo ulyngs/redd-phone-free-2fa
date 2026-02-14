@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - ReDD 2FA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p>Last updated: February 14, 2026</p>
+
+        <p>Thank you for using ReDD 2FA. This Privacy Policy explains how we handle your information when you use our
+            browser extension.</p>
+
+        <h2>1. Information Collection and Use</h2>
+        <p><strong>ReDD 2FA does not collect, store, or transmit any of your personal data or usage information to us
+                or any third parties.</strong></p>
+
+        <p>The extension is designed to operate entirely locally in your browser. It makes no network requests of any
+            kind — no analytics, no telemetry, no remote servers. All data you enter into ReDD 2FA remains on your
+            local machine.</p>
+
+        <h2>2. Browser Permissions</h2>
+        <p>ReDD 2FA requests only the <code>storage</code> permission, which is used to save your encrypted account
+            data and preferences locally via <code>browser.storage.local</code>. No host permissions, no access to
+            browsing history, and no access to web page content are requested.</p>
+
+        <h2>3. Data Storage and Encryption</h2>
+        <p>All account data (TOTP secret keys, labels, and settings) is encrypted using AES-256-GCM before being
+            stored locally. Encryption keys are derived from your master passphrase using PBKDF2 with 600,000
+            iterations. Your passphrase is never stored — only a verification hash is kept.</p>
+
+        <p>If you enable biometric unlock (Touch ID / Windows Hello), your passphrase is encrypted with a key derived
+            from the WebAuthn PRF extension and stored locally. It can only be decrypted when biometric authentication
+            succeeds on your device.</p>
+
+        <p>You have full control over your data and can export or delete it at any time.</p>
+
+        <h2>4. No Remote Code</h2>
+        <p>ReDD 2FA does not load or execute any remote code. All functionality, including cryptographic operations,
+            is implemented locally using the browser's built-in Web Crypto API. The extension has no external
+            dependencies.</p>
+
+        <h2>5. Changes to This Privacy Policy</h2>
+        <p>We may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically
+            for any changes. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+        <h2>6. Contact Us</h2>
+        <p>If you have any questions about our Privacy Policy, please contact us at:</p>
+        <p>The Reduce Digital Distraction Project<br>
+            <a href="mailto:team@reddfocus.org">team@reddfocus.org</a>
+        </p>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 The Reduce Digital Distraction Project. Licensed under <a
+                href="https://creativecommons.org/licenses/by-nc-nd/3.0/" target="_blank" rel="noopener noreferrer">CC
+                BY-NC-ND 3.0</a>.</p>
+    </footer>
+</body>
+
+</html>
