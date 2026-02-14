@@ -246,7 +246,7 @@
 
       <div class="form-group">
         <label for="manual-label">Label</label>
-        <input type="text" id="manual-label" placeholder="e.g. GitHub, Google, Work email" autocomplete="off">
+        <input type="text" id="manual-label" placeholder="e.g. My University 2FA" autocomplete="off">
       </div>
       <div class="form-group">
         <div class="label-row">
@@ -260,6 +260,15 @@
           </button>
         </div>
         <div id="secret-help-content" class="inline-help-content" style="display: none;">
+          <button type="button" id="download-instructions-btn" class="download-instructions-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" width="14" height="14">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download instructions
+          </button>
           <p>Services usually show the secret key as a QR code — but a QR code is just a fancy way of displaying it.
             There's always an option to reveal the key as text instead.</p>
           <p><strong>For university Microsoft accounts:</strong></p>
@@ -268,7 +277,8 @@
                 target="_blank">mysignins.microsoft.com/security-info</a> and click <strong>Add sign-in method</strong>
             </li>
             <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication
-                app</strong> → Next → <strong>Can't scan the QR code?</strong> → copy the secret key</li>
+                app</strong> → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key
+            </li>
             <li>Paste the secret key here in ReDD 2FA, then copy one of the generated codes and give it to Microsoft —
               done!</li>
           </ol>
