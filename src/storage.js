@@ -222,13 +222,14 @@ export async function saveBackupFingerprint(accounts) {
 
 /**
  * Check whether the current accounts differ from the last backed-up state.
- * Returns true if no backup has ever been made, or if accounts have changed since.
+ * Returns 'current' if backup is up to date, 'never' if no backup exists,
+ * or 'stale' if accounts have changed since the last backup.
  */
-export async function isBackupStale(accounts) {
-    if (!accounts || accounts.length === 0) return false; // nothing to back up
+export async function getBackupStatus(accounts) {
+    if (!accounts || accounts.length === 0) return 'current'; // nothing to back up
     const result = await browser.storage.local.get(STORAGE_KEY_BACKUP_FINGERPRINT);
     const savedFingerprint = result[STORAGE_KEY_BACKUP_FINGERPRINT];
-    if (!savedFingerprint) return true; // never backed up
+    if (!savedFingerprint) return 'never';
     const currentFingerprint = await computeAccountsFingerprint(accounts);
-    return currentFingerprint !== savedFingerprint;
+    return currentFingerprint !== savedFingerprint ? 'stale' : 'current';
 }

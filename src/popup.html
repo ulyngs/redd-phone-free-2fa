@@ -222,8 +222,12 @@
         </svg>
       </button>
       <div id="migration-content" class="settings-collapsible-content" style="display: none;">
-        <p>To move your accounts, tap the <strong>⋮</strong> menu on any account, choose <strong>Edit</strong>, and copy
+        <p>You have two options:</p>
+        <p><strong>1.</strong> Tap the <strong>⋮</strong> button for any of your accounts in ReDD 2FA, choose
+          <strong>Edit</strong>, and copy
           the secret key into your new app.</p>
+        <p><strong>2.</strong> Use <strong>Export backup</strong> above and choose <strong>Plain text URIs</strong> to
+          create a file you can import into most authenticator apps.</p>
       </div>
       <div class="settings-divider"></div>
       <button id="change-passphrase-btn" class="settings-action">Change passphrase</button>
@@ -332,16 +336,30 @@
   <div id="export-modal-overlay" class="modal-overlay" style="display: none;">
     <div class="modal modal-small">
       <h3 id="export-modal-title">Export Backup</h3>
-      <p class="modal-desc">Create an encrypted backup of all your accounts. Choose a password to protect the file.</p>
+      <div class="export-format-selector">
+        <label class="export-format-option">
+          <input type="radio" name="export-format" value="encrypted" checked>
+          <span>Encrypted backup <span class="format-hint">(for ReDD 2FA)</span></span>
+        </label>
+        <label class="export-format-option">
+          <input type="radio" name="export-format" value="plain">
+          <span>Plain text URIs <span class="format-hint">(for other authenticator apps)</span></span>
+        </label>
+      </div>
       <div id="export-password-section">
+        <p class="modal-desc">Choose a password to protect the backup file.</p>
         <div class="form-group">
-          <label for="export-password">Encryption password for backup</label>
+          <label for="export-password">Encryption password</label>
           <input type="password" id="export-password" placeholder="Strong password for this backup" autocomplete="off">
         </div>
         <div class="form-group">
           <label for="export-password-confirm">Confirm password</label>
           <input type="password" id="export-password-confirm" placeholder="Confirm password" autocomplete="off">
         </div>
+      </div>
+      <div id="export-plain-section" style="display: none;">
+        <p class="export-plain-warning">⚠️ This will export all secrets as <strong>unencrypted</strong> plain text.
+          Anyone with this file can access your accounts. Only use this for migrating to another authenticator app.</p>
       </div>
       <p id="export-error" class="error-text" style="display: none;"></p>
       <div class="modal-actions">
@@ -357,8 +375,9 @@
   <div id="import-modal-overlay" class="modal-overlay" style="display: none;">
     <div class="modal modal-small">
       <h3>Import Backup</h3>
-      <p class="modal-desc">Restore accounts from a backup file. Supports encrypted backups and plain otpauth:// URI
-        text files.</p>
+      <p class="modal-desc">Restore accounts from a backup file. Supports backups from ReDD 2FA, as well as plain
+        otpauth:// URI
+        text file exports from other authenticator apps.</p>
       <div class="form-group">
         <label for="import-file">Select backup file</label>
         <input type="file" id="import-file" accept=".json,.txt">

@@ -6,8 +6,8 @@
  */
 
 
-import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData, isBackupStale, saveBackupFingerprint } from './storage.js';
+import { generateTOTP, getRemainingSeconds, parseOtpauthURI, buildOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData, getBackupStatus, saveBackupFingerprint } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 
@@ -186,8 +186,17 @@ function initEventListeners() {
         if (settingsDropdown.style.display === 'block') {
             updateBiometricToggle();
             // Check backup staleness
-            const stale = await isBackupStale(accounts);
-            $('backup-badge').style.display = stale ? 'inline' : 'none';
+            const status = await getBackupStatus(accounts);
+            const badge = $('backup-badge');
+            if (status === 'never') {
+                badge.textContent = 'no backup exported';
+                badge.style.display = 'inline';
+            } else if (status === 'stale') {
+                badge.textContent = 'changes since last export';
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
         }
     });
     $('settings-close-btn').addEventListener('click', () => {
@@ -228,6 +237,17 @@ function initEventListeners() {
     $('import-btn').addEventListener('click', () => {
         openImportModal();
     });
+
+    // Export format toggle
+    document.querySelectorAll('input[name="export-format"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const isEncrypted = radio.value === 'encrypted';
+            $('export-password-section').style.display = isEncrypted ? 'block' : 'none';
+            $('export-plain-section').style.display = isEncrypted ? 'none' : 'block';
+        });
+    });
+
+    // Migration toggle
     $('migration-toggle').addEventListener('click', () => {
         const content = $('migration-content');
         const chevron = $('migration-toggle').querySelector('.chevron-icon');
@@ -235,6 +255,7 @@ function initEventListeners() {
         content.style.display = isOpen ? 'none' : 'block';
         chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
+
     $('how-it-works-toggle').addEventListener('click', () => {
         const content = $('how-it-works-content');
         const chevron = $('how-it-works-toggle').querySelector('.chevron-icon');
@@ -309,11 +330,17 @@ function initEventListeners() {
     $('export-cancel-btn').addEventListener('click', () => {
         exportModalOverlay.style.display = 'none';
     });
+    exportModalOverlay.addEventListener('click', (e) => {
+        if (e.target === exportModalOverlay) exportModalOverlay.style.display = 'none';
+    });
     $('export-confirm-btn').addEventListener('click', handleExport);
 
     // Import modal
     $('import-cancel-btn').addEventListener('click', () => {
         importModalOverlay.style.display = 'none';
+    });
+    importModalOverlay.addEventListener('click', (e) => {
+        if (e.target === importModalOverlay) importModalOverlay.style.display = 'none';
     });
     $('import-confirm-btn').addEventListener('click', handleImport);
     importFile.addEventListener('change', () => {
@@ -1014,10 +1041,27 @@ function openExportModal() {
     exportPassword.value = '';
     exportPasswordConfirm.value = '';
     hideElement(exportError);
+    // Reset to encrypted format
+    const encryptedRadio = document.querySelector('input[name="export-format"][value="encrypted"]');
+    if (encryptedRadio) encryptedRadio.checked = true;
+    $('export-password-section').style.display = 'block';
+    $('export-plain-section').style.display = 'none';
     exportModalOverlay.style.display = 'flex';
 }
 
 async function handleExport() {
+    const format = document.querySelector('input[name="export-format"]:checked')?.value || 'encrypted';
+
+    if (format === 'plain') {
+        // Plain text URI export
+        const uris = accounts.map(a => buildOtpauthURI(a)).join('\n');
+        downloadFile(uris, `redd-2fa-uris-${dateStamp()}.txt`, 'text/plain');
+        exportModalOverlay.style.display = 'none';
+        showToast('Plain text URIs exported');
+        return;
+    }
+
+    // Encrypted export
     const pw = exportPassword.value;
     const pwConfirm = exportPasswordConfirm.value;
 
@@ -1058,6 +1102,7 @@ async function handleExport() {
 
         // Save backup fingerprint so we can detect future changes
         await saveBackupFingerprint(accounts);
+        $('backup-badge').style.display = 'none';
 
         exportModalOverlay.style.display = 'none';
         showToast('Backup exported');
