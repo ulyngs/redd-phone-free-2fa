@@ -52,7 +52,7 @@ flowchart TD
 
     subgraph Unlock
         passphrase(["Enter passphrase"]) --> |"passphrase"| crypto.js["crypto.js<br>PBKDF2 600k iter → AES-256-GCM"]
-        touchid(["Touch ID / Windows Hello"]) --> biometric.js["biometric.js<br>WebAuthn PRF · Chrome/Edge<br>Credential-gated · Firefox"] --> |"recovered passphrase"| crypto.js
+        touchid(["Touch ID / Windows Hello"]) --> biometric.js["biometric.js<br>WebAuthn + PRF (Chrome) · WebAuthn credential-gated (Firefox)"] --> |"recovered passphrase"| crypto.js
     end
 
     crypto.js --> session.js["session.js<br>Holds encryption key in memory<br>Auto-lock timer"]
