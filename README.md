@@ -6,6 +6,7 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 
 - **Chrome Web Store**: https://chromewebstore.google.com/detail/redd-2fa-phone-free-authe/dhkhbjppnoabmglidgfpndfghbhlkgbn
 - **Add-ons for Firefox**: (in review)
+- **Safari**: not necessary: the native Passwords application (newer Macs) or Safari itself (older Macs, go to Safari > Settings > Passwords) can generate TOTP codes.
 
 ## Features
 
