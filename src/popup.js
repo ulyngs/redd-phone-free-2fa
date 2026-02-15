@@ -7,7 +7,7 @@
 
 
 import { generateTOTP, getRemainingSeconds, parseOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData } from './storage.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData, isBackupStale, saveBackupFingerprint } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 
@@ -181,9 +181,14 @@ function initEventListeners() {
 
 
     // Settings
-    $('settings-btn').addEventListener('click', () => {
+    $('settings-btn').addEventListener('click', async () => {
         settingsDropdown.style.display = settingsDropdown.style.display === 'none' ? 'block' : 'none';
-        if (settingsDropdown.style.display === 'block') updateBiometricToggle();
+        if (settingsDropdown.style.display === 'block') {
+            updateBiometricToggle();
+            // Check backup staleness
+            const stale = await isBackupStale(accounts);
+            $('backup-badge').style.display = stale ? 'inline' : 'none';
+        }
     });
     $('settings-close-btn').addEventListener('click', () => {
         settingsDropdown.style.display = 'none';
@@ -211,7 +216,6 @@ function initEventListeners() {
 
     // Change passphrase
     $('change-passphrase-btn').addEventListener('click', () => {
-        settingsDropdown.style.display = 'none';
         openChangePassphraseModal();
     });
     $('change-passphrase-cancel-btn').addEventListener('click', closeChangePassphraseModal);
@@ -219,11 +223,9 @@ function initEventListeners() {
 
     // Export/Import
     $('export-btn').addEventListener('click', () => {
-        settingsDropdown.style.display = 'none';
         openExportModal();
     });
     $('import-btn').addEventListener('click', () => {
-        settingsDropdown.style.display = 'none';
         openImportModal();
     });
     $('migration-toggle').addEventListener('click', () => {
@@ -1032,12 +1034,18 @@ async function handleExport() {
         const { generateSalt, deriveKey, encrypt } = await import('./crypto.js');
         const salt = generateSalt();
         const exportKey = await deriveKey(pw, salt);
-        const plaintext = JSON.stringify(accounts);
+
+        // Export only essential data: label + secret pairs
+        const essentialData = accounts.map(a => ({
+            label: a.issuer || a.accountName,
+            secret: a.secret,
+        }));
+        const plaintext = JSON.stringify(essentialData);
         const encrypted = await encrypt(plaintext, exportKey);
 
         const exportData = {
             format: 'redd-2fa-backup',
-            version: 1,
+            version: 2,
             salt,
             ...encrypted,
         };
@@ -1047,6 +1055,9 @@ async function handleExport() {
             `redd-2fa-backup-${dateStamp()}.json`,
             'application/json'
         );
+
+        // Save backup fingerprint so we can detect future changes
+        await saveBackupFingerprint(accounts);
 
         exportModalOverlay.style.display = 'none';
         showToast('Backup exported');
@@ -1096,7 +1107,21 @@ async function handleImport() {
                 const importKey = await dk(pw, data.salt);
                 try {
                     const plaintext = await dec(data.iv, data.ciphertext, importKey);
-                    const imported = JSON.parse(plaintext);
+                    let imported = JSON.parse(plaintext);
+
+                    // v2 format: convert label+secret pairs to full account objects
+                    if (data.version >= 2) {
+                        imported = imported.map(item => ({
+                            id: generateId(),
+                            issuer: item.label,
+                            accountName: item.label,
+                            secret: item.secret,
+                            algorithm: 'SHA1',
+                            digits: 6,
+                            period: 30,
+                        }));
+                    }
+
                     await importMerge(imported, key);
                 } catch {
                     showElement(importError, 'Wrong password or corrupted backup.');

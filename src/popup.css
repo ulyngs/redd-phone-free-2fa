@@ -776,6 +776,27 @@ body {
   font-style: italic;
 }
 
+/* ========================================
+   Backup Badge (inline with Export button)
+   ======================================== */
+.backup-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 0.72em;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.dark-mode .backup-badge {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
 .settings-divider {
   height: 1px;
   background-color: var(--border-color);
@@ -783,7 +804,8 @@ body {
 }
 
 .settings-action {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   padding: 8px 0;
   font-size: 1.05em;
@@ -890,6 +912,13 @@ body {
   gap: 8px;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+.modal-desc {
+  margin: -4px 0 12px 0;
+  font-size: 0.88em;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 

@@ -11,6 +11,7 @@ import { encrypt, decrypt, generateSalt, createPassphraseHash, deriveKey, verify
 const STORAGE_KEY_DATA = 'redd2fa_data';
 const STORAGE_KEY_META = 'redd2fa_meta';
 const STORAGE_KEY_SETTINGS = 'redd2fa_settings';
+const STORAGE_KEY_BACKUP_FINGERPRINT = 'redd2fa_backup_fingerprint';
 const SCHEMA_VERSION = 1;
 
 /** Default settings */
@@ -192,4 +193,42 @@ export async function clearBiometricData() {
 export async function hasData() {
     const result = await browser.storage.local.get([STORAGE_KEY_META, STORAGE_KEY_DATA]);
     return !!(result[STORAGE_KEY_META] && result[STORAGE_KEY_DATA]);
+}
+
+/**
+ * Compute a fingerprint of the accounts array for backup staleness detection.
+ * Only considers label + secret (the essential data), ignoring internal fields.
+ * Returns a hex-encoded SHA-256 hash.
+ */
+export async function computeAccountsFingerprint(accounts) {
+    if (!accounts || accounts.length === 0) return null;
+    const essential = accounts
+        .map(a => ({ label: a.issuer || a.accountName, secret: a.secret }))
+        .sort((a, b) => a.label.localeCompare(b.label) || a.secret.localeCompare(b.secret));
+    const json = JSON.stringify(essential);
+    const encoded = new TextEncoder().encode(json);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Save the current accounts fingerprint as the "last backed-up" state.
+ */
+export async function saveBackupFingerprint(accounts) {
+    const fingerprint = await computeAccountsFingerprint(accounts);
+    await browser.storage.local.set({ [STORAGE_KEY_BACKUP_FINGERPRINT]: fingerprint });
+}
+
+/**
+ * Check whether the current accounts differ from the last backed-up state.
+ * Returns true if no backup has ever been made, or if accounts have changed since.
+ */
+export async function isBackupStale(accounts) {
+    if (!accounts || accounts.length === 0) return false; // nothing to back up
+    const result = await browser.storage.local.get(STORAGE_KEY_BACKUP_FINGERPRINT);
+    const savedFingerprint = result[STORAGE_KEY_BACKUP_FINGERPRINT];
+    if (!savedFingerprint) return true; // never backed up
+    const currentFingerprint = await computeAccountsFingerprint(accounts);
+    return currentFingerprint !== savedFingerprint;
 }

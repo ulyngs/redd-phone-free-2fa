@@ -211,7 +211,8 @@
         <p class="settings-hint">Also locks when popup is closed</p>
       </div>
       <div class="settings-divider"></div>
-      <button id="export-btn" class="settings-action">Export backup</button>
+      <button id="export-btn" class="settings-action">Export backup<span id="backup-badge" class="backup-badge"
+          style="display: none;">unsaved changes</span></button>
       <button id="import-btn" class="settings-action">Import backup</button>
       <button id="migration-toggle" class="settings-collapsible">
         Migrating to another 2FA app?
@@ -331,6 +332,7 @@
   <div id="export-modal-overlay" class="modal-overlay" style="display: none;">
     <div class="modal modal-small">
       <h3 id="export-modal-title">Export Backup</h3>
+      <p class="modal-desc">Create an encrypted backup of all your accounts. Choose a password to protect the file.</p>
       <div id="export-password-section">
         <div class="form-group">
           <label for="export-password">Encryption password for backup</label>
@@ -355,6 +357,8 @@
   <div id="import-modal-overlay" class="modal-overlay" style="display: none;">
     <div class="modal modal-small">
       <h3>Import Backup</h3>
+      <p class="modal-desc">Restore accounts from a backup file. Supports encrypted backups and plain otpauth:// URI
+        text files.</p>
       <div class="form-group">
         <label for="import-file">Select backup file</label>
         <input type="file" id="import-file" accept=".json,.txt">
