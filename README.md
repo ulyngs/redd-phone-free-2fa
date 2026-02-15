@@ -20,7 +20,7 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 - **No secrets in DOM** — TOTP secrets are kept in memory only; never written to HTML attributes
 
 ### Biometric Unlock
-- **Touch ID / Windows Hello** — optional biometric unlock via WebAuthn PRF extension
+- **Touch ID / Windows Hello** — optional biometric unlock via WebAuthn
 - Passphrase is encrypted with a PRF-derived key (HKDF → AES-256-GCM) and stored locally
 - Biometric data is automatically cleared when passphrase is changed
 
