@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "ReDD 2FA: Phone-Free Authentication",
-    "description": "Minimalist, local-only TOTP authenticator. Secure, encrypted, and simple.",
-    "version": "1.3.0",
+    "description": "Open-source, local-only authenticator for time-based one-time passwords (TOTP).",
+    "version": "1.3.1",
     "icons": {
         "16": "icons/icon-16.png",
         "48": "icons/icon-48.png",
