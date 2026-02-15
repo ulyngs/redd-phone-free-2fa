@@ -1,6 +1,6 @@
 # ReDD 2FA
 
-Minimalist, local-only TOTP authenticator browser extension. Simple, secure, encrypted.
+Minimalist, local-only authenticator browser extension for time-based one-time passwords (TOTP). Simple, secure, and open-source.
 
 Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction project ([reddfocus.org](https://reddfocus.org)).
 
@@ -11,8 +11,8 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 - **Local-only** — never makes network requests; all data stays on your device
 - **Minimal permissions** — only requests `storage` and `tabs`; no host permissions, no remote code
 - **Master passphrase** — all account data encrypted at rest; decrypted only while unlocked
-- **Passphrase never stored** — only a verification hash is persisted
-- **Memory safety** — derived key is held in memory only while unlocked; wiped on lock or popup close
+- **Passphrase never stored** — only a derived verification token is persisted
+- **Memory safety** — derived key is held in memory only while unlocked; wiped on lock or when the tab is closed
 - **Auto-lock** — configurable inactivity timeout (1, 5, 15, 30 minutes, or never)
 - **Brute-force protection** — progressive lockout after failed unlock attempts (5s → 30s → 5min)
 - **Clipboard auto-clear** — copied codes are removed from clipboard after 30 seconds
@@ -21,17 +21,17 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 
 ### Biometric Unlock
 - **Touch ID / Windows Hello** — optional biometric unlock via WebAuthn
-- Passphrase is encrypted with a PRF-derived key (HKDF → AES-256-GCM) and stored locally
+- On Chrome/Edge, passphrase is encrypted with a PRF-derived key (HKDF → AES-256-GCM); on Firefox/Safari, a credential-gated random wrapping key is used
 - Biometric data is automatically cleared when passphrase is changed
 
 ### Usability
 - **Cross-browser** — Chrome, Firefox, and Edge (Manifest V3)
 - **Dark / light mode** — auto-detects system preference, or set manually
-- **Search & filter** — search accounts by name or issuer
+- **Search & filter** — search accounts by label
 - **Copy on click** — tap any account card to copy its current code
 - **Progress ring** — visual countdown showing time remaining for each code
 - **Change passphrase** — re-encrypts all accounts with a new key
-- **Backup / restore** — password-protected JSON export and import
+- **Backup / restore** — encrypted JSON export and import
 - **Account migration** — view secret keys in the edit view for manual transfer to another app
 - **Data loss warning** — clear warning during setup about passphrase recovery
 
@@ -90,7 +90,7 @@ to 6/8-digit code"]
     subgraph "storage.js"
         store["browser.storage.local"]
         blob["Encrypted JSON blob
-(accounts, meta, settings)"]
+(accounts + meta)"]
     end
 
     click_icon --> tab --> ui
@@ -132,7 +132,7 @@ No build step required — the extension runs as vanilla ES modules.
 | Encryption | AES-256-GCM (Web Crypto API) |
 | Key derivation | PBKDF2 · 600,000 iterations · SHA-256 |
 | Passphrase verification | Constant-time XOR comparison of derived hashes |
-| Biometric key wrapping | WebAuthn PRF → HKDF → AES-256-GCM |
+| Biometric key wrapping | WebAuthn PRF → HKDF → AES-256-GCM (Chrome/Edge); credential-gated AES-256-GCM (Firefox/Safari) |
 | TOTP generation | HMAC-SHA1/256/512 (Web Crypto API), RFC 6238 |
 | Network access | None — no host permissions declared |
 | Storage | `browser.storage.local` only |
@@ -160,7 +160,7 @@ src/
 ├── totp.js             # TOTP engine (Base32, HMAC, RFC 6238)
 ├── storage.js          # Encrypted storage manager
 ├── session.js          # In-memory session & auto-lock
-├── biometric.js        # WebAuthn PRF biometric unlock
+├── biometric.js        # WebAuthn biometric unlock (PRF + credential-gated)
 ├── browser.js          # Minimal browser API shim
 ├── options.html        # Options page
 ├── options.css         # Options page styles
