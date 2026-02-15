@@ -45,67 +45,23 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 6. On lock (manual, auto-lock timeout, or popup close), the key is wiped from memory
 
 ```mermaid
-flowchart TB
-    subgraph User
-        click_icon["Click extension icon"]
-        passphrase["Enter passphrase"]
-        touchid["Touch ID / Windows Hello"]
+flowchart TD
+    click["Click extension icon"] --> background.js["background.js\nOpens / focuses extension tab"]
+    background.js --> popup.js
+
+    subgraph "Unlock"
+        biometric.js["biometric.js\nWebAuthn PRF (Chrome/Edge)\nor credential-gated (Firefox)"] --> |decrypts passphrase| crypto.js
+        passphrase["Enter passphrase"] --> crypto.js["crypto.js\nPBKDF2 (600k iter) → AES-256-GCM"]
     end
 
-    subgraph "background.js"
-        tab["Open / focus extension tab"]
-    end
+    crypto.js --> session.js["session.js\nHolds key in memory\nAuto-lock timer"]
 
-    subgraph "popup.js"
-        ui["UI controller"]
-        lock_screen["Lock screen"]
-        main_screen["Account list + TOTP codes"]
-    end
+    session.js <--> storage.js["storage.js\nEncrypted JSON in\nbrowser.storage.local"]
 
-    subgraph "crypto.js"
-        pbkdf2["PBKDF2 key derivation
-(600k iterations, SHA-256)"]
-        aesgcm["AES-256-GCM
-encrypt / decrypt"]
-    end
+    session.js --> totp.js["totp.js\nHMAC-SHA1/256/512 → 6-digit code"]
+    totp.js --> popup.js["popup.js\nUI: account list, search,\ncode display, settings"]
 
-    subgraph "session.js"
-        memkey["In-memory CryptoKey"]
-        autolock["Auto-lock timer"]
-    end
-
-    subgraph "biometric.js"
-        webauthn["WebAuthn PRF / credential-gated"]
-        hkdf["HKDF then AES-256-GCM
-passphrase wrapping"]
-    end
-
-    subgraph "totp.js"
-        hmac["HMAC-SHA1/256/512
-(Web Crypto API)"]
-        truncate["Dynamic truncation
-to 6/8-digit code"]
-    end
-
-    subgraph "storage.js"
-        store["browser.storage.local"]
-        blob["Encrypted JSON blob
-(accounts + meta)"]
-    end
-
-    click_icon --> tab --> ui
-    passphrase --> pbkdf2 --> memkey
-    touchid --> webauthn --> hkdf --> passphrase
-
-    memkey --> aesgcm
-    aesgcm <--> blob
-    blob <--> store
-
-    memkey --> main_screen
-    main_screen --> hmac --> truncate --> main_screen
-
-    autolock -- "timeout" --> lock_screen
-    lock_screen -- "key wiped" --> memkey
+    session.js -. "lock / timeout / tab close" .-> Unlock
 ```
 
 ## Loading the Extension
