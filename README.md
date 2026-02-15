@@ -46,20 +46,19 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 
 ```mermaid
 flowchart TD
-    click["Click extension icon"] --> background.js["background.js\nOpens / focuses extension tab"]
-    background.js --> popup.js
+    click(["Click extension icon"]) --> background.js["background.js<br>Opens extension tab"]
+    background.js --> popup.js["popup.js<br>UI controller"]
+    popup.js --> Unlock
 
-    subgraph "Unlock"
-        biometric.js["biometric.js\nWebAuthn PRF (Chrome/Edge)\nor credential-gated (Firefox)"] --> |decrypts passphrase| crypto.js
-        passphrase["Enter passphrase"] --> crypto.js["crypto.js\nPBKDF2 (600k iter) → AES-256-GCM"]
+    subgraph Unlock
+        passphrase(["Enter passphrase"]) --> |"passphrase"| crypto.js["crypto.js<br>PBKDF2 600k iter → AES-256-GCM"]
+        touchid(["Touch ID / Windows Hello"]) --> biometric.js["biometric.js<br>WebAuthn PRF · Chrome/Edge<br>Credential-gated · Firefox"] --> |"recovered passphrase"| crypto.js
     end
 
-    crypto.js --> session.js["session.js\nHolds key in memory\nAuto-lock timer"]
-
-    session.js <--> storage.js["storage.js\nEncrypted JSON in\nbrowser.storage.local"]
-
-    session.js --> totp.js["totp.js\nHMAC-SHA1/256/512 → 6-digit code"]
-    totp.js --> popup.js["popup.js\nUI: account list, search,\ncode display, settings"]
+    crypto.js --> session.js["session.js<br>Holds encryption key in memory<br>Auto-lock timer"]
+    session.js --> |"encryption key"| storage.js["storage.js<br>Encrypted accounts in<br>browser.storage.local"]
+    storage.js --> |"decrypted secrets"| totp.js["totp.js<br>HMAC-SHA1/256/512 → 6-digit code"]
+    totp.js --> |"codes"| popup.js
 
     session.js -. "lock / timeout / tab close" .-> Unlock
 ```
