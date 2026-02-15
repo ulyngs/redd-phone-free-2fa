@@ -35,8 +35,10 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 - **Copy on click** — tap any account card to copy its current code
 - **Progress ring** — visual countdown showing time remaining for each code
 - **Change passphrase** — re-encrypts all accounts with a new key
-- **Backup / restore** — encrypted JSON export and import
-- **Account migration** — view secret keys in the edit view for manual transfer to another app
+- **Backup / restore** — encrypted JSON export (stores only label + secret pairs); import supports both encrypted backups and plain `otpauth://` URI text files from other authenticator apps
+- **Backup status** — inline badge on the Export button warns if no backup has been exported, or if accounts have changed since the last export
+- **Plain text URI export** — export accounts as standard `otpauth://` URIs for migrating to another authenticator app
+- **Account migration** — view secret keys in the edit view for manual transfer, or use plain text URI export
 - **Data loss warning** — clear warning during setup about passphrase recovery
 
 ## How It Works
@@ -117,13 +119,10 @@ src/
 ├── background.js       # Service worker (tab management)
 ├── crypto.js           # Encryption/decryption (AES-GCM, PBKDF2)
 ├── totp.js             # TOTP engine (Base32, HMAC, RFC 6238)
-├── storage.js          # Encrypted storage manager
+├── storage.js          # Encrypted storage manager + backup fingerprinting
 ├── session.js          # In-memory session & auto-lock
 ├── biometric.js        # WebAuthn biometric unlock (PRF + credential-gated)
 ├── browser.js          # Minimal browser API shim
-├── options.html        # Options page
-├── options.css         # Options page styles
-├── options.js          # Options page controller
 └── icons/              # Extension icons
 ```
 
