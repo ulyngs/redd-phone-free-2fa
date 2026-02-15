@@ -4,6 +4,9 @@ Simple, secure, local-only authenticator browser extension for time-based one-ti
 
 Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction project ([reddfocus.org](https://reddfocus.org)).
 
+**Chrome Web Store**: https://chromewebstore.google.com/detail/redd-2fa-phone-free-authe/dhkhbjppnoabmglidgfpndfghbhlkgbn
+**Add-ons for Firefox**: (in review)
+
 ## Features
 
 ### Security
