@@ -1,8 +1,12 @@
 # ReDD 2FA
 
-Simple, secure, local-only authenticator browser extension for time-based one-time passwords (TOTP).
+Simple, secure, local-only authenticator browser extension for time-based one-time passwords (TOTP). Lets you use your computer for 2FA, so you can put your phone away when you need to focus.
 
-Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction project ([reddfocus.org](https://reddfocus.org)).
+Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction Project ([reddfocus.org](https://reddfocus.org)).
+
+- **Chrome Web Store**: https://chromewebstore.google.com/detail/redd-2fa-phone-free-authe/dhkhbjppnoabmglidgfpndfghbhlkgbn
+- **Add-ons for Firefox**: (in review)
+- **Safari**: not necessary: the native Passwords application (newer Macs) or Safari itself (older Macs, go to Safari > Settings > Passwords) can generate TOTP codes.
 
 ## Features
 
