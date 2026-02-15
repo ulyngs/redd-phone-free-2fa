@@ -1,8 +1,8 @@
 # ReDD 2FA
 
-Minimalist, local-only TOTP authenticator browser extension. Secure, encrypted, distraction-free.
+Minimalist, local-only TOTP authenticator browser extension. Simple, secure, encrypted.
 
-Part of the [reddfocus.org](https://reddfocus.org) family of productivity tools.
+Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction project ([reddfocus.org](https://reddfocus.org)).
 
 ## Features
 
