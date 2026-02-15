@@ -1,6 +1,6 @@
 # ReDD 2FA
 
-Minimalist, local-only authenticator browser extension for time-based one-time passwords (TOTP). Simple, secure, and open-source.
+Simple, secure, local-only authenticator browser extension for time-based one-time passwords (TOTP).
 
 Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction project ([reddfocus.org](https://reddfocus.org)).
 
