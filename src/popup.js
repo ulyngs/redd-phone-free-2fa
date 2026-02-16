@@ -217,10 +217,11 @@ function initEventListeners() {
         await saveSettings(settings);
     });
 
-    $('lock-btn').addEventListener('click', () => {
+    $('lock-btn').addEventListener('click', async () => {
         lock();
         settingsDropdown.style.display = 'none';
         showScreen('lock');
+        await setupLockScreen();
     });
 
     // Change passphrase
