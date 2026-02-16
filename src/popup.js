@@ -128,12 +128,12 @@ function showScreen(screen) {
 // Theme
 // ========================================
 function applyTheme(theme) {
-    document.body.classList.remove('dark-mode');
+    document.documentElement.classList.remove('dark-mode');
     if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('dark-mode');
     } else if (theme === 'system') {
         if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('dark-mode');
+            document.documentElement.classList.add('dark-mode');
         }
     }
 }

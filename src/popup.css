@@ -139,6 +139,7 @@ html {
   margin: 0;
   padding: 0;
   background-color: var(--bg-primary);
+  transition: background-color 0.2s ease;
 }
 
 body {
@@ -151,10 +152,9 @@ body {
   font-size: 15px;
   line-height: 1.5;
   color: var(--text-primary);
-  background-color: var(--bg-primary);
   overflow-x: hidden;
   overflow-y: auto;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 /* ========================================
@@ -1347,6 +1347,7 @@ body {
   font-size: 0.73em;
   color: var(--text-muted);
   border-top: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
   width: 100%;
   position: fixed;
   bottom: 0;
