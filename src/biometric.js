@@ -17,8 +17,6 @@
  * Check if platform authenticator (Touch ID / Windows Hello) is available.
  */
 export async function isBiometricAvailable() {
-    return false;
-
     if (!window.PublicKeyCredential) return false;
     try {
         return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
