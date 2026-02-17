@@ -1,15 +1,12 @@
 /**
  * ReDD 2FA — Biometric unlock via WebAuthn
  *
- * Two modes:
- *   1. PRF mode (Chrome 118+, Edge 118+): derives a key from the biometric
- *      gesture itself — the key never exists in storage.
- *   2. Credential-gated mode (Firefox, Safari): a random wrapping key is
- *      stored alongside the credential data, but can only be *used* after
- *      a successful WebAuthn assertion (Touch ID / Windows Hello).
+ * Uses WebAuthn PRF extension (Chrome 118+, Edge 118+) to derive a key
+ * from the biometric gesture itself.
  *
- * The mode is chosen automatically at registration time based on browser
- * support.  Existing data without a `mode` field is treated as PRF.
+ * Security:
+ * - The encryption key never exists in storage.
+ * - It is cryptographically derived from the hardware authenticator (Touch ID / Windows Hello).
  */
 
 // ========================================
@@ -20,6 +17,8 @@
  * Check if platform authenticator (Touch ID / Windows Hello) is available.
  */
 export async function isBiometricAvailable() {
+    return false;
+
     if (!window.PublicKeyCredential) return false;
     try {
         return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
@@ -30,7 +29,7 @@ export async function isBiometricAvailable() {
 
 /**
  * Register a biometric credential and encrypt the passphrase.
- * Tries PRF first; falls back to credential-gated mode.
+ * Requires PRF support.
  * Returns the data to store.
  */
 export async function registerBiometric(passphrase) {
@@ -104,28 +103,9 @@ export async function registerBiometric(passphrase) {
         };
     }
 
-    // ── Credential-gated fallback ─────────────────────────────────
-    // PRF not available — encrypt passphrase with a random key that
-    // is stored locally.  Security gate: the stored data is only
-    // used after a successful WebAuthn assertion (Touch ID).
-    const rawKey = crypto.getRandomValues(new Uint8Array(32));
-    const wrappingKey = await crypto.subtle.importKey(
-        'raw', rawKey, { name: 'AES-GCM' }, false, ['encrypt'],
-    );
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ciphertext = await crypto.subtle.encrypt(
-        { name: 'AES-GCM', iv },
-        wrappingKey,
-        new TextEncoder().encode(passphrase),
-    );
-
-    return {
-        mode: 'credential',
-        credentialId: bufferToBase64(credential.rawId),
-        wrappingKey: bufferToBase64(rawKey),
-        iv: bufferToBase64(iv),
-        ciphertext: bufferToBase64(ciphertext),
-    };
+    // ── Legacy Fallback Removed ───────────────────────────────────
+    // PRF not available — throw error (user requested removal of soft gate)
+    throw new Error('Secure biometric unlock (PRF) is not supported by this browser.');
 }
 
 /**
@@ -136,10 +116,11 @@ export async function authenticateBiometric(storedData) {
     const credentialId = base64ToBuffer(storedData.credentialId);
     const mode = storedData.mode || 'prf'; // backwards compatibility
 
-    if (mode === 'prf') {
-        return authenticatePRF(storedData, credentialId);
+    if (mode !== 'prf') {
+        throw new Error('Legacy biometric data not supported. Please re-enable Touch ID.');
     }
-    return authenticateCredentialGated(storedData, credentialId);
+
+    return authenticatePRF(storedData, credentialId);
 }
 
 // ========================================
@@ -160,28 +141,12 @@ async function authenticatePRF(storedData, credentialId) {
         },
     });
 
-    const prfOutput = assertion.getClientExtensionResults()?.prf?.results?.first;
-    if (!prfOutput) throw new Error('Biometric authentication failed.');
+    const prfResults = assertion.getClientExtensionResults()?.prf;
+    const prfOutput = prfResults?.results?.first;
+
+    if (!prfOutput) throw new Error('Biometric authentication failed (no PRF output).');
 
     const wrappingKey = await deriveWrappingKey(new Uint8Array(prfOutput));
-    return decryptPassphrase(wrappingKey, storedData);
-}
-
-async function authenticateCredentialGated(storedData, credentialId) {
-    // WebAuthn assertion — requires Touch ID / Windows Hello
-    await navigator.credentials.get({
-        publicKey: {
-            challenge: crypto.getRandomValues(new Uint8Array(32)),
-            allowCredentials: [{ id: credentialId, type: 'public-key' }],
-            userVerification: 'required',
-        },
-    });
-
-    // Assertion succeeded → user is verified, decrypt with stored key
-    const rawKey = base64ToBuffer(storedData.wrappingKey);
-    const wrappingKey = await crypto.subtle.importKey(
-        'raw', rawKey, { name: 'AES-GCM' }, false, ['decrypt'],
-    );
     return decryptPassphrase(wrappingKey, storedData);
 }
 
