@@ -101,8 +101,7 @@ export async function registerBiometric(passphrase) {
         };
     }
 
-    // ── Legacy Fallback Removed ───────────────────────────────────
-    // PRF not available — throw error (user requested removal of soft gate)
+    // PRF not available — throw error so consumer knows biometric is unsupported
     throw new Error('Secure biometric unlock (PRF) is not supported by this browser.');
 }
 
@@ -112,10 +111,10 @@ export async function registerBiometric(passphrase) {
  */
 export async function authenticateBiometric(storedData) {
     const credentialId = base64ToBuffer(storedData.credentialId);
-    const mode = storedData.mode || 'prf'; // backwards compatibility
+    const mode = storedData.mode || 'prf';
 
     if (mode !== 'prf') {
-        throw new Error('Legacy biometric data not supported. Please re-enable Touch ID.');
+        throw new Error('Legacy biometric data format.');
     }
 
     return authenticatePRF(storedData, credentialId);
