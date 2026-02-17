@@ -25,7 +25,7 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 
 ### Biometric Unlock
 - **Touch ID / Windows Hello** — optional biometric unlock via WebAuthn
-- On Chrome/Edge, passphrase is encrypted with a PRF-derived key (HKDF → AES-256-GCM); on Firefox/Safari, a credential-gated random wrapping key is used
+- **Hardware-backed security** — passphrase is encrypted with a PRF-derived key (HKDF → AES-256-GCM) directly from the security chip; no keys are ever stored on disk
 - Biometric data is automatically cleared when passphrase is changed
 
 ### Usability
@@ -58,7 +58,7 @@ flowchart TD
 
     subgraph Unlock
         passphrase(["Enter passphrase"]) --> |"passphrase"| crypto.js["crypto.js<br>PBKDF2 600k iter → AES-256-GCM"]
-        touchid(["Touch ID / Windows Hello"]) --> biometric.js["biometric.js<br>WebAuthn + PRF (Chrome) · WebAuthn credential-gated (Firefox)"] --> |"recovered passphrase"| crypto.js
+        touchid(["Touch ID / Windows Hello"]) --> biometric.js["biometric.js<br>WebAuthn PRF (Hardware Key)"] --> |"recovered passphrase"| crypto.js
     end
 
     crypto.js --> session.js["session.js<br>Holds encryption key in memory<br>Auto-lock timer"]
@@ -93,7 +93,7 @@ No build step required — the extension runs as vanilla ES modules.
 | Encryption | AES-256-GCM (Web Crypto API) |
 | Key derivation | PBKDF2 · 600,000 iterations · SHA-256 |
 | Passphrase verification | Constant-time XOR comparison of derived hashes |
-| Biometric key wrapping | WebAuthn PRF → HKDF → AES-256-GCM (Chrome/Edge); credential-gated AES-256-GCM (Firefox/Safari) |
+| Biometric key wrapping | WebAuthn PRF → HKDF → AES-256-GCM (Hardware-backed only) |
 | TOTP generation | HMAC-SHA1/256/512 (Web Crypto API), RFC 6238 |
 | Network access | None — no host permissions declared |
 | Storage | `browser.storage.local` only |
@@ -121,7 +121,7 @@ src/
 ├── totp.js             # TOTP engine (Base32, HMAC, RFC 6238)
 ├── storage.js          # Encrypted storage manager + backup fingerprinting
 ├── session.js          # In-memory session & auto-lock
-├── biometric.js        # WebAuthn biometric unlock (PRF + credential-gated)
+├── biometric.js        # WebAuthn biometric unlock (PRF hardware integration)
 ├── browser.js          # Minimal browser API shim
 └── icons/              # Extension icons
 ```
