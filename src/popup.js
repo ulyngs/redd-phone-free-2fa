@@ -550,30 +550,55 @@ async function handleBiometricUnlock() {
 }
 
 /**
+ * Perform the actual biometric registration (WebAuthn credential creation + PRF).
+ */
+async function performBiometricRegistration() {
+    try {
+        const data = await registerBiometric(pendingPassphrase);
+        await saveBiometricData(data);
+        pendingPassphrase = null;
+        if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+        biometricPromptOverlay.style.display = 'none';
+        showToast('Touch ID enabled!');
+        updateBiometricToggle();
+    } catch (err) {
+        console.error('Biometric registration failed:', err);
+        pendingPassphrase = null;
+        if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+        biometricPromptOverlay.style.display = 'none';
+        showToast('Biometric setup failed. Try deleting old passkeys in your OS settings.');
+    }
+}
+
+/**
  * Register biometric listeners.
  */
 function initBiometricListeners() {
     biometricUnlockBtn.addEventListener('click', handleBiometricUnlock);
 
     $('biometric-enable-btn').addEventListener('click', async () => {
-        try {
-            if (!pendingPassphrase) return;
+        if (!pendingPassphrase) return;
 
-
-            const data = await registerBiometric(pendingPassphrase);
-            await saveBiometricData(data);
-            pendingPassphrase = null;
-            if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+        const isWindows = navigator.userAgent.includes('Windows');
+        if (isWindows) {
+            // Show Windows hint before proceeding
             biometricPromptOverlay.style.display = 'none';
-            showToast('Touch ID enabled!');
-            updateBiometricToggle();
-        } catch (err) {
-            console.error('Biometric registration failed:', err);
-            pendingPassphrase = null;
-            if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
-            biometricPromptOverlay.style.display = 'none';
-            showToast('Biometric setup failed. Try deleting old passkeys in your OS settings.');
+            $('windows-hint-overlay').style.display = 'flex';
+        } else {
+            await performBiometricRegistration();
         }
+    });
+
+    // Windows hint buttons
+    $('windows-hint-proceed-btn').addEventListener('click', async () => {
+        $('windows-hint-overlay').style.display = 'none';
+        await performBiometricRegistration();
+    });
+
+    $('windows-hint-cancel-btn').addEventListener('click', () => {
+        $('windows-hint-overlay').style.display = 'none';
+        pendingPassphrase = null;
+        if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
     });
 
     $('biometric-skip-btn').addEventListener('click', () => {
