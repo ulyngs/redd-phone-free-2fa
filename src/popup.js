@@ -7,7 +7,7 @@
 
 
 import { generateTOTP, getRemainingSeconds, parseOtpauthURI, buildOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, clearBiometricData, getBackupStatus, saveBackupFingerprint } from './storage.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, loadBiometricDataRaw, disableBiometric, clearBiometricData, getBackupStatus, saveBackupFingerprint } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 
@@ -551,9 +551,31 @@ async function handleBiometricUnlock() {
 
 /**
  * Perform the actual biometric registration (WebAuthn credential creation + PRF).
+ * If a previously disabled credential exists, try to reuse it first.
  */
 async function performBiometricRegistration() {
     try {
+        // Check for existing (disabled) credential we can reuse
+        const existing = await loadBiometricDataRaw();
+        if (existing?.disabled && existing.credentialId) {
+            try {
+                // Test if the old credential still works
+                const passphrase = await authenticateBiometric(existing);
+                // It works — re-enable with existing data
+                delete existing.disabled;
+                await saveBiometricData(existing);
+                pendingPassphrase = null;
+                if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+                biometricPromptOverlay.style.display = 'none';
+                showToast('Touch ID re-enabled!');
+                updateBiometricToggle();
+                return;
+            } catch {
+                // Old credential failed — fall through to create a new one
+                console.log('Existing credential could not be reused, creating new one.');
+            }
+        }
+
         const data = await registerBiometric(pendingPassphrase);
         await saveBiometricData(data);
         pendingPassphrase = null;
@@ -610,7 +632,7 @@ function initBiometricListeners() {
     biometricToggleBtn.addEventListener('click', async () => {
         const biometricData = await loadBiometricData();
         if (biometricData) {
-            await clearBiometricData();
+            await disableBiometric();
             showToast('Touch ID disabled.');
             updateBiometricToggle();
         } else {

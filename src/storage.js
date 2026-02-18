@@ -169,19 +169,43 @@ export async function importAccounts(accounts, key, replace = false) {
  * Save biometric credential data (credential ID + PRF salt + encrypted passphrase).
  */
 export async function saveBiometricData(data) {
-    await browser.storage.local.set({ redd2fa_biometric: data });
+    // Remove disabled flag if present
+    const { disabled, ...cleanData } = data;
+    await browser.storage.local.set({ redd2fa_biometric: cleanData });
 }
 
 /**
- * Load biometric credential data. Returns null if not set.
+ * Load biometric credential data. Returns null if not set or disabled.
  */
 export async function loadBiometricData() {
+    const result = await browser.storage.local.get('redd2fa_biometric');
+    const data = result.redd2fa_biometric || null;
+    if (data?.disabled) return null;
+    return data;
+}
+
+/**
+ * Load biometric data even if disabled (for re-enabling without creating a new credential).
+ */
+export async function loadBiometricDataRaw() {
     const result = await browser.storage.local.get('redd2fa_biometric');
     return result.redd2fa_biometric || null;
 }
 
 /**
- * Clear biometric data (disable biometric unlock).
+ * Soft-disable biometric unlock (keep credential data for potential re-use).
+ */
+export async function disableBiometric() {
+    const result = await browser.storage.local.get('redd2fa_biometric');
+    const data = result.redd2fa_biometric;
+    if (data) {
+        data.disabled = true;
+        await browser.storage.local.set({ redd2fa_biometric: data });
+    }
+}
+
+/**
+ * Fully clear biometric data (used when passphrase changes and old data is invalid).
  */
 export async function clearBiometricData() {
     await browser.storage.local.remove('redd2fa_biometric');
