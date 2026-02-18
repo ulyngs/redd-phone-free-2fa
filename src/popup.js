@@ -502,7 +502,12 @@ async function promptBiometricSetup(passphrase) {
         const available = await isBiometricAvailable();
         if (!available) return;
 
+        // Check if user dismissed the prompt permanently
+        const { redd2fa_biometric_dont_ask } = await browser.storage.local.get('redd2fa_biometric_dont_ask');
+        if (redd2fa_biometric_dont_ask) return;
+
         pendingPassphrase = passphrase;
+        $('biometric-dont-ask-checkbox').checked = false;
         biometricPromptOverlay.style.display = 'flex';
 
         // Auto-clear passphrase from memory after 60s if user doesn't act
@@ -623,7 +628,10 @@ function initBiometricListeners() {
         if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
     });
 
-    $('biometric-skip-btn').addEventListener('click', () => {
+    $('biometric-skip-btn').addEventListener('click', async () => {
+        if ($('biometric-dont-ask-checkbox').checked) {
+            await browser.storage.local.set({ redd2fa_biometric_dont_ask: true });
+        }
         pendingPassphrase = null;
         if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
         biometricPromptOverlay.style.display = 'none';
