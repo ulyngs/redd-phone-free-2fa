@@ -269,6 +269,9 @@ function initEventListeners() {
     // Account modal
     $('modal-close-btn').addEventListener('click', closeAccountModal);
     $('modal-cancel-btn').addEventListener('click', closeAccountModal);
+    accountModalOverlay.addEventListener('click', (e) => {
+        if (e.target === accountModalOverlay) closeAccountModal();
+    });
     modalSaveBtn.addEventListener('click', handleSaveAccount);
     $('secret-help-toggle').addEventListener('click', () => {
         const content = $('secret-help-content');
@@ -565,10 +568,11 @@ function initBiometricListeners() {
             showToast('Touch ID enabled!');
             updateBiometricToggle();
         } catch (err) {
+            console.error('Biometric registration failed:', err);
             pendingPassphrase = null;
             if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
             biometricPromptOverlay.style.display = 'none';
-            showToast('Touch ID not available on this device.');
+            showToast('Biometric setup failed. Try deleting old passkeys in your OS settings.');
         }
     });
 
