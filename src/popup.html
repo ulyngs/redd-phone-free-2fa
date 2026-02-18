@@ -416,11 +416,16 @@
   <!-- Windows-specific hint before WebAuthn prompt -->
   <div id="windows-hint-overlay" class="modal-overlay" style="display: none;">
     <div class="modal modal-small">
-      <h3>Important for Windows users</h3>
+      <svg style="width: 32px; height: 32px; margin-bottom: 8px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none"
+        stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="16" x2="12" y2="12" />
+        <line x1="12" y1="8" x2="12.01" y2="8" />
+      </svg>
       <p class="biometric-prompt-text">When prompted, choose <strong>Google Password Manager</strong> (or another
         password manager like 1Password).</p>
-      <p class="biometric-prompt-text" style="margin-top: 8px;">Do <strong>not</strong> select "Windows Hello" — it does
-        not support the secure key derivation required for biometric unlock.</p>
+      <p class="biometric-prompt-text" style="margin-top: 8px;">Do <strong>not</strong> select "Windows Hello", as this
+        currently does not support secure processing of your fingerprint from a browser extension.</p>
       <div class="modal-actions">
         <button id="windows-hint-cancel-btn" class="btn-secondary">Cancel</button>
         <button id="windows-hint-proceed-btn" class="btn-primary">Proceed</button>
