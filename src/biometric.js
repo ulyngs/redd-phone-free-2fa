@@ -49,7 +49,7 @@ export async function registerBiometric(passphrase) {
             ],
             authenticatorSelection: {
                 authenticatorAttachment: 'platform',
-                residentKey: 'preferred',
+                residentKey: 'discouraged',
                 userVerification: 'required',
             },
             extensions: {
