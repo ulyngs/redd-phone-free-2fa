@@ -26,6 +26,7 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 ### Biometric Unlock
 - **Touch ID / Windows Hello** — optional biometric unlock via WebAuthn
 - **Hardware-backed security** — passphrase is encrypted with a PRF-derived key (HKDF → AES-256-GCM) directly from the security chip; no keys are ever stored on disk
+- **Windows note** — Windows Hello does not currently support the WebAuthn PRF extension required for secure key derivation from a browser extension. Windows users should select **Google Password Manager** (or another password manager like 1Password) as their passkey provider when prompted, instead of "Windows Hello"
 - Biometric data is automatically cleared when passphrase is changed
 
 ### Usability
