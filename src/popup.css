@@ -189,6 +189,13 @@ body {
   margin: 0 auto;
 }
 
+#setup-screen .screen-container,
+#lock-screen .screen-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 52px);
+}
+
 .logo-header {
   display: flex;
   flex-direction: column;
@@ -297,7 +304,8 @@ body {
 }
 
 .assurance-copy {
-  margin: 18px 0 0 0;
+  margin: auto 0 0 0;
+  padding-top: 18px;
   font-size: 0.82em;
   line-height: 1.6;
   color: var(--text-muted);
