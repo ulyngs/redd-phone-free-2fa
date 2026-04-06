@@ -148,29 +148,6 @@
           </svg>
         </button>
       </div>
-      <button id="how-it-works-toggle" class="how-it-works-toggle">
-        How does ReDD 2FA work?
-        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-    </div>
-    <div id="how-it-works-content" class="how-it-works-content" style="display: none;">
-      <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
-        more secure, because a hacker cannot get into your accounts with your password alone.</p>
-      <p>The most common approach to 2FA is <strong>time-based one-time passwords</strong> (TOTP).
-        You get a secret key from e.g. your university Microsoft account, and pass
-        it to the 2FA service (e.g., this extension).
-        The 2FA service then generates a unique 6-digit code for you every 30 seconds.
-        ReDD 2FA encrypts your secret keys with your master passphrase / touch ID, which never leaves your
-        device.
-      <p>ReDD 2FA is safe, secure, and open-source. It is developed by
-        computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
-        Kollnig, Henry Tari), as
-        part of the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
-        The code is available at <a href="https://github.com/ulyngs/redd-2fa">https://github.com/ulyngs/redd-2fa</a>.
-      </p>
     </div>
 
     <!-- Search Bar -->
@@ -199,6 +176,73 @@
       <p class="empty-subtitle">Add your first account to start generating secure one-time codes on this device.</p>
       <button id="empty-add-btn" class="btn-secondary">Add your first account</button>
     </div>
+
+    <section class="account-help-wrapper" aria-labelledby="account-help-title">
+      <button id="account-help-toggle" class="account-help-toggle" type="button" aria-expanded="true"
+        aria-controls="account-help-content">
+        <span class="account-help-toggle-label">
+          <h3 id="account-help-title" class="account-help-title">How do I use ReDD 2FA?</h3>
+        </span>
+        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div id="account-help-content" class="account-help-section">
+        <div class="account-help-timeline">
+          <article class="timeline-step">
+            <div class="timeline-marker" aria-hidden="true">1</div>
+            <div class="timeline-content">
+              <h4>Get a secret key from your service</h4>
+              <p>From the service you want to use with ReDD 2FA (e.g. your university Microsoft account), you need a 'secret key'. They look like this: <code>bp8wkh4doj9n34jf</code>. They're often shown as a QR code, where you need to click 'can't scan?' to see it.</p>
+            </div>
+          </article>
+          <article class="timeline-step">
+            <div class="timeline-marker" aria-hidden="true">2</div>
+            <div class="timeline-content">
+              <h4>Add the secret key to ReDD 2FA</h4>
+              <p>In ReDD 2FA, click 'Add account', give it a name you'll remember (e.g. 'My University 2FA'), and paste the secret key you got from your service. ReDD 2FA will start generating rotating one-time passwords.</p>
+            </div>
+          </article>
+          <article class="timeline-step">
+            <div class="timeline-marker" aria-hidden="true">3</div>
+            <div class="timeline-content">
+              <h4>Give a code from ReDD 2FA to your service</h4>
+              <p>Copy a generated code back into the service you want to use with ReDD 2FA, to confirm the linking of the two. 🥳</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="how-it-works-wrapper" aria-labelledby="how-it-works-title">
+      <button id="how-it-works-toggle" class="how-it-works-toggle" type="button" aria-expanded="false"
+        aria-controls="how-it-works-content">
+        <span class="how-it-works-toggle-label">
+          <h3 id="how-it-works-title" class="how-it-works-title">How does ReDD 2FA work?</h3>
+        </span>
+        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div id="how-it-works-content" class="how-it-works-content" style="display: none;">
+        <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
+          more secure, because a hacker cannot get into your accounts with your password alone.</p>
+        <p>The most common approach to 2FA is <strong>time-based one-time passwords</strong> (TOTP).
+          You get a secret key from e.g. your university Microsoft account, and pass
+          it to the 2FA service (e.g., this extension).
+          The 2FA service then generates a unique 6-digit code for you every 30 seconds.
+          ReDD 2FA encrypts your secret keys with your master passphrase / touch ID, which never leaves your
+          device.
+        <p>ReDD 2FA is safe, secure, and open-source. It is developed by
+          computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
+          Kollnig, Henry Tari), as
+          part of the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
+          The code is available at <a href="https://github.com/ulyngs/redd-2fa">https://github.com/ulyngs/redd-2fa</a>.
+        </p>
+      </div>
+    </section>
 
     <!-- Settings Dropdown -->
     <div id="settings-dropdown" class="settings-dropdown" style="display: none;">

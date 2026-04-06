@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS = {
     clipboardClearSeconds: 15,
     theme: 'system',
     fetchIcons: false,
+    accountHelpExpanded: true,
 };
 
 /**
@@ -125,6 +126,7 @@ export async function loadSettings() {
         clipboardClearSeconds: stored?.clipboardClearSeconds ?? 15,
         theme: stored?.theme ?? 'system',
         fetchIcons: stored?.fetchIcons ?? false,
+        accountHelpExpanded: stored?.accountHelpExpanded ?? true,
     };
 }
 

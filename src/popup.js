@@ -54,6 +54,8 @@ const searchInput = $('search-input');
 const accountList = $('account-list');
 const emptyState = $('empty-state');
 const settingsDropdown = $('settings-dropdown');
+const accountHelpToggle = $('account-help-toggle');
+const accountHelpContent = $('account-help-content');
 
 // Modal
 const accountModalOverlay = $('account-modal-overlay');
@@ -97,6 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     settings = await loadSettings();
     applyTheme(settings.theme);
     initEventListeners();
+    applyAccountHelpExpandedState();
     initBiometricListeners();
     setOnLockCallback(() => { showScreen('lock'); setupLockScreen(); });
 
@@ -178,6 +181,12 @@ function initEventListeners() {
     // Add account
     $('add-account-btn').addEventListener('click', () => openAccountModal());
     $('empty-add-btn').addEventListener('click', () => openAccountModal());
+
+    accountHelpToggle.addEventListener('click', async () => {
+        settings.accountHelpExpanded = !settings.accountHelpExpanded;
+        applyAccountHelpExpandedState();
+        await saveSettings(settings);
+    });
 
 
     // Settings
@@ -262,6 +271,7 @@ function initEventListeners() {
         const chevron = $('how-it-works-toggle').querySelector('.chevron-icon');
         const isOpen = content.style.display !== 'none';
         content.style.display = isOpen ? 'none' : 'block';
+        $('how-it-works-toggle').setAttribute('aria-expanded', String(!isOpen));
         chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
 
@@ -378,6 +388,12 @@ function initEventListeners() {
             window.open(link.href, '_blank');
         }
     });
+}
+
+function applyAccountHelpExpandedState() {
+    const isExpanded = settings.accountHelpExpanded !== false;
+    accountHelpToggle.setAttribute('aria-expanded', String(isExpanded));
+    accountHelpContent.hidden = !isExpanded;
 }
 
 // ========================================
