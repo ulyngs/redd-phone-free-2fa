@@ -296,6 +296,22 @@ body {
   line-height: 1.55;
 }
 
+.assurance-copy {
+  margin: 18px 0 0 0;
+  font-size: 0.82em;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.assurance-copy a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.assurance-copy a:hover {
+  color: var(--link-hover);
+}
+
 .trust-badges {
   display: flex;
   flex-wrap: wrap;
