@@ -539,6 +539,14 @@ async function handleBiometricUnlock() {
     }
 }
 
+function isWindowsPlatform() {
+    return navigator.userAgent.includes('Windows');
+}
+
+function getWindowsBiometricGuidance() {
+    return 'On Windows, biometric unlock may work in Edge if you use a compatible passkey provider like 1Password or Google Password Manager. If your browser only offers Windows Hello, use Chrome instead.';
+}
+
 /**
  * Perform the actual biometric registration (WebAuthn credential creation + PRF).
  * If a previously disabled credential exists, try to reuse it first.
@@ -578,7 +586,11 @@ async function performBiometricRegistration() {
         pendingPassphrase = null;
         if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
         biometricPromptOverlay.style.display = 'none';
-        showToast('Biometric setup failed. Try deleting old passkeys in your OS settings.');
+        if (isWindowsPlatform()) {
+            showToast(getWindowsBiometricGuidance());
+        } else {
+            showToast('Biometric setup failed. Try deleting old passkeys in your OS settings.');
+        }
     }
 }
 
@@ -629,8 +641,14 @@ function initBiometricListeners() {
             showToast('Touch ID disabled.');
             updateBiometricToggle();
         } else {
-            // To re-enable, user needs to lock and unlock with passphrase
-            showToast('Lock and unlock with passphrase to re-enable Touch ID.');
+            const biometricDataRaw = await loadBiometricDataRaw();
+            if (biometricDataRaw?.disabled) {
+                showToast('Lock and unlock with passphrase to re-enable Touch ID.');
+            } else if (isWindowsPlatform()) {
+                showToast(getWindowsBiometricGuidance());
+            } else {
+                showToast('Lock and unlock with passphrase to enable Touch ID.');
+            }
         }
     });
 }
