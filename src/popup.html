@@ -26,28 +26,32 @@
 
       <div class="form-group">
         <label for="setup-passphrase">Master passphrase</label>
-        <input type="password" id="setup-passphrase" placeholder="Enter a strong passphrase" autocomplete="off"
-          spellcheck="false">
-        <button type="button" class="toggle-visibility" data-target="setup-passphrase" title="Show/hide passphrase">
-          <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </button>
+        <div class="input-with-toggle">
+          <input type="password" id="setup-passphrase" placeholder="Enter a strong passphrase" autocomplete="off"
+            spellcheck="false">
+          <button type="button" class="toggle-visibility" data-target="setup-passphrase" title="Show/hide passphrase">
+            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label for="setup-passphrase-confirm">Confirm passphrase</label>
-        <input type="password" id="setup-passphrase-confirm" placeholder="Confirm your passphrase" autocomplete="off"
-          spellcheck="false">
-        <button type="button" class="toggle-visibility" data-target="setup-passphrase-confirm"
-          title="Show/hide passphrase">
-          <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </button>
+        <div class="input-with-toggle">
+          <input type="password" id="setup-passphrase-confirm" placeholder="Confirm your passphrase" autocomplete="off"
+            spellcheck="false">
+          <button type="button" class="toggle-visibility" data-target="setup-passphrase-confirm"
+            title="Show/hide passphrase">
+            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
       </div>
       <p id="setup-error" class="error-text" style="display: none;"></p>
       <button id="setup-btn" class="btn-primary" disabled>Create & Unlock</button>
@@ -102,15 +106,17 @@
       <div id="passphrase-section">
         <p id="passphrase-divider" class="lock-divider" style="display: none;"><span>or use passphrase</span></p>
         <div class="form-group">
-          <input type="password" id="unlock-passphrase" placeholder="Master passphrase" autocomplete="off"
-            spellcheck="false">
-          <button type="button" class="toggle-visibility" data-target="unlock-passphrase" title="Show/hide passphrase">
-            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
+          <div class="input-with-toggle">
+            <input type="password" id="unlock-passphrase" placeholder="Master passphrase" autocomplete="off"
+              spellcheck="false">
+            <button type="button" class="toggle-visibility" data-target="unlock-passphrase" title="Show/hide passphrase">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
         </div>
         <p id="unlock-error" class="error-text" style="display: none;"></p>
         <button id="unlock-btn" class="btn-primary">Unlock</button>
