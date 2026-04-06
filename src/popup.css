@@ -1146,14 +1146,22 @@ body {
    Settings Dropdown
    ======================================== */
 .settings-dropdown {
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   background-color: var(--bg-primary);
-  padding: 24px 18px 80px;
-  min-height: 100%;
   z-index: 100;
   overflow-y: auto;
-  width: 100%;
+}
+
+.settings-panel {
+  position: relative;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 24px 18px 80px;
 }
 
 .settings-kicker {

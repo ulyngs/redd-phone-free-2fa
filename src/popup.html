@@ -268,57 +268,59 @@
 
     <!-- Settings Dropdown -->
     <div id="settings-dropdown" class="settings-dropdown" style="display: none;">
-      <button id="settings-close-btn" class="close-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-          stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      </button>
-      <p class="settings-kicker">Security and backup</p>
-      <h3>Settings</h3>
-      <div class="settings-item">
-        <label for="theme-select">Light / dark theme</label>
-        <select id="theme-select" class="settings-select">
-          <option value="system">Auto</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
+      <div class="settings-panel">
+        <button id="settings-close-btn" class="close-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+        <p class="settings-kicker">Security and backup</p>
+        <h3>Settings</h3>
+        <div class="settings-item">
+          <label for="theme-select">Light / dark theme</label>
+          <select id="theme-select" class="settings-select">
+            <option value="system">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <div class="settings-item">
+          <label for="auto-lock-select">Auto-lock after</label>
+          <select id="auto-lock-select" class="settings-select">
+            <option value="1">1 minute</option>
+            <option value="5" selected>5 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="0">Never</option>
+          </select>
+        </div>
+        <div class="settings-divider"></div>
+        <button id="export-btn" class="settings-action">Export backup<span id="backup-badge" class="backup-badge"
+            style="display: none;">unsaved changes</span></button>
+        <button id="import-btn" class="settings-action">Import backup</button>
+        <button id="migration-toggle" class="settings-collapsible">
+          Migrating to another 2FA app?
+          <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div id="migration-content" class="settings-collapsible-content" style="display: none;">
+          <p>You have two options:</p>
+          <p><strong>1.</strong> Tap the <strong>⋮</strong> button for any of your accounts in ReDD 2FA, choose
+            <strong>Edit</strong>, and copy
+            the secret key into your new app.
+          </p>
+          <p><strong>2.</strong> Use <strong>Export backup</strong> above and choose <strong>Plain text URIs</strong> to
+            create a file you can import into most authenticator apps.</p>
+        </div>
+        <div class="settings-divider"></div>
+        <button id="change-passphrase-btn" class="settings-action">Change passphrase</button>
+        <button id="biometric-toggle-btn" class="settings-action" style="display: none;"></button>
+        <button id="lock-btn" class="settings-action settings-action-danger">Lock now</button>
       </div>
-      <div class="settings-item">
-        <label for="auto-lock-select">Auto-lock after</label>
-        <select id="auto-lock-select" class="settings-select">
-          <option value="1">1 minute</option>
-          <option value="5" selected>5 minutes</option>
-          <option value="15">15 minutes</option>
-          <option value="30">30 minutes</option>
-          <option value="0">Never</option>
-        </select>
-      </div>
-      <div class="settings-divider"></div>
-      <button id="export-btn" class="settings-action">Export backup<span id="backup-badge" class="backup-badge"
-          style="display: none;">unsaved changes</span></button>
-      <button id="import-btn" class="settings-action">Import backup</button>
-      <button id="migration-toggle" class="settings-collapsible">
-        Migrating to another 2FA app?
-        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div id="migration-content" class="settings-collapsible-content" style="display: none;">
-        <p>You have two options:</p>
-        <p><strong>1.</strong> Tap the <strong>⋮</strong> button for any of your accounts in ReDD 2FA, choose
-          <strong>Edit</strong>, and copy
-          the secret key into your new app.
-        </p>
-        <p><strong>2.</strong> Use <strong>Export backup</strong> above and choose <strong>Plain text URIs</strong> to
-          create a file you can import into most authenticator apps.</p>
-      </div>
-      <div class="settings-divider"></div>
-      <button id="change-passphrase-btn" class="settings-action">Change passphrase</button>
-      <button id="biometric-toggle-btn" class="settings-action" style="display: none;"></button>
-      <button id="lock-btn" class="settings-action settings-action-danger">Lock now</button>
     </div>
 
   </div>
