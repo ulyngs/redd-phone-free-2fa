@@ -1024,7 +1024,11 @@ function openDeleteModal(id) {
     const account = accounts.find(a => a.id === id);
     if (!account) return;
     deletingAccountId = id;
-    deleteAccountName.textContent = `${account.issuer || 'Unknown'} — ${account.accountName}`;
+    const issuer = (account.issuer || '').trim();
+    const accountName = (account.accountName || '').trim();
+    deleteAccountName.textContent = issuer && accountName && issuer !== accountName
+        ? `${issuer} — ${accountName}`
+        : issuer || accountName || 'Unknown';
     deleteModalOverlay.style.display = 'flex';
 }
 

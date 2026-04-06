@@ -519,6 +519,23 @@ body {
   transition: all 0.2s ease;
 }
 
+.icon-btn-label {
+  display: none;
+}
+
+#add-account-btn {
+  width: auto;
+  padding: 0 12px;
+  gap: 8px;
+}
+
+#add-account-btn .icon-btn-label {
+  display: inline;
+  font-size: 0.98em;
+  font-weight: 600;
+  line-height: 1;
+}
+
 .icon-btn:hover {
   background-color: var(--bg-hover);
   color: var(--icon-hover);
@@ -527,8 +544,8 @@ body {
 }
 
 .icon-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 /* ========================================
@@ -574,10 +591,10 @@ body {
 .search-icon {
   position: absolute;
   left: 26px;
-  top: 50%;
+  top: calc(50% - 4px);
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: var(--text-subtle);
   pointer-events: none;
 }
@@ -737,8 +754,8 @@ body {
 }
 
 .account-edit-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 .more-btn {
@@ -750,7 +767,7 @@ body {
   background: none;
   color: var(--text-subtle);
   cursor: pointer;
-  font-size: 1.2em;
+  font-size: 1.45em;
   font-weight: 700;
   line-height: 1;
   display: flex;
