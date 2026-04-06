@@ -705,15 +705,28 @@ async function renderAccounts() {
 
     filtered.forEach((account, i) => {
         const formattedCode = formatCode(codes[i]);
-        const initials = getInitials(account.issuer || account.accountName);
-        const color = getColorForIssuer(account.issuer);
 
         const card = document.createElement('div');
         card.className = 'account-card';
         card.dataset.id = account.id;
         card.title = 'Click to copy code';
 
-        // More menu
+        // Account actions
+        const actions = document.createElement('div');
+        actions.className = 'account-actions';
+
+        const editQuickBtn = document.createElement('button');
+        editQuickBtn.className = 'account-edit-btn';
+        editQuickBtn.dataset.id = account.id;
+        editQuickBtn.title = 'Edit account';
+        editQuickBtn.setAttribute('aria-label', 'Edit account');
+        editQuickBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z" />
+                <path d="m15 5 4 4" />
+            </svg>
+        `;
+
         const more = document.createElement('div');
         more.className = 'account-more';
         const moreBtn = document.createElement('button');
@@ -724,22 +737,13 @@ async function renderAccounts() {
         const menu = document.createElement('div');
         menu.className = 'more-menu';
         menu.dataset.id = account.id;
-        const editBtn = document.createElement('button');
-        editBtn.className = 'more-menu-item edit-btn';
-        editBtn.dataset.id = account.id;
-        editBtn.textContent = 'Edit';
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'more-menu-item delete-btn';
         deleteBtn.dataset.id = account.id;
         deleteBtn.textContent = 'Delete';
-        menu.append(editBtn, deleteBtn);
+        menu.append(deleteBtn);
         more.append(moreBtn, menu);
-
-        // Icon
-        const icon = document.createElement('div');
-        icon.className = 'account-icon';
-        icon.style.backgroundColor = color;
-        icon.textContent = initials;
+        actions.append(editQuickBtn, more);
 
         // Info
         const info = document.createElement('div');
@@ -781,7 +785,7 @@ async function renderAccounts() {
         svg.append(track, fill, text);
         codeSection.append(codeSpan, svg);
 
-        card.append(more, icon, info, codeSection);
+        card.append(actions, info, codeSection);
         fragment.appendChild(card);
     });
     accountList.replaceChildren(fragment);
@@ -790,10 +794,19 @@ async function renderAccounts() {
     accountList.querySelectorAll('.account-card').forEach((card) => {
         card.addEventListener('click', (e) => {
             const target = e.target;
-            // Don't copy if clicking the more menu or its items
-            if (target.closest('.account-more')) return;
+            // Don't copy if clicking row action buttons or menus
+            if (target.closest('.account-actions')) return;
             const id = card.dataset.id;
             copyCode(id, card);
+        });
+    });
+
+    accountList.querySelectorAll('.account-edit-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            closeAllMoreMenus();
+            openAccountModal(id);
         });
     });
 
@@ -808,15 +821,6 @@ async function renderAccounts() {
             });
             const menu = accountList.querySelector(`.more-menu[data-id="${id}"]`);
             if (menu) menu.classList.toggle('open');
-        });
-    });
-
-    accountList.querySelectorAll('.edit-btn').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = btn.dataset.id;
-            closeAllMoreMenus();
-            openAccountModal(id);
         });
     });
 
@@ -1321,24 +1325,6 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
-}
-
-function getInitials(name) {
-    return name.slice(0, 2).toUpperCase();
-}
-
-function getColorForIssuer(issuer) {
-    const colors = [
-        '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-        '#ec4899', '#f43f5e', '#ef4444', '#f97316',
-        '#f59e0b', '#eab308', '#84cc16', '#22c55e',
-        '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6',
-    ];
-    let hash = 0;
-    for (let i = 0; i < issuer.length; i++) {
-        hash = issuer.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
 }
 
 function downloadFile(content, filename, mimeType) {

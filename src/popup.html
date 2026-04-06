@@ -15,12 +15,18 @@
   <div id="setup-screen" style="display: none;">
     <div class="screen-container">
       <div class="top-bar top-bar-no-border">
-        <div class="top-title-group">
+        <div class="top-title-group top-title-group-screen">
           <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
-          <h2 class="top-title">ReDD 2FA</h2>
+          <div class="top-title-block">
+            <h2 class="top-title">ReDD 2FA</h2>
+          </div>
         </div>
       </div>
       <p class="subtitle">Create a master passphrase to encrypt your accounts.</p>
+      <div class="trust-badges">
+        <span class="trust-badge">Open source</span>
+        <span class="trust-badge">Local-only</span>
+      </div>
 
       <div class="form-group">
         <label for="setup-passphrase">Master passphrase</label>
@@ -68,11 +74,14 @@
   <div id="lock-screen" style="display: none;">
     <div class="screen-container">
       <div class="top-bar top-bar-no-border">
-        <div class="top-title-group">
+        <div class="top-title-group top-title-group-screen">
           <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
-          <h2 class="top-title">ReDD 2FA</h2>
+          <div class="top-title-block">
+            <h2 class="top-title">ReDD 2FA</h2>
+          </div>
         </div>
       </div>
+      <p class="subtitle">Unlock your encrypted accounts with your passphrase or Touch ID.</p>
 
       <!-- Biometric unlock button (shown if biometric is set up) -->
       <button id="biometric-unlock-btn" class="btn-biometric" style="display: none;">
@@ -111,6 +120,14 @@
        Main Screen (Unlocked)
        ======================================== -->
   <div id="main-screen" style="display: none;">
+    <div class="main-brand-row">
+      <div class="top-title-group top-title-group-main">
+        <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
+        <div class="top-title-block">
+          <h2 class="top-title top-title-main">ReDD 2FA</h2>
+        </div>
+      </div>
+    </div>
     <!-- Top Bar -->
     <div class="top-bar">
       <div class="top-actions">
@@ -177,7 +194,8 @@
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
       </svg>
-      <p>No accounts yet</p>
+      <p class="empty-title">No accounts yet</p>
+      <p class="empty-subtitle">Add your first account to start generating secure one-time codes on this device.</p>
       <button id="empty-add-btn" class="btn-secondary">Add your first account</button>
     </div>
 
@@ -190,7 +208,8 @@
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       </button>
-      <h3>SETTINGS</h3>
+      <p class="settings-kicker">Security and backup</p>
+      <h3>Settings</h3>
       <div class="settings-item">
         <label for="theme-select">Light / dark theme</label>
         <select id="theme-select" class="settings-select">
