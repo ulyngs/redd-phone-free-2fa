@@ -283,37 +283,6 @@ function initEventListeners() {
         if (e.target === accountModalOverlay) closeAccountModal();
     });
     modalSaveBtn.addEventListener('click', handleSaveAccount);
-    $('secret-help-toggle').addEventListener('click', () => {
-        const content = $('secret-help-content');
-        const chevron = $('secret-help-toggle').querySelector('.chevron-icon');
-        const isOpen = content.style.display !== 'none';
-        content.style.display = isOpen ? 'none' : 'block';
-        chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
-    });
-    $('download-instructions-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>ReDD 2FA — Setup Instructions</title>
-<style>body{font-family:system-ui,sans-serif;max-width:600px;margin:40px auto;padding:0 20px;line-height:1.6;color:#333}h1{font-size:1.3em}ol{padding-left:20px}ol li{margin-bottom:8px}em{color:#555}</style>
-</head><body>
-<h1>Where do I find my secret key?</h1>
-<p>Services usually show the secret key as a QR code — but a QR code is just a fancy way of displaying it. There's always an option to reveal the key as text instead.</p>
-<p><strong>For university Microsoft accounts:</strong></p>
-<ol>
-<li>Go to <a href="https://mysignins.microsoft.com/security-info" target="_blank">mysignins.microsoft.com/security-info</a> and click <strong>Add sign-in method</strong></li>
-<li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication app</strong> → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key</li>
-<li>Paste the secret key in ReDD 2FA, then copy one of the generated codes and give it to Microsoft — done!</li>
-</ol>
-<p><em>Note: When you next time log in, your Microsoft account may still default to the Authenticator app — click "Sign in another way" / "I can't use my Microsoft Authenticator app right now" → Use a verification code.</em></p>
-</body></html>`;
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'redd-2fa-setup-instructions.html';
-        a.click();
-        URL.revokeObjectURL(url);
-    });
 
     // Secret validation
     manualSecret.addEventListener('input', () => {

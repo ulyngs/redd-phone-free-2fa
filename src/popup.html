@@ -189,12 +189,24 @@
         </svg>
       </button>
       <div id="account-help-content" class="account-help-section">
+        <div class="account-help-detail-block">
+          <h4 class="account-help-subheading">Specific instructions for Microsoft accounts</h4>
+          <ol class="account-help-detail-list">
+            <li>Go to <a href="https://mysignins.microsoft.com/security-info" target="_blank">mysignins.microsoft.com/security-info</a> and click <strong>Add sign-in method</strong> (if you don't see it, click 'Security info' in the left sidebar).</li>
+            <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication app</strong> → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
+            <li>Open ReDD 2FA in a new tab, add an account and paste the secret key. Then copy one of the codes that ReDD 2FA generates.</li>
+            <li>Go back to the tab with your Microsoft account, click Next, and paste the code from ReDD 2FA. Done! 🥳</li>
+          </ol>
+          <p><em>Note: When you next log in, your Microsoft account will probably still default to the Authenticator app. Click <strong></strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use a verification code</strong>.</em></p>
+        </div>
+        <h4 class="account-help-subheading">General process</h4>
         <div class="account-help-timeline">
           <article class="timeline-step">
             <div class="timeline-marker" aria-hidden="true">1</div>
             <div class="timeline-content">
               <h4>Get a secret key from your service</h4>
-              <p>From the service you want to use with ReDD 2FA (e.g. your university Microsoft account), you need a 'secret key'. They look like this: <code>bp8wkh4doj9n34jf</code>. They're often shown as a QR code, where you need to click 'can't scan?' to see it.</p>
+              <p>From the service you want to use with ReDD 2FA (e.g. your Microsoft account), you need a 'secret key'. They're often shown as a QR code, where you need to click 'can't scan?'.</p>
+              <img class="timeline-image" src="step1.png" alt="Illustration for getting a secret key from a service">
             </div>
           </article>
           <article class="timeline-step">
@@ -202,13 +214,15 @@
             <div class="timeline-content">
               <h4>Add the secret key to ReDD 2FA</h4>
               <p>In ReDD 2FA, click 'Add account', give it a name you'll remember (e.g. 'My University 2FA'), and paste the secret key you got from your service. ReDD 2FA will start generating rotating one-time passwords.</p>
+              <img class="timeline-image" src="step2.png" alt="Illustration for adding the secret key to ReDD 2FA">
             </div>
           </article>
           <article class="timeline-step">
             <div class="timeline-marker" aria-hidden="true">3</div>
             <div class="timeline-content">
               <h4>Give a code from ReDD 2FA to your service</h4>
-              <p>Copy a generated code back into the service you want to use with ReDD 2FA, to confirm the linking of the two. 🥳</p>
+              <p>Copy a generated code back into the service you want to use with ReDD 2FA. This confirms the linking of the two services. Well done! 🥳</p>
+              <img class="timeline-image" src="step3.png" alt="Illustration for confirming setup with a generated code">
             </div>
           </article>
         </div>
@@ -229,16 +243,15 @@
       <div id="how-it-works-content" class="how-it-works-content" style="display: none;">
         <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
           more secure, because a hacker cannot get into your accounts with your password alone.</p>
-        <p>The most common approach to 2FA is <strong>time-based one-time passwords</strong> (TOTP).
-          You get a secret key from e.g. your university Microsoft account, and pass
-          it to the 2FA service (e.g., this extension).
-          The 2FA service then generates a unique 6-digit code for you every 30 seconds.
-          ReDD 2FA encrypts your secret keys with your master passphrase / touch ID, which never leaves your
-          device.
-        <p>ReDD 2FA is safe, secure, and open-source. It is developed by
+        <p>ReDD 2FA uses the most common approach to 2FA, namely <strong>time-based one-time passwords</strong> (TOTP).
+          You get a secret key from e.g. your  Microsoft account, pass
+          it to ReDD 2FA, and it will generate a unique 6-digit code for you every 30 seconds. 
+          You can then copy this code and paste it into your (e.g.) Microsoft account to log in.
+        <p>ReDD 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your secret keys with your master passphrase / touch ID, which never leaves your
+          device. It is developed by
           computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
           Kollnig, Henry Tari), as
-          part of the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
+          part of their work with the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
           The code is available at <a href="https://github.com/ulyngs/redd-2fa">https://github.com/ulyngs/redd-2fa</a>.
         </p>
       </div>
@@ -318,57 +331,22 @@
       </div>
 
       <div class="form-group">
-        <label for="manual-label">Label</label>
+        <label for="manual-label">Name</label>
         <input type="text" id="manual-label" placeholder="e.g. My University 2FA" autocomplete="off">
       </div>
       <div class="form-group">
-        <div class="label-row">
-          <label for="manual-secret">Secret key</label>
-          <button type="button" id="secret-help-toggle" class="inline-help-toggle">
-            Where do I find this?
-            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        <label for="manual-secret">Secret key</label>
+        <div class="input-with-toggle">
+          <input type="password" id="manual-secret" placeholder="e.g. JBSWY3DPEHPK3PXP" autocomplete="off"
+            spellcheck="false">
+          <button type="button" class="toggle-visibility" data-target="manual-secret" title="Show/hide secret key">
+            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
         </div>
-        <div id="secret-help-content" class="inline-help-content" style="display: none;">
-          <button type="button" id="download-instructions-btn" class="download-instructions-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round" width="14" height="14">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Download instructions
-          </button>
-          <p>Services usually show the secret key as a QR code — but a QR code is just a fancy way of displaying it.
-            There's always an option to reveal the key as text instead.</p>
-          <p><strong>For university Microsoft accounts:</strong></p>
-          <ol>
-            <li>Go to <a href="https://mysignins.microsoft.com/security-info"
-                target="_blank">mysignins.microsoft.com/security-info</a> and click <strong>Add sign-in method</strong>
-            </li>
-            <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication
-                app</strong> → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key
-            </li>
-            <li>Paste the secret key here in ReDD 2FA, then copy one of the generated codes and give it to Microsoft —
-              done!</li>
-          </ol>
-          <p><em>Note: When you next log in to your Microsoft acccount, it may still default to the Authenticator app
-              for 2FA —
-              click "Sign in another way"/"I can't use my
-              Microsoft Authenticator app right now" → Use a verification code.</em></p>
-        </div>
-        <input type="password" id="manual-secret" placeholder="e.g. JBSWY3DPEHPK3PXP" autocomplete="off"
-          spellcheck="false">
-        <button type="button" class="toggle-visibility" data-target="manual-secret" title="Show/hide secret key">
-          <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </button>
         <p id="secret-validation" class="feedback-text" style="display: none;"></p>
       </div>
 

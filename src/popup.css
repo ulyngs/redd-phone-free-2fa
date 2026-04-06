@@ -420,10 +420,20 @@ body {
   min-height: 60px;
 }
 
+.input-with-toggle {
+  position: relative;
+}
+
+.input-with-toggle input {
+  padding-right: 40px;
+}
+
 .toggle-visibility {
   position: absolute;
   right: 5px;
-  bottom: 7px;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
   padding: 5px;
   border: none;
   background: none;
@@ -433,12 +443,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.form-group:has(#manual-secret) .toggle-visibility {
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%);
 }
 
 .toggle-visibility:hover {
@@ -902,7 +906,7 @@ body {
 .how-it-works-wrapper {
   width: calc(100% + 220px);
   max-width: 820px;
-  margin: 10px 50% 0;
+  margin: 18px 50% 0;
   transform: translateX(-50%);
 }
 
@@ -994,6 +998,13 @@ body {
   color: var(--text-primary);
 }
 
+.account-help-subheading {
+  margin: 0 0 14px 0;
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 .how-it-works-title {
   margin: 0;
   font-family: var(--font-heading);
@@ -1008,6 +1019,7 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   padding-top: 2px;
+  margin-bottom: 22px;
 }
 
 .account-help-timeline::before {
@@ -1062,6 +1074,48 @@ body {
   font-size: 0.94em;
   line-height: 1.55;
   color: var(--text-muted);
+}
+
+.timeline-image {
+  display: block;
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+  margin: 16px auto 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-help-detail-block {
+  padding-top: 2px;
+}
+
+.account-help-detail-block p {
+  margin: 0 0 10px 0;
+  font-size: 0.95em;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.account-help-detail-list {
+  margin: 0 0 12px 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+}
+
+.account-help-detail-list li {
+  margin-bottom: 8px;
+  line-height: 1.55;
+}
+
+.account-help-detail-block a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.account-help-detail-block a:hover {
+  color: var(--link-hover);
 }
 
 /* ========================================
@@ -1264,7 +1318,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .modal-header h3 {
