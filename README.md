@@ -5,7 +5,7 @@ Simple, secure, local-only authenticator browser extension for time-based one-ti
 Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction Project ([reddfocus.org](https://reddfocus.org)).
 
 - **Chrome Web Store**: https://chromewebstore.google.com/detail/redd-2fa-phone-free-authe/dhkhbjppnoabmglidgfpndfghbhlkgbn
-- **Add-ons for Firefox**: (in review)
+- **Add-ons for Firefox**: https://addons.mozilla.org/en-US/firefox/addon/redd-2fa-simple-authenticator
 - **Safari**: not necessary: the native Passwords application (newer Macs) or Safari itself (older Macs, go to Safari > Settings > Passwords) can generate TOTP codes.
 
 ## Features
