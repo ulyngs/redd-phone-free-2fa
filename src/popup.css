@@ -1346,11 +1346,13 @@ body {
   padding: 6px 16px;
   font-size: 0.73em;
   color: var(--text-muted);
-  border-top: 1px solid var(--border-color);
   background-color: var(--bg-primary);
-  width: 100%;
+  width: 470px;
+  max-width: 100%;
   position: fixed;
   bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .popup-footer a {
