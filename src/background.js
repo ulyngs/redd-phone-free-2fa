@@ -1,23 +1,24 @@
 /**
  * ReDD 2FA — Background service worker
  *
- * Opens (or focuses) popup.html in a tab when the extension icon is clicked.
+ * Opens popup.html in a sidebar panel when the extension icon is clicked.
+ * - Chrome: uses the Side Panel API (chrome.sidePanel)
+ * - Firefox: uses the Sidebar Action API (browser.sidebarAction)
  */
 
 // Normalise the browser API global (Firefox = `browser`, Chrome/Edge = `chrome`)
 const api = typeof browser !== 'undefined' ? browser : chrome;
 
-api.action.onClicked.addListener(async () => {
-    // Check if popup.html is already open in a tab
-    const extensionUrl = api.runtime.getURL('popup.html');
-    const tabs = await api.tabs.query({ url: extensionUrl });
+const isChrome = typeof chrome !== 'undefined' && !!chrome.sidePanel;
+const isFirefox = typeof browser !== 'undefined' && !!browser.sidebarAction;
 
-    if (tabs.length > 0) {
-        // Focus existing tab
-        await api.tabs.update(tabs[0].id, { active: true });
-        await api.windows.update(tabs[0].windowId, { focused: true });
-    } else {
-        // Open new tab
-        await api.tabs.create({ url: extensionUrl });
-    }
-});
+if (isChrome) {
+    // Chrome: configure side panel to open when the extension icon is clicked
+    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
+        .catch((error) => console.error('Failed to set side panel behavior:', error));
+} else if (isFirefox) {
+    // Firefox: toggle the sidebar when the extension icon is clicked
+    api.action.onClicked.addListener(() => {
+        api.sidebarAction.toggle();
+    });
+}

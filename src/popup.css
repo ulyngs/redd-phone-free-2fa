@@ -164,8 +164,8 @@ html {
 }
 
 body {
-  width: 470px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 470px;
   min-height: 360px;
   margin: 0 auto;
   padding: 0 0 52px;
@@ -921,17 +921,15 @@ body {
    Account Help Timeline
    ======================================== */
 .account-help-wrapper {
-  width: calc(100% + 220px);
-  max-width: 820px;
-  margin: 16px 50% 0;
-  transform: translateX(-50%);
+  width: 100%;
+  margin: 16px 0 0;
+  padding: 0 12px;
 }
 
 .how-it-works-wrapper {
-  width: calc(100% + 220px);
-  max-width: 820px;
-  margin: 18px 50% 0;
-  transform: translateX(-50%);
+  width: 100%;
+  margin: 18px 0 0;
+  padding: 0 12px;
 }
 
 .account-help-toggle {

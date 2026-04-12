@@ -15,6 +15,19 @@
             "48": "icons/icon-48.png"
         }
     },
+    "side_panel": {
+        "default_path": "popup.html"
+    },
+    "sidebar_action": {
+        "default_panel": "popup.html",
+        "default_title": "ReDD 2FA",
+        "default_icon": {
+            "16": "icons/icon-16.png",
+            "32": "icons/icon-32.png",
+            "48": "icons/icon-48.png"
+        },
+        "open_at_install": false
+    },
     "background": {
         "scripts": [
             "background.js"
@@ -23,7 +36,8 @@
     },
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "sidePanel"
     ],
     "browser_specific_settings": {
         "gecko": {
