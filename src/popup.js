@@ -153,7 +153,7 @@ async function updateTopBarBackupBadge() {
             badge.textContent = 'no backup exported';
             badge.style.display = 'inline';
         } else if (status === 'stale') {
-            badge.textContent = 'unsaved changes';
+            badge.textContent = 'changes since last export';
             badge.style.display = 'inline';
         } else {
             badge.style.display = 'none';
