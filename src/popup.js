@@ -136,8 +136,31 @@ function showScreen(screen) {
 
     if (screen === 'main') {
         startTOTPRefresh();
+        updateTopBarBackupBadge();
     } else {
         stopTOTPRefresh();
+    }
+}
+
+/**
+ * Show/hide the backup status badge in the top bar.
+ */
+async function updateTopBarBackupBadge() {
+    const badge = $('backup-badge-topbar');
+    if (!badge) return;
+    try {
+        const status = await getBackupStatus(accounts);
+        if (status === 'never') {
+            badge.textContent = 'no backup exported';
+            badge.style.display = 'inline';
+        } else if (status === 'stale') {
+            badge.textContent = 'unsaved changes';
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch {
+        badge.style.display = 'none';
     }
 }
 
@@ -320,6 +343,9 @@ function initEventListeners() {
 
     // Export/Import
     $('export-btn').addEventListener('click', () => {
+        openExportModal();
+    });
+    $('backup-badge-topbar').addEventListener('click', () => {
         openExportModal();
     });
     $('import-btn').addEventListener('click', () => {
@@ -1093,6 +1119,7 @@ async function handleSaveAccount() {
     await saveAccounts(accounts, key);
     closeAccountModal();
     renderAccounts();
+    updateTopBarBackupBadge();
     showToast(editingAccountId ? 'Account updated' : 'Account added');
 }
 
@@ -1123,6 +1150,7 @@ async function handleDeleteAccount() {
     deleteModalOverlay.style.display = 'none';
     deletingAccountId = null;
     renderAccounts();
+    updateTopBarBackupBadge();
     showToast('Account deleted');
 }
 
@@ -1252,6 +1280,7 @@ async function handleExport() {
         // Save backup fingerprint so we can detect future changes
         await saveBackupFingerprint(accounts);
         $('backup-badge').style.display = 'none';
+        updateTopBarBackupBadge();
 
         exportModalOverlay.style.display = 'none';
         showToast('Backup exported');
@@ -1360,6 +1389,7 @@ async function handleImport() {
 }
 
 async function importMerge(imported, key) {
+    const hadExistingAccounts = accounts.length > 0;
     const existingSecrets = new Set(accounts.map(a => a.secret));
     const newAccounts = imported.filter(a => !existingSecrets.has(a.secret));
     // Ensure unique IDs
@@ -1370,6 +1400,14 @@ async function importMerge(imported, key) {
     });
     accounts = [...accounts, ...newAccounts];
     await saveAccounts(accounts, key);
+
+    // If importing into an empty vault, the imported file is effectively
+    // the backup — save its fingerprint so we don't nag about backups.
+    if (!hadExistingAccounts && newAccounts.length > 0) {
+        await saveBackupFingerprint(accounts);
+    }
+
+    updateTopBarBackupBadge();
 }
 
 // ========================================

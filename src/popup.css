@@ -1027,6 +1027,10 @@ body {
   color: var(--text-primary);
 }
 
+.account-help-detail-block + .account-help-subheading {
+  margin-top: 20px;
+}
+
 .how-it-works-title {
   margin: 0;
   font-family: var(--font-heading);
@@ -1140,6 +1144,32 @@ body {
   color: var(--link-hover);
 }
 
+/* Callout box */
+.callout-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  background-color: var(--bg-info-soft);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.88em;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.callout-box p {
+  margin: 0;
+}
+
+.callout-icon {
+  flex-shrink: 0;
+  font-size: 1em;
+  line-height: 1.55;
+}
+
 /* ========================================
    Settings Dropdown
    ======================================== */
@@ -1242,6 +1272,12 @@ body {
   border: 1px solid var(--warning-border);
   border-radius: var(--radius-pill);
   white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+button.backup-badge:hover {
+  opacity: 0.8;
 }
 
 .dark-mode .backup-badge {

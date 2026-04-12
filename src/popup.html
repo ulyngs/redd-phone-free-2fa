@@ -29,8 +29,8 @@
             aria-label="I agree to the End User License Agreement and Privacy Policy">
           <span class="eula-checkbox-text">
             I agree to the ReDD Project's
-            <a href="https://reddfocus.org/eula" target="_blank" rel="noopener noreferrer"
-              class="eula-link">End User License Agreement</a>
+            <a href="https://reddfocus.org/eula" target="_blank" rel="noopener noreferrer" class="eula-link">End User
+              License Agreement</a>
           </span>
         </div>
         <p class="eula-note">
@@ -110,7 +110,8 @@
         ReDD 2FA is developed by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of
         Maastricht (Dr Konrad Kollnig, Henry Tari), as part of their work with the
         <a href="https://www.reddproject.org" target="_blank">Reduce Digital Distraction Project</a>. The source code
-        is available at <a href="https://github.com/ulyngs/redd-2fa" target="_blank">https://github.com/ulyngs/redd-2fa</a>.
+        is available at <a href="https://github.com/ulyngs/redd-2fa"
+          target="_blank">https://github.com/ulyngs/redd-2fa</a>.
       </p>
     </div>
   </div>
@@ -150,7 +151,8 @@
           <div class="input-with-toggle">
             <input type="password" id="unlock-passphrase" placeholder="Master passphrase" autocomplete="off"
               spellcheck="false">
-            <button type="button" class="toggle-visibility" data-target="unlock-passphrase" title="Show/hide passphrase">
+            <button type="button" class="toggle-visibility" data-target="unlock-passphrase"
+              title="Show/hide passphrase">
               <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -166,7 +168,8 @@
         ReDD 2FA is developed by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of
         Maastricht (Dr Konrad Kollnig, Henry Tari), as part of their work with the
         <a href="https://www.reddproject.org" target="_blank">Reduce Digital Distraction Project</a>. The source code
-        is available at <a href="https://github.com/ulyngs/redd-2fa" target="_blank">https://github.com/ulyngs/redd-2fa</a>.
+        is available at <a href="https://github.com/ulyngs/redd-2fa"
+          target="_blank">https://github.com/ulyngs/redd-2fa</a>.
       </p>
     </div>
   </div>
@@ -202,6 +205,7 @@
               d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.65 0 1.24-.37 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 3.3l.06.06c.48.48 1.18.62 1.82.33A1.65 1.65 0 0 0 10.42 2.2V2a2 2 0 1 1 4 0v.09c0 .65.37 1.24 1 1.51.64.29 1.34.15 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.48.48-.62 1.18-.33 1.82.27.63.86 1 1.51 1H22a2 2 0 1 1 0 4h-.09c-.65 0-1.24.37-1.51 1Z" />
           </svg>
         </button>
+        <button id="backup-badge-topbar" class="backup-badge" style="display: none;" title="Export backup"></button>
       </div>
     </div>
 
@@ -242,12 +246,24 @@
         <div class="account-help-detail-block">
           <h4 class="account-help-subheading">Specific instructions for Microsoft accounts</h4>
           <ol class="account-help-detail-list">
-            <li>Go to <a href="https://mysignins.microsoft.com/security-info" target="_blank">mysignins.microsoft.com/security-info</a> and click <strong>Add sign-in method</strong> (if you don't see it, click 'Security info' in the left sidebar).</li>
-            <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication app</strong> → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
-            <li>Open ReDD 2FA in a new tab, add an account and paste the secret key. Then copy one of the codes that ReDD 2FA generates.</li>
-            <li>Go back to the tab with your Microsoft account, click Next, and paste the code from ReDD 2FA. Done! 🥳</li>
+            <li>Go to <a href="https://mysignins.microsoft.com/security-info"
+                target="_blank">mysignins.microsoft.com/security-info</a>, sign in, and click <strong>Add sign-in
+                method</strong>
+              (if you don't see it and the page, click 'Security info').</li>
+            <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication app</strong>
+              → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
+            <li>In ReDD 2FA, <strong>Add account</strong> → paste the secret key → ReDD 2FA now generates codes</li>
+            <li>On your Microsoft account page, click <strong>Next</strong> → then enter a code ReDD 2FA generates.
+              Done!
+              🥳
+            </li>
           </ol>
-          <p><em>Note: When you next log in, your Microsoft account will probably still default to the Authenticator app. Click <strong></strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use a verification code</strong>.</em></p>
+          <div class="callout-box">
+            <span class="callout-icon" aria-hidden="true">ℹ️</span>
+            <p>When you next log in, your Microsoft account will probably still default to the Authenticator
+              app. Click <strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use
+                a verification code</strong>.</p>
+          </div>
         </div>
         <h4 class="account-help-subheading">General process</h4>
         <div class="account-help-timeline">
@@ -255,7 +271,8 @@
             <div class="timeline-marker" aria-hidden="true">1</div>
             <div class="timeline-content">
               <h4>Get a secret key from your service</h4>
-              <p>From the service you want to use with ReDD 2FA (e.g. your Microsoft account), you need a 'secret key'. They're often shown as a QR code, where you need to click 'can't scan?'.</p>
+              <p>From e.g. your Microsoft account, add a new sign-in route and get a
+                'secret key' (this key is sometimes shown as a QR code; if so, click 'Can't scan the QR code?').</p>
               <img class="timeline-image" src="step1.png" alt="Illustration for getting a secret key from a service">
             </div>
           </article>
@@ -263,7 +280,8 @@
             <div class="timeline-marker" aria-hidden="true">2</div>
             <div class="timeline-content">
               <h4>Add the secret key to ReDD 2FA</h4>
-              <p>In ReDD 2FA, click 'Add account', give it a name you'll remember (e.g. 'My University 2FA'), and paste the secret key you got from your service. ReDD 2FA will start generating rotating one-time passwords.</p>
+              <p>In ReDD 2FA, click 'Add account', name it e.g. 'My University 2FA' and paste the secret key.
+              </p>
               <img class="timeline-image" src="step2.png" alt="Illustration for adding the secret key to ReDD 2FA">
             </div>
           </article>
@@ -271,7 +289,8 @@
             <div class="timeline-marker" aria-hidden="true">3</div>
             <div class="timeline-content">
               <h4>Give a code from ReDD 2FA to your service</h4>
-              <p>Copy a generated code back into the service you want to use with ReDD 2FA. This confirms the linking of the two services. Well done! 🥳</p>
+              <p>Copy a generated code back into e.g. your Microsoft account's setup page for new sign-ins, and you're
+                done! 🥳</p>
               <img class="timeline-image" src="step3.png" alt="Illustration for confirming setup with a generated code">
             </div>
           </article>
@@ -294,10 +313,11 @@
         <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
           more secure, because a hacker cannot get into your accounts with your password alone.</p>
         <p>ReDD 2FA uses the most common approach to 2FA, namely <strong>time-based one-time passwords</strong> (TOTP).
-          You get a secret key from e.g. your  Microsoft account, pass
-          it to ReDD 2FA, and it will generate a unique 6-digit code for you every 30 seconds. 
+          You get a secret key from e.g. your Microsoft account, pass
+          it to ReDD 2FA, and it will generate a unique 6-digit code for you every 30 seconds.
           You can then copy this code and paste it into your (e.g.) Microsoft account to log in.
-        <p>ReDD 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your secret keys with your master passphrase / touch ID, which never leaves your
+        <p>ReDD 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your
+          secret keys with your master passphrase / touch ID, which never leaves your
           device. It is developed by
           computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
           Kollnig, Henry Tari), as
