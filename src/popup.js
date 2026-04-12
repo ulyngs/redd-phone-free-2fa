@@ -421,6 +421,9 @@ function initEventListeners() {
         if (e.target === exportModalOverlay) exportModalOverlay.style.display = 'none';
     });
     $('export-confirm-btn').addEventListener('click', handleExport);
+    $('export-password-confirm').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleExport();
+    });
 
     // Import modal
     $('import-cancel-btn').addEventListener('click', () => {
