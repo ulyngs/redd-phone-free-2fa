@@ -12,6 +12,12 @@ import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoL
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 
 // ========================================
+// EULA
+// ========================================
+const EULA_STORAGE_KEY = 'redd2fa_eula';
+const CURRENT_EULA_REVISION = 1;
+
+// ========================================
 // State
 // ========================================
 let accounts = [];
@@ -27,6 +33,7 @@ let pendingPassphrase = null; // held briefly for biometric registration
 const $ = (id) => document.getElementById(id);
 
 // Screens
+const eulaOverlay = $('eula-overlay');
 const setupScreen = $('setup-screen');
 const lockScreen = $('lock-screen');
 const mainScreen = $('main-screen');
@@ -103,6 +110,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     initBiometricListeners();
     setOnLockCallback(() => { showScreen('lock'); setupLockScreen(); });
 
+    // Check EULA acceptance before showing any screen
+    if (!await hasAcceptedEula()) {
+        showEulaOverlay();
+        return;
+    }
+
     if (await isFirstLaunch()) {
         showScreen('setup');
     } else {
@@ -116,6 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Screen management
 // ========================================
 function showScreen(screen) {
+    eulaOverlay.style.display = 'none';
     setupScreen.style.display = screen === 'setup' ? 'block' : 'none';
     lockScreen.style.display = screen === 'lock' ? 'block' : 'none';
     mainScreen.style.display = screen === 'main' ? 'block' : 'none';
@@ -125,6 +139,41 @@ function showScreen(screen) {
     } else {
         stopTOTPRefresh();
     }
+}
+
+// ========================================
+// EULA helpers
+// ========================================
+async function hasAcceptedEula() {
+    try {
+        const result = await browser.storage.local.get(EULA_STORAGE_KEY);
+        const data = result[EULA_STORAGE_KEY];
+        return data?.acceptedRevision === CURRENT_EULA_REVISION;
+    } catch {
+        return false;
+    }
+}
+
+async function acceptEula() {
+    await browser.storage.local.set({
+        [EULA_STORAGE_KEY]: {
+            acceptedRevision: CURRENT_EULA_REVISION,
+            acceptedAt: Date.now(),
+        }
+    });
+}
+
+function showEulaOverlay() {
+    // Hide all other screens
+    setupScreen.style.display = 'none';
+    lockScreen.style.display = 'none';
+    mainScreen.style.display = 'none';
+    // Reset checkbox state
+    const checkbox = $('eula-agree-checkbox');
+    const continueBtn = $('eula-continue-btn');
+    if (checkbox) checkbox.checked = false;
+    if (continueBtn) continueBtn.disabled = true;
+    eulaOverlay.style.display = 'block';
 }
 
 // ========================================
@@ -152,6 +201,35 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 // Event Listeners
 // ========================================
 function initEventListeners() {
+    // EULA acceptance
+    const eulaCheckbox = $('eula-agree-checkbox');
+    const eulaContinueBtn = $('eula-continue-btn');
+    if (eulaCheckbox && eulaContinueBtn) {
+        eulaCheckbox.addEventListener('change', () => {
+            eulaContinueBtn.disabled = !eulaCheckbox.checked;
+        });
+        eulaContinueBtn.addEventListener('click', async () => {
+            if (!eulaCheckbox.checked) return;
+            const originalText = eulaContinueBtn.textContent;
+            eulaContinueBtn.disabled = true;
+            eulaContinueBtn.textContent = 'Continuing...';
+            try {
+                await acceptEula();
+                // Now proceed to the normal startup flow
+                if (await isFirstLaunch()) {
+                    showScreen('setup');
+                } else {
+                    showScreen('lock');
+                    await setupLockScreen();
+                }
+            } catch (err) {
+                console.error('Failed to accept EULA:', err);
+                eulaContinueBtn.disabled = !eulaCheckbox.checked;
+                eulaContinueBtn.textContent = originalText;
+            }
+        });
+    }
+
     // Setup screen
     const validateSetup = () => {
         const p = setupPassphraseInput.value;

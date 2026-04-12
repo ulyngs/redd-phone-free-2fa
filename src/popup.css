@@ -1809,3 +1809,98 @@ body {
   color: var(--link-hover);
   text-decoration: underline;
 }
+
+/* ========================================
+   EULA Overlay
+   ======================================== */
+.eula-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-primary);
+  z-index: 300;
+  overflow-y: auto;
+}
+
+.eula-screen-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 24px 24px 88px;
+  text-align: left;
+  max-width: 470px;
+  margin: 0 auto;
+}
+
+.eula-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 20px 18px;
+  margin: 8px 0 0;
+  text-align: left;
+}
+
+.eula-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 1em;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.eula-checkbox-row input[type="checkbox"] {
+  margin-top: 3px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 6px;
+  accent-color: var(--accent-primary);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.eula-checkbox-text {
+  cursor: default;
+  flex: 1;
+  min-width: 0;
+}
+
+.eula-link {
+  color: var(--text-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+
+.eula-link:hover {
+  color: var(--link-hover);
+  text-decoration: none;
+}
+
+.eula-note {
+  margin: 14px 0 0;
+  font-size: 0.9em;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.eula-note .eula-link {
+  font-weight: 400;
+}
+
+.eula-card .btn-primary {
+  margin-top: 16px;
+}
+
+.eula-card .btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

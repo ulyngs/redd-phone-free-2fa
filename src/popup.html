@@ -10,6 +10,47 @@
 <body>
 
   <!-- ========================================
+       EULA Acceptance Overlay
+       ======================================== -->
+  <div id="eula-overlay" class="eula-overlay" style="display: none;">
+    <div class="screen-container eula-screen-container">
+      <div class="top-bar top-bar-no-border">
+        <div class="top-title-group top-title-group-screen">
+          <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
+          <div class="top-title-block">
+            <h2 class="top-title">Welcome to ReDD 2FA</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="eula-card">
+        <div class="eula-checkbox-row">
+          <input type="checkbox" id="eula-agree-checkbox"
+            aria-label="I agree to the End User License Agreement and Privacy Policy">
+          <span class="eula-checkbox-text">
+            I agree to the ReDD Project's
+            <a href="https://reddfocus.org/eula" target="_blank" rel="noopener noreferrer"
+              class="eula-link">End User License Agreement</a>
+          </span>
+        </div>
+        <p class="eula-note">
+          Note that we do not collect any user data, as per our
+          <a href="https://reddfocus.org/privacy-policy" target="_blank" rel="noopener noreferrer"
+            class="eula-link">Privacy Policy</a>.
+        </p>
+        <button id="eula-continue-btn" class="btn-primary" disabled>Continue</button>
+      </div>
+
+      <p class="assurance-copy">
+        ReDD 2FA is developed by the Reduce Digital Distraction Project, in collaboration with
+        researchers at the University of Oxford and University of Maastricht. The ReDD Project is a
+        not-for-profit creating insights &amp; open-source digital focus tools for everyone to thrive in
+        the digital world.
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================================
        Setup Screen (First Launch)
        ======================================== -->
   <div id="setup-screen" style="display: none;">
