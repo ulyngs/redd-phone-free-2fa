@@ -61,8 +61,7 @@ const searchInput = $('search-input');
 const accountList = $('account-list');
 const emptyState = $('empty-state');
 const settingsDropdown = $('settings-dropdown');
-const accountHelpToggle = $('account-help-toggle');
-const accountHelpContent = $('account-help-content');
+
 
 // Modal
 const accountModalOverlay = $('account-modal-overlay');
@@ -106,8 +105,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     settings = await loadSettings();
     applyTheme(settings.theme);
     initEventListeners();
-    applyAccountHelpExpandedState();
     initBiometricListeners();
+    initHelpTabs();
     setOnLockCallback(() => { showScreen('lock'); setupLockScreen(); });
 
     // Check EULA acceptance before showing any screen
@@ -283,11 +282,7 @@ function initEventListeners() {
     $('add-account-btn').addEventListener('click', () => openAccountModal());
     $('empty-add-btn').addEventListener('click', () => openAccountModal());
 
-    accountHelpToggle.addEventListener('click', async () => {
-        settings.accountHelpExpanded = !settings.accountHelpExpanded;
-        applyAccountHelpExpandedState();
-        await saveSettings(settings);
-    });
+
 
 
     // Settings
@@ -370,14 +365,7 @@ function initEventListeners() {
         chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
     });
 
-    $('how-it-works-toggle').addEventListener('click', () => {
-        const content = $('how-it-works-content');
-        const chevron = $('how-it-works-toggle').querySelector('.chevron-icon');
-        const isOpen = content.style.display !== 'none';
-        content.style.display = isOpen ? 'none' : 'block';
-        $('how-it-works-toggle').setAttribute('aria-expanded', String(!isOpen));
-        chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
-    });
+
 
 
     // Account modal
@@ -466,10 +454,30 @@ function initEventListeners() {
     });
 }
 
-function applyAccountHelpExpandedState() {
-    const isExpanded = settings.accountHelpExpanded !== false;
-    accountHelpToggle.setAttribute('aria-expanded', String(isExpanded));
-    accountHelpContent.hidden = !isExpanded;
+/**
+ * Initialise help tab switching.
+ */
+function initHelpTabs() {
+    const tabs = document.querySelectorAll('.help-tab');
+    const panels = document.querySelectorAll('.help-tab-panel');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+            panels.forEach(p => { p.style.display = 'none'; });
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+            $(tab.getAttribute('aria-controls')).style.display = 'block';
+        });
+    });
+
+    // Show/hide toggle
+    const toggleBtn = $('help-toggle-btn');
+    const collapsible = $('help-tabs-content');
+    toggleBtn.addEventListener('click', () => {
+        const isVisible = collapsible.style.display !== 'none';
+        collapsible.style.display = isVisible ? 'none' : 'block';
+        toggleBtn.textContent = isVisible ? 'show' : 'hide';
+    });
 }
 
 // ========================================

@@ -178,14 +178,6 @@
        Main Screen (Unlocked)
        ======================================== -->
   <div id="main-screen" style="display: none;">
-    <div class="main-brand-row">
-      <div class="top-title-group top-title-group-main">
-        <img class="top-logo" src="icons/icon-128.png" alt="ReDD 2FA">
-        <div class="top-title-block">
-          <h2 class="top-title top-title-main">ReDD 2FA</h2>
-        </div>
-      </div>
-    </div>
     <!-- Top Bar -->
     <div class="top-bar">
       <div class="top-actions">
@@ -231,101 +223,96 @@
       <button id="empty-add-btn" class="btn-secondary">Add your first account</button>
     </div>
 
-    <section class="account-help-wrapper" aria-labelledby="account-help-title">
-      <button id="account-help-toggle" class="account-help-toggle" type="button" aria-expanded="true"
-        aria-controls="account-help-content">
-        <span class="account-help-toggle-label">
-          <h3 id="account-help-title" class="account-help-title">How do I use ReDD 2FA?</h3>
-        </span>
-        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div id="account-help-content" class="account-help-section">
-        <div class="account-help-detail-block">
-          <h4 class="account-help-subheading">Specific instructions for Microsoft accounts</h4>
-          <ol class="account-help-detail-list">
-            <li>Go to <a href="https://mysignins.microsoft.com/security-info"
-                target="_blank">mysignins.microsoft.com/security-info</a>, sign in, and click <strong>Add sign-in
-                method</strong>
-              (if you don't see it and the page, click 'Security info').</li>
-            <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication app</strong>
-              → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
-            <li>In ReDD 2FA, <strong>Add account</strong> → paste the secret key → ReDD 2FA now generates codes</li>
-            <li>On your Microsoft account page, click <strong>Next</strong> → then enter a code ReDD 2FA generates.
-              Done!
-              🥳
-            </li>
-          </ol>
-          <div class="callout-box">
-            <span class="callout-icon" aria-hidden="true">ℹ️</span>
-            <p>When you next log in, your Microsoft account will probably still default to the Authenticator
-              app. Click <strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use
-                a verification code</strong>.</p>
+    <div class="help-tabs-wrapper">
+      <div class="help-header-row">
+        <h3 class="help-header-title">Instructions</h3>
+        <button id="help-toggle-btn" class="help-toggle-btn" type="button">hide</button>
+      </div>
+      <div id="help-tabs-content" class="help-tabs-collapsible">
+        <div class="help-tabs-bar" role="tablist">
+          <button id="tab-use" class="help-tab active" role="tab" aria-selected="true" aria-controls="tab-panel-use">How
+            to use</button>
+          <button id="tab-works" class="help-tab" role="tab" aria-selected="false" aria-controls="tab-panel-works">How
+            it works</button>
+        </div>
+
+        <div id="tab-panel-use" class="help-tab-panel" role="tabpanel" aria-labelledby="tab-use">
+          <div class="account-help-detail-block">
+            <h4 class="account-help-subheading">Specific instructions for Microsoft accounts</h4>
+            <ol class="account-help-detail-list">
+              <li>Go to <a href="https://mysignins.microsoft.com/security-info"
+                  target="_blank">mysignins.microsoft.com/security-info</a>, sign in, and click <strong>Add sign-in
+                  method</strong>
+                (if you don't see it and the page, click 'Security info').</li>
+              <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication
+                  app</strong>
+                → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
+              <li>In ReDD 2FA, <strong>Add account</strong> → paste the secret key → ReDD 2FA now generates codes</li>
+              <li>On your Microsoft account page, click <strong>Next</strong> → then enter a code ReDD 2FA generates.
+                Done!
+                🥳
+              </li>
+            </ol>
+            <div class="callout-box">
+              <span class="callout-icon" aria-hidden="true">ℹ️</span>
+              <p>When you next log in, your Microsoft account will probably still default to the Authenticator
+                app. Click <strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use
+                  a verification code</strong>.</p>
+            </div>
+          </div>
+          <h4 class="account-help-subheading">General process</h4>
+          <div class="account-help-timeline">
+            <article class="timeline-step">
+              <div class="timeline-marker" aria-hidden="true">1</div>
+              <div class="timeline-content">
+                <h4>Get a secret key from your service</h4>
+                <p>From e.g. your Microsoft account, add a new sign-in route and get a
+                  'secret key' (this key is sometimes shown as a QR code; if so, click 'Can't scan the QR code?').</p>
+                <img class="timeline-image" src="step1.png" alt="Illustration for getting a secret key from a service">
+              </div>
+            </article>
+            <article class="timeline-step">
+              <div class="timeline-marker" aria-hidden="true">2</div>
+              <div class="timeline-content">
+                <h4>Add the secret key to ReDD 2FA</h4>
+                <p>In ReDD 2FA, click 'Add account', name it e.g. 'My University 2FA' and paste the secret key.
+                </p>
+                <img class="timeline-image" src="step2.png" alt="Illustration for adding the secret key to ReDD 2FA">
+              </div>
+            </article>
+            <article class="timeline-step">
+              <div class="timeline-marker" aria-hidden="true">3</div>
+              <div class="timeline-content">
+                <h4>Give a code from ReDD 2FA to your service</h4>
+                <p>Copy a generated code back into e.g. your Microsoft account's setup page for new sign-ins, and you're
+                  done! 🥳</p>
+                <img class="timeline-image" src="step3.png"
+                  alt="Illustration for confirming setup with a generated code">
+              </div>
+            </article>
           </div>
         </div>
-        <h4 class="account-help-subheading">General process</h4>
-        <div class="account-help-timeline">
-          <article class="timeline-step">
-            <div class="timeline-marker" aria-hidden="true">1</div>
-            <div class="timeline-content">
-              <h4>Get a secret key from your service</h4>
-              <p>From e.g. your Microsoft account, add a new sign-in route and get a
-                'secret key' (this key is sometimes shown as a QR code; if so, click 'Can't scan the QR code?').</p>
-              <img class="timeline-image" src="step1.png" alt="Illustration for getting a secret key from a service">
-            </div>
-          </article>
-          <article class="timeline-step">
-            <div class="timeline-marker" aria-hidden="true">2</div>
-            <div class="timeline-content">
-              <h4>Add the secret key to ReDD 2FA</h4>
-              <p>In ReDD 2FA, click 'Add account', name it e.g. 'My University 2FA' and paste the secret key.
-              </p>
-              <img class="timeline-image" src="step2.png" alt="Illustration for adding the secret key to ReDD 2FA">
-            </div>
-          </article>
-          <article class="timeline-step">
-            <div class="timeline-marker" aria-hidden="true">3</div>
-            <div class="timeline-content">
-              <h4>Give a code from ReDD 2FA to your service</h4>
-              <p>Copy a generated code back into e.g. your Microsoft account's setup page for new sign-ins, and you're
-                done! 🥳</p>
-              <img class="timeline-image" src="step3.png" alt="Illustration for confirming setup with a generated code">
-            </div>
-          </article>
+
+        <div id="tab-panel-works" class="help-tab-panel" role="tabpanel" aria-labelledby="tab-works"
+          style="display: none;">
+          <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
+            more secure, because a hacker cannot get into your accounts with your password alone.</p>
+          <p>ReDD 2FA uses the most common approach to 2FA, namely <strong>time-based one-time passwords</strong>
+            (TOTP).
+            You get a secret key from e.g. your Microsoft account, pass
+            it to ReDD 2FA, and it will generate a unique 6-digit code for you every 30 seconds.
+            You can then copy this code and paste it into your (e.g.) Microsoft account to log in.
+          <p>ReDD 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your
+            secret keys with your master passphrase / touch ID. This never leaves your device. ReDD 2FA is developed by
+            computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
+            Kollnig, Henry Tari), as
+            part of their work with the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
+            The code is available at <a
+              href="https://github.com/ulyngs/redd-2fa">https://github.com/ulyngs/redd-2fa</a>.
+          </p>
         </div>
       </div>
-    </section>
-
-    <section class="how-it-works-wrapper" aria-labelledby="how-it-works-title">
-      <button id="how-it-works-toggle" class="how-it-works-toggle" type="button" aria-expanded="false"
-        aria-controls="how-it-works-content">
-        <span class="how-it-works-toggle-label">
-          <h3 id="how-it-works-title" class="how-it-works-title">How does ReDD 2FA work?</h3>
-        </span>
-        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-      <div id="how-it-works-content" class="how-it-works-content" style="display: none;">
-        <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
-          more secure, because a hacker cannot get into your accounts with your password alone.</p>
-        <p>ReDD 2FA uses the most common approach to 2FA, namely <strong>time-based one-time passwords</strong> (TOTP).
-          You get a secret key from e.g. your Microsoft account, pass
-          it to ReDD 2FA, and it will generate a unique 6-digit code for you every 30 seconds.
-          You can then copy this code and paste it into your (e.g.) Microsoft account to log in.
-        <p>ReDD 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your
-          secret keys with your master passphrase / touch ID, which never leaves your
-          device. It is developed by
-          computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
-          Kollnig, Henry Tari), as
-          part of their work with the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
-          The code is available at <a href="https://github.com/ulyngs/redd-2fa">https://github.com/ulyngs/redd-2fa</a>.
-        </p>
-      </div>
-    </section>
+    </div>
 
     <!-- Settings Dropdown -->
     <div id="settings-dropdown" class="settings-dropdown" style="display: none;">
