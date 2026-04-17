@@ -21,6 +21,7 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 - **Brute-force protection** — progressive lockout after failed unlock attempts (5s → 30s → 5min)
 - **Clipboard auto-clear** — copied codes are removed from clipboard after 30 seconds
 - **Constant-time comparison** — passphrase hash verification uses XOR-based comparison to prevent timing attacks
+- **Strength-checked passphrases** — new passphrases are validated with hand-rolled, fully-auditable checks for common-password substrings, keyboard walks, repeating patterns, and low character diversity (see `src/passphrase-strength.js`)
 - **No secrets in DOM** — TOTP secrets are kept in memory only; never written to HTML attributes
 
 ### Biometric Unlock
@@ -72,7 +73,7 @@ flowchart TD
 
 ## Loading the Extension
 
-No build step required — the extension runs as vanilla ES modules.
+No build step required — the extension runs as vanilla ES modules, and every file that ships is human-readable.
 
 ### Chrome / Edge
 
@@ -98,7 +99,7 @@ No build step required — the extension runs as vanilla ES modules.
 | TOTP generation | HMAC-SHA1/256/512 (Web Crypto API), RFC 6238 |
 | Network access | None — no host permissions declared |
 | Storage | `browser.storage.local` only |
-| Dependencies | Zero external runtime dependencies |
+| Runtime dependencies | Zero (no build step, no bundler, no minified blobs — every shipped file is readable source) |
 
 ## Tech Stack
 
@@ -124,8 +125,13 @@ src/
 ├── session.js          # In-memory session & auto-lock
 ├── biometric.js        # WebAuthn biometric unlock (PRF hardware integration)
 ├── browser.js          # Minimal browser API shim
+├── passphrase-strength.js  # Hand-rolled strength check (~170 lines)
 └── icons/              # Extension icons
 ```
+
+### Auditability
+
+Every file that ships in the extension is plain, readable source — no bundlers, no minification, no build step, no vendored third-party code. The passphrase strength check (`src/passphrase-strength.js`) is ~170 lines of commented JavaScript covering: a `"password"` substring check (including leet-speak variants), an exact-match lookup against a 10-entry constant derived from the SecLists top-10k list filtered to `length >= 12`, keyboard-walk detection, repeating-pattern detection, and a minimum unique-character count. The derivation of the 10-entry list is documented inline with a one-line `curl | awk` command an auditor can run to reproduce it.
 
 ## License
 

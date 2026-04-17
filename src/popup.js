@@ -11,6 +11,7 @@ import { generateTOTP, getRemainingSeconds, parseOtpauthURI, buildOtpauthURI, va
 import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, loadBiometricDataRaw, disableBiometric, clearBiometricData, getBackupStatus, saveBackupFingerprint } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
+import { checkPassphraseStrength } from './passphrase-strength.js';
 
 // ========================================
 // EULA
@@ -517,7 +518,14 @@ async function handleSetup() {
         return;
     }
 
+    const strength = checkPassphraseStrength(passphrase);
+    if (!strength.ok) {
+        showElement(setupError, strength.message);
+        return;
+    }
+
     setupBtn.disabled = true;
+    const originalSetupText = setupBtn.textContent;
     setupBtn.textContent = 'Setting up...';
 
     try {
@@ -533,7 +541,7 @@ async function handleSetup() {
     } catch (err) {
         showElement(setupError, 'Setup failed. Please try again.');
         setupBtn.disabled = false;
-        setupBtn.textContent = 'Create & Unlock';
+        setupBtn.textContent = originalSetupText;
     }
 }
 
@@ -1241,6 +1249,12 @@ async function handleChangePassphrase() {
     }
     if (newPw !== newPwConfirm) {
         showElement(errorEl, 'New passphrases do not match.');
+        return;
+    }
+
+    const strength = checkPassphraseStrength(newPw);
+    if (!strength.ok) {
+        showElement(errorEl, strength.message);
         return;
     }
 
