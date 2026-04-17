@@ -29,6 +29,23 @@ let pendingPassphrase = null; // held briefly for biometric registration
 
 
 // ========================================
+// Passphrase validation helpers
+// ========================================
+const MIN_PASSPHRASE_LENGTH = 12;
+
+// Example phrases shown in the setup tips — must not be used verbatim.
+const EXAMPLE_PASSPHRASES = [
+    'correct-horse-battery-staple',
+    'My dog loves chasing squirrels in the park!',
+];
+
+function isExamplePassphrase(passphrase) {
+    const normalized = passphrase.trim().toLowerCase();
+    return EXAMPLE_PASSPHRASES.some((ex) => ex.toLowerCase() === normalized);
+}
+
+
+// ========================================
 // DOM refs
 // ========================================
 const $ = (id) => document.getElementById(id);
@@ -257,9 +274,13 @@ function initEventListeners() {
     const validateSetup = () => {
         const p = setupPassphraseInput.value;
         const c = setupPassphraseConfirm.value;
-        setupBtn.disabled = p.length < 8 || p !== c;
-        if (p.length > 0 && p.length < 8) {
-            showElement(setupError, 'Passphrase must be at least 8 characters.');
+        const tooShort = p.length < MIN_PASSPHRASE_LENGTH;
+        const isExample = p.length > 0 && isExamplePassphrase(p);
+        setupBtn.disabled = tooShort || isExample || p !== c;
+        if (p.length > 0 && tooShort) {
+            showElement(setupError, `Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters.`);
+        } else if (isExample) {
+            showElement(setupError, 'Please choose your own passphrase, not one of the example phrases.');
         } else if (c.length > 0 && p !== c) {
             showElement(setupError, 'Passphrases do not match.');
         } else {
@@ -486,6 +507,16 @@ function initHelpTabs() {
 // ========================================
 async function handleSetup() {
     const passphrase = setupPassphraseInput.value;
+
+    if (passphrase.length < MIN_PASSPHRASE_LENGTH) {
+        showElement(setupError, `Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters.`);
+        return;
+    }
+    if (isExamplePassphrase(passphrase)) {
+        showElement(setupError, 'Please choose your own passphrase, not one of the example phrases.');
+        return;
+    }
+
     setupBtn.disabled = true;
     setupBtn.textContent = 'Setting up...';
 
@@ -1200,8 +1231,12 @@ async function handleChangePassphrase() {
         return;
     }
 
-    if (newPw.length < 8) {
-        showElement(errorEl, 'New passphrase must be at least 8 characters.');
+    if (newPw.length < MIN_PASSPHRASE_LENGTH) {
+        showElement(errorEl, `New passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters.`);
+        return;
+    }
+    if (isExamplePassphrase(newPw)) {
+        showElement(errorEl, 'Please choose your own passphrase, not one of the example phrases.');
         return;
     }
     if (newPw !== newPwConfirm) {
@@ -1254,8 +1289,8 @@ async function handleExport() {
     const pw = exportPassword.value;
     const pwConfirm = exportPasswordConfirm.value;
 
-    if (pw.length < 8) {
-        showElement(exportError, 'Password must be at least 8 characters.');
+    if (pw.length < 12) {
+        showElement(exportError, 'Password must be at least 12 characters.');
         return;
     }
     if (pw !== pwConfirm) {

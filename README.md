@@ -44,7 +44,7 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 
 ## How It Works
 
-1. On first launch, you create a master passphrase (minimum 8 characters)
+1. On first launch, you create a master passphrase (minimum 12 characters)
 2. A 256-bit encryption key is derived from your passphrase using PBKDF2 (600k iterations)
 3. All account data is encrypted with AES-256-GCM and stored in `browser.storage.local`
 4. When you unlock, the key is re-derived and held in memory for the duration of your session
