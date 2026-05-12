@@ -43,6 +43,17 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 - **Account migration** — view secret keys in the edit view for manual transfer, or use plain text URI export
 - **Data loss warning** — clear warning during setup about passphrase recovery
 
+## Screenshots
+
+<p align="center">
+  <img src="./docs/screenshots/R2FA-git-1.png" alt="ReDD 2FA - 1" width="49%" />
+  <img src="./docs/screenshots/R2FA-git-3.png" alt="ReDD 2FA - 2" width="49%" />
+</p>
+<p align="center">
+  <img src="./docs/screenshots/R2FA-git-4.png" alt="ReDD 2FA - 3" width="49%" />
+  <img src="./docs/screenshots/R2FA-git-5.png" alt="ReDD 2FA - 4" width="49%" />
+</p>
+
 ## How It Works
 
 1. On first launch, you create a master passphrase (minimum 12 characters)
