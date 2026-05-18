@@ -747,6 +747,11 @@ function biometricErrorMessage(err) {
     if (name === 'NotAllowedError') {
         return 'Touch ID was cancelled or timed out. Click Enable Touch ID to try again.';
     }
+    if (name === 'OperationError') {
+        // Chrome throws this for concurrent WebAuthn ceremonies — e.g. a
+        // passkey prompt left open in another tab.
+        return 'Another passkey prompt is already open. Finish or cancel it, then try again.';
+    }
     if (name === 'InvalidStateError') {
         return 'A Touch ID credential already exists for this extension. Remove old ReDD 2FA passkeys in your OS or browser settings, then try again.';
     }
@@ -803,15 +808,19 @@ async function performBiometricRegistration() {
         updateBiometricToggle();
     } catch (err) {
         console.error('Biometric registration failed:', err);
-        const userCancelled = err?.name === 'NotAllowedError';
-        if (!userCancelled) {
+        // Recoverable: user just needs to retry. Don't tear down the prompt.
+        //   NotAllowedError  → user cancelled or timed out
+        //   OperationError   → another passkey ceremony was already pending
+        const recoverable = err?.name === 'NotAllowedError' || err?.name === 'OperationError';
+        if (!recoverable) {
             // Real failure — clear the held passphrase and close the prompt.
             pendingPassphrase = null;
             if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
             biometricPromptOverlay.style.display = 'none';
         }
-        // On cancel/timeout we keep the overlay open and the pending passphrase
-        // alive so the user can press Enable Touch ID again without re-unlocking.
+        // On recoverable errors we keep the overlay open and the pending
+        // passphrase alive so the user can press Enable Touch ID again
+        // without re-unlocking.
         showToast(biometricErrorMessage(err));
     } finally {
         enableBtn.disabled = false;
