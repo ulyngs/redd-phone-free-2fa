@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReDD 2FA — Touch ID</title>
+    <style>
+        :root {
+            --bg: #f7f5f0;
+            --fg: #1f2937;
+            --muted: #6b7280;
+            --error: #b42318;
+            --primary: #15a883;
+            --border: #d1d5db;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --fg: #e5e7eb;
+                --muted: #9ca3af;
+                --error: #f97066;
+                --border: #404040;
+            }
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        main {
+            max-width: 460px;
+            margin: 80px auto 40px;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 0 0 12px;
+        }
+
+        p {
+            line-height: 1.55;
+            margin: 8px 0;
+            color: var(--muted);
+        }
+
+        .error {
+            color: var(--error);
+            display: none;
+        }
+
+        .actions {
+            margin-top: 28px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: var(--border);
+            color: inherit;
+        }
+
+        button[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1 id="title">Setting up Touch ID</h1>
+        <p id="status">Look for the Touch ID prompt from your browser.</p>
+        <p class="error" id="error"></p>
+        <div class="actions">
+            <button class="btn-secondary" id="cancel-btn">Cancel</button>
+            <button class="btn-primary" id="retry-btn" style="display: none;">Try again</button>
+        </div>
+    </main>
+    <script type="module" src="biometric-tab.js"></script>
+</body>
+
+</html>

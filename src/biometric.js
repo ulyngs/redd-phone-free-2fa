@@ -18,6 +18,12 @@
  */
 export async function isBiometricAvailable() {
     if (!window.PublicKeyCredential) return false;
+    // Firefox doesn't allow the WebAuthn / Credentials API from extension
+    // origins (moz-extension://) — calls throw SecurityError "The operation
+    // is insecure" regardless of whether you're in a sidebar or a regular
+    // tab. Tracked upstream at
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1462088
+    if (location.protocol === 'moz-extension:') return false;
     try {
         return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     } catch {

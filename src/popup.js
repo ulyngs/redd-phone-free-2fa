@@ -695,6 +695,19 @@ async function promptBiometricSetup(passphrase) {
  * Handle biometric unlock from the lock screen.
  */
 async function handleBiometricUnlock() {
+    if (await needsTabWorkaroundForWebAuthn()) {
+        try {
+            biometricUnlockBtn.disabled = true;
+            hideElement(biometricError);
+            await openBiometricTab('unlock');
+        } catch (err) {
+            console.error('Failed to open biometric unlock tab:', err);
+            biometricUnlockBtn.disabled = false;
+            showElement(biometricError, 'Could not open Touch ID tab.');
+        }
+        return;
+    }
+
     try {
         biometricUnlockBtn.disabled = true;
         hideElement(biometricError);
@@ -761,6 +774,143 @@ function biometricErrorMessage(err) {
     return 'Biometric setup failed. If this persists, remove old ReDD 2FA passkeys in your OS/browser settings.';
 }
 
+// =================================================================
+// Biometric tab workaround (Chrome side panel)
+// =================================================================
+// Chrome doesn't show WebAuthn prompts from side panels or action popups —
+// the navigator.credentials API call just hangs silently. When we detect we
+// aren't in a regular tab, we pop a dedicated tab (biometric-tab.html) that
+// does the ceremony in a working context and reports back via runtime
+// messaging.
+
+let biometricTab = null;        // { id, mode: 'setup' | 'unlock' }
+let biometricTabRemoveListener = null;
+
+async function needsTabWorkaroundForWebAuthn() {
+    // If we're already in a regular tab, WebAuthn works inline — don't pop another.
+    try {
+        if (browser.tabs?.getCurrent) {
+            const tab = await browser.tabs.getCurrent();
+            if (tab) return false;
+        }
+    } catch { /* ignore */ }
+    return true;
+}
+
+async function openBiometricTab(mode) {
+    if (biometricTab) {
+        // Focus the existing tab rather than spawn a duplicate.
+        try { await browser.tabs.update(biometricTab.id, { active: true }); }
+        catch { clearBiometricTab(); }
+        return;
+    }
+    const url = browser.runtime.getURL(`biometric-tab.html?mode=${mode}`);
+    const tab = await browser.tabs.create({ url, active: true });
+    biometricTab = { id: tab.id, mode };
+    biometricTabRemoveListener = (closedId) => {
+        if (biometricTab && closedId === biometricTab.id) {
+            handleBiometricTabClosedUnexpectedly();
+        }
+    };
+    try { browser.tabs.onRemoved.addListener(biometricTabRemoveListener); }
+    catch { /* ignore */ }
+}
+
+function clearBiometricTab() {
+    if (biometricTabRemoveListener) {
+        try { browser.tabs.onRemoved.removeListener(biometricTabRemoveListener); }
+        catch { /* ignore */ }
+        biometricTabRemoveListener = null;
+    }
+    biometricTab = null;
+}
+
+function handleBiometricTabClosedUnexpectedly() {
+    const mode = biometricTab?.mode;
+    clearBiometricTab();
+    if (mode === 'setup') {
+        pendingPassphrase = null;
+        if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+        biometricPromptOverlay.style.display = 'none';
+        showToast('Touch ID setup cancelled.');
+    } else if (mode === 'unlock') {
+        biometricUnlockBtn.disabled = false;
+        hideElement(biometricError);
+    }
+}
+
+function initBiometricMessaging() {
+    if (!browser.runtime?.onMessage) return;
+    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (!message?.type) return;
+        // Defence in depth: only honour messages from our currently-tracked tab.
+        if (sender?.tab && biometricTab && sender.tab.id !== biometricTab.id) return;
+
+        switch (message.type) {
+            case 'biometric-setup-request-passphrase':
+                // Hand off the passphrase but keep it until the tab confirms
+                // success/failure — that way the tab's "Try again" button works
+                // without forcing the user to re-unlock.
+                if (pendingPassphrase) sendResponse({ passphrase: pendingPassphrase });
+                else sendResponse({ error: 'no-pending' });
+                return false; // synchronous response
+
+            case 'biometric-setup-done':
+                pendingPassphrase = null;
+                if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+                biometricPromptOverlay.style.display = 'none';
+                clearBiometricTab();
+                showToast('Touch ID enabled!');
+                updateBiometricToggle();
+                return;
+
+            case 'biometric-setup-failed':
+                // The tab is still open and offering its own retry. Surface a
+                // toast in the side panel but don't tear down state — the tab
+                // will message us again on success or be closed by the user.
+                showToast(message.error || 'Touch ID setup failed.');
+                return;
+
+            case 'biometric-unlock-result':
+                handleBiometricUnlockResult(message);
+                return;
+        }
+    });
+}
+
+async function handleBiometricUnlockResult(message) {
+    clearBiometricTab();
+    biometricUnlockBtn.disabled = false;
+
+    if (message.error) {
+        showElement(biometricError, message.error);
+        return;
+    }
+    if (!message.passphrase) {
+        showElement(biometricError, 'Biometric authentication failed.');
+        return;
+    }
+
+    try {
+        const key = await unlockWithPassphrase(message.passphrase);
+        if (!key) {
+            showElement(biometricError, 'Biometric data outdated. Please use your passphrase.');
+            return;
+        }
+        failedAttempts = 0;
+        lockoutUntil = 0;
+        await clearLockoutState();
+        setSessionKey(key);
+        setAutoLockMinutes(settings.autoLockMinutes);
+        accounts = await loadAccounts(key);
+        hideElement(biometricError);
+        showScreen('main');
+        renderAccounts();
+    } catch {
+        showElement(biometricError, 'Failed to unlock. Please try again.');
+    }
+}
+
 /**
  * Perform the actual biometric registration (WebAuthn credential creation + PRF).
  * If a previously disabled credential exists, try to reuse it first.
@@ -770,6 +920,18 @@ function biometricErrorMessage(err) {
  * with NotAllowedError, surfacing as a confusing "setup failed" toast).
  */
 async function performBiometricRegistration() {
+    if (await needsTabWorkaroundForWebAuthn()) {
+        try {
+            await openBiometricTab('setup');
+            biometricPromptOverlay.style.display = 'none';
+            showToast('Touch ID setup opened in a new tab.');
+        } catch (err) {
+            console.error('Failed to open biometric setup tab:', err);
+            showToast('Could not open Touch ID setup tab.');
+        }
+        return;
+    }
+
     const enableBtn = $('biometric-enable-btn');
     const skipBtn = $('biometric-skip-btn');
     const originalEnableText = enableBtn.textContent;
@@ -833,6 +995,7 @@ async function performBiometricRegistration() {
  * Register biometric listeners.
  */
 function initBiometricListeners() {
+    initBiometricMessaging();
     biometricUnlockBtn.addEventListener('click', handleBiometricUnlock);
 
     $('biometric-enable-btn').addEventListener('click', async () => {
