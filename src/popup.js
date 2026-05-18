@@ -736,10 +736,42 @@ function getWindowsBiometricGuidance() {
 }
 
 /**
+ * Build a user-facing message from a WebAuthn error. NotAllowedError covers
+ * both "user cancelled" and "request timed out" — we let the user retry
+ * rather than nuking the prompt.
+ */
+function biometricErrorMessage(err) {
+    if (isWindowsPlatform()) return getWindowsBiometricGuidance();
+    const name = err?.name || '';
+    const message = String(err?.message || '');
+    if (name === 'NotAllowedError') {
+        return 'Touch ID was cancelled or timed out. Click Enable Touch ID to try again.';
+    }
+    if (name === 'InvalidStateError') {
+        return 'A Touch ID credential already exists for this extension. Remove old ReDD 2FA passkeys in your OS or browser settings, then try again.';
+    }
+    if (message.includes('PRF')) {
+        return 'Your browser does not support secure biometric unlock (PRF). Touch ID is unavailable.';
+    }
+    return 'Biometric setup failed. If this persists, remove old ReDD 2FA passkeys in your OS/browser settings.';
+}
+
+/**
  * Perform the actual biometric registration (WebAuthn credential creation + PRF).
  * If a previously disabled credential exists, try to reuse it first.
+ *
+ * The Enable / Not now buttons are disabled for the duration of the call so a
+ * second click can't start a parallel WebAuthn ceremony (which Chrome rejects
+ * with NotAllowedError, surfacing as a confusing "setup failed" toast).
  */
 async function performBiometricRegistration() {
+    const enableBtn = $('biometric-enable-btn');
+    const skipBtn = $('biometric-skip-btn');
+    const originalEnableText = enableBtn.textContent;
+    enableBtn.disabled = true;
+    skipBtn.disabled = true;
+    enableBtn.textContent = 'Waiting for Touch ID…';
+
     try {
         // Check for existing (disabled) credential we can reuse
         const existing = await loadBiometricDataRaw();
@@ -771,14 +803,20 @@ async function performBiometricRegistration() {
         updateBiometricToggle();
     } catch (err) {
         console.error('Biometric registration failed:', err);
-        pendingPassphrase = null;
-        if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
-        biometricPromptOverlay.style.display = 'none';
-        if (isWindowsPlatform()) {
-            showToast(getWindowsBiometricGuidance());
-        } else {
-            showToast('Biometric setup failed. Try deleting old passkeys in your OS settings.');
+        const userCancelled = err?.name === 'NotAllowedError';
+        if (!userCancelled) {
+            // Real failure — clear the held passphrase and close the prompt.
+            pendingPassphrase = null;
+            if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
+            biometricPromptOverlay.style.display = 'none';
         }
+        // On cancel/timeout we keep the overlay open and the pending passphrase
+        // alive so the user can press Enable Touch ID again without re-unlocking.
+        showToast(biometricErrorMessage(err));
+    } finally {
+        enableBtn.disabled = false;
+        skipBtn.disabled = false;
+        enableBtn.textContent = originalEnableText;
     }
 }
 
