@@ -18,7 +18,7 @@ const SCHEMA_VERSION = 1;
 /** Default settings */
 export const DEFAULT_SETTINGS = {
     autoLockMinutes: 5,
-    clipboardClearSeconds: 15,
+    clipboardClearSeconds: 30,
     theme: 'system',
     fetchIcons: false,
     accountHelpExpanded: true,
@@ -124,7 +124,7 @@ export async function loadSettings() {
     const stored = result[STORAGE_KEY_SETTINGS];
     return {
         autoLockMinutes: stored?.autoLockMinutes ?? 5,
-        clipboardClearSeconds: stored?.clipboardClearSeconds ?? 15,
+        clipboardClearSeconds: stored?.clipboardClearSeconds ?? 30,
         theme: stored?.theme ?? 'system',
         fetchIcons: stored?.fetchIcons ?? false,
         accountHelpExpanded: stored?.accountHelpExpanded ?? true,

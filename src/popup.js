@@ -472,6 +472,14 @@ function initEventListeners() {
     document.addEventListener('click', () => touchActivity());
     document.addEventListener('keydown', () => touchActivity());
 
+    // Best-effort: flush a pending clipboard clear before the panel goes
+    // away, so a copied code doesn't linger forever if the side panel is
+    // closed within the clear window.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushClipboardClear();
+    });
+    window.addEventListener('pagehide', flushClipboardClear);
+
     // Open external links in a new tab
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
@@ -1099,6 +1107,36 @@ function updateProgressRings() {
 // ========================================
 let clipboardClearTimer = null;
 
+/**
+ * Schedule the clipboard to be wiped after the user's configured delay.
+ * Cancels any previously scheduled clear so back-to-back copies extend
+ * the lifetime of the most recent code rather than stacking timers.
+ */
+function scheduleClipboardClear() {
+    const seconds = Number(settings?.clipboardClearSeconds);
+    const delayMs = (Number.isFinite(seconds) && seconds > 0 ? seconds : 30) * 1000;
+    if (clipboardClearTimer) clearTimeout(clipboardClearTimer);
+    clipboardClearTimer = setTimeout(() => {
+        clipboardClearTimer = null;
+        navigator.clipboard.writeText('').catch(() => { });
+    }, delayMs);
+}
+
+/**
+ * Fire the scheduled clear immediately (and cancel the pending timer).
+ * Called when the panel becomes hidden — its timer would otherwise die
+ * with the page and leave the code on the clipboard indefinitely.
+ *
+ * Note: the write is async; the browser is unlikely to settle the promise
+ * if the page is being torn down. This is a best-effort flush.
+ */
+function flushClipboardClear() {
+    if (!clipboardClearTimer) return;
+    clearTimeout(clipboardClearTimer);
+    clipboardClearTimer = null;
+    navigator.clipboard.writeText('').catch(() => { });
+}
+
 async function copyCode(accountId, cardElement) {
     const account = accounts.find(a => a.id === accountId);
     if (!account) return;
@@ -1113,12 +1151,7 @@ async function copyCode(accountId, cardElement) {
         cardElement.classList.add('copied');
         setTimeout(() => cardElement.classList.remove('copied'), 600);
 
-        // Auto-clear clipboard after 30 seconds
-        if (clipboardClearTimer) clearTimeout(clipboardClearTimer);
-        clipboardClearTimer = setTimeout(() => {
-            navigator.clipboard.writeText('').catch(() => { });
-            clipboardClearTimer = null;
-        }, 30_000);
+        scheduleClipboardClear();
     } catch {
         showToast('Failed to copy');
     }
@@ -1521,10 +1554,7 @@ function wipeSensitiveState() {
         clearTimeout(pendingPassphraseTimer);
         pendingPassphraseTimer = null;
     }
-    if (clipboardClearTimer) {
-        clearTimeout(clipboardClearTimer);
-        clipboardClearTimer = null;
-    }
+    flushClipboardClear();
 
     // Clear any inputs that may hold a secret or passphrase.
     const clearValue = (el) => { if (el) el.value = ''; };
