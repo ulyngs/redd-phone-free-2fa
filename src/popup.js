@@ -480,12 +480,14 @@ function initEventListeners() {
     });
     window.addEventListener('pagehide', flushClipboardClear);
 
-    // Open external links in a new tab
+    // Open external links in a new tab. The rel="noopener noreferrer" on the
+    // <a> doesn't carry through when we intercept the click and call
+    // window.open ourselves — the features string is what actually applies it.
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
         if (link && link.href.startsWith('http')) {
             e.preventDefault();
-            window.open(link.href, '_blank');
+            window.open(link.href, '_blank', 'noopener,noreferrer');
         }
     });
 }
