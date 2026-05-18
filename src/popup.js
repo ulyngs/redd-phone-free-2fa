@@ -860,7 +860,7 @@ function initBiometricMessaging() {
                 if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
                 biometricPromptOverlay.style.display = 'none';
                 clearBiometricTab();
-                showToast('Touch ID enabled!');
+                showToast(message.reEnabled ? 'Touch ID re-enabled!' : 'Touch ID enabled!');
                 updateBiometricToggle();
                 return;
 

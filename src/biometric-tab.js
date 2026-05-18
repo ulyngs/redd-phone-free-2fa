@@ -17,7 +17,7 @@
 
 import browser from './browser.js';
 import { registerBiometric, authenticateBiometric } from './biometric.js';
-import { loadBiometricData, saveBiometricData } from './storage.js';
+import { loadBiometricData, loadBiometricDataRaw, saveBiometricData } from './storage.js';
 
 const titleEl = document.getElementById('title');
 const statusEl = document.getElementById('status');
@@ -75,33 +75,61 @@ async function requestPassphraseFromSidePanel() {
     return response.passphrase || null;
 }
 
-async function run() {
-    try {
-        if (mode === 'setup') {
-            const passphrase = await requestPassphraseFromSidePanel();
-            if (!passphrase) {
-                showError('Could not retrieve the passphrase from the extension. Close this tab and start setup again from the side panel.');
-                return;
-            }
-            const data = await registerBiometric(passphrase);
-            await saveBiometricData(data);
-            await browser.runtime.sendMessage({ type: 'biometric-setup-done' }).catch(() => { });
+async function runSetup() {
+    // Try to re-enable an existing disabled credential without creating a new
+    // one. Without this branch, repeated disable/enable cycles would leave a
+    // growing pile of orphaned platform passkeys in the user's OS/browser
+    // settings (the old credential stays registered with the authenticator
+    // even after we replace its storage record).
+    const existing = await loadBiometricDataRaw();
+    if (existing?.disabled && existing.credentialId) {
+        try {
+            await authenticateBiometric(existing);
+            // Credential still works — just clear the disabled flag.
+            delete existing.disabled;
+            await saveBiometricData(existing);
+            await browser.runtime.sendMessage({
+                type: 'biometric-setup-done',
+                reEnabled: true,
+            }).catch(() => { });
             window.close();
             return;
+        } catch (err) {
+            // Old credential could not be re-used (revoked, deleted from the
+            // OS, etc.) — fall through to creating a fresh one.
+            console.log('Existing credential could not be reused, creating new one:', err);
         }
+    }
 
-        // mode === 'unlock'
-        const data = await loadBiometricData();
-        if (!data) {
-            showError('No Touch ID credential found. Close this tab and unlock with your passphrase.');
-            return;
-        }
-        const passphrase = await authenticateBiometric(data);
-        await browser.runtime.sendMessage({
-            type: 'biometric-unlock-result',
-            passphrase,
-        }).catch(() => { });
-        window.close();
+    const passphrase = await requestPassphraseFromSidePanel();
+    if (!passphrase) {
+        showError('Could not retrieve the passphrase from the extension. Close this tab and start setup again from the side panel.');
+        return;
+    }
+    const data = await registerBiometric(passphrase);
+    await saveBiometricData(data);
+    await browser.runtime.sendMessage({ type: 'biometric-setup-done' }).catch(() => { });
+    window.close();
+}
+
+async function runUnlock() {
+    const data = await loadBiometricData();
+    if (!data) {
+        showError('No Touch ID credential found. Close this tab and unlock with your passphrase.');
+        return;
+    }
+    const passphrase = await authenticateBiometric(data);
+    await browser.runtime.sendMessage({
+        type: 'biometric-unlock-result',
+        passphrase,
+    }).catch(() => { });
+    window.close();
+}
+
+async function run() {
+    try {
+        if (mode === 'setup') await runSetup();
+        else await runUnlock();
     } catch (err) {
         console.error('Biometric tab error:', err);
         const userMessage = errorToMessage(err);
