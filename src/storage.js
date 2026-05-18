@@ -12,6 +12,7 @@ const STORAGE_KEY_DATA = 'redd2fa_data';
 const STORAGE_KEY_META = 'redd2fa_meta';
 const STORAGE_KEY_SETTINGS = 'redd2fa_settings';
 const STORAGE_KEY_BACKUP_FINGERPRINT = 'redd2fa_backup_fingerprint';
+const STORAGE_KEY_LOCKOUT = 'redd2fa_lockout';
 const SCHEMA_VERSION = 1;
 
 /** Default settings */
@@ -244,6 +245,39 @@ export async function computeAccountsFingerprint(accounts) {
 export async function saveBackupFingerprint(accounts) {
     const fingerprint = await computeAccountsFingerprint(accounts);
     await browser.storage.local.set({ [STORAGE_KEY_BACKUP_FINGERPRINT]: fingerprint });
+}
+
+/**
+ * Load the persisted brute-force lockout state.
+ * Returns { failedAttempts, lockoutUntil } with safe defaults.
+ */
+export async function loadLockoutState() {
+    const result = await browser.storage.local.get(STORAGE_KEY_LOCKOUT);
+    const state = result[STORAGE_KEY_LOCKOUT];
+    if (!state) return { failedAttempts: 0, lockoutUntil: 0 };
+    return {
+        failedAttempts: Number(state.failedAttempts) || 0,
+        lockoutUntil: Number(state.lockoutUntil) || 0,
+    };
+}
+
+/**
+ * Persist the brute-force lockout state. Survives popup close.
+ */
+export async function saveLockoutState(state) {
+    await browser.storage.local.set({
+        [STORAGE_KEY_LOCKOUT]: {
+            failedAttempts: state.failedAttempts,
+            lockoutUntil: state.lockoutUntil,
+        },
+    });
+}
+
+/**
+ * Clear the brute-force lockout state on successful unlock.
+ */
+export async function clearLockoutState() {
+    await browser.storage.local.remove(STORAGE_KEY_LOCKOUT);
 }
 
 /**

@@ -8,7 +8,7 @@
 
 import browser from './browser.js';
 import { generateTOTP, getRemainingSeconds, parseOtpauthURI, buildOtpauthURI, validateBase32, normalizeSecret } from './totp.js';
-import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, loadBiometricDataRaw, disableBiometric, clearBiometricData, getBackupStatus, saveBackupFingerprint } from './storage.js';
+import { isFirstLaunch, setupPassphrase, unlockWithPassphrase, changePassphrase, loadAccounts, saveAccounts, loadSettings, saveSettings, saveBiometricData, loadBiometricData, loadBiometricDataRaw, disableBiometric, clearBiometricData, getBackupStatus, saveBackupFingerprint, loadLockoutState, saveLockoutState, clearLockoutState } from './storage.js';
 import { setSessionKey, getSessionKey, isUnlocked, lock, touchActivity, setAutoLockMinutes, setOnLockCallback } from './session.js';
 import { isBiometricAvailable, registerBiometric, authenticateBiometric } from './biometric.js';
 import { checkPassphraseStrength } from './passphrase-strength.js';
@@ -548,6 +548,8 @@ async function handleSetup() {
 // ========================================
 // Unlock handler
 // ========================================
+// Brute-force lockout state — persisted to storage so closing the side panel
+// doesn't reset the counter. Hydrated in setupLockScreen().
 let failedAttempts = 0;
 let lockoutUntil = 0;
 
@@ -583,6 +585,7 @@ async function handleUnlock() {
             } else {
                 showElement(unlockError, 'Incorrect passphrase.');
             }
+            await saveLockoutState({ failedAttempts, lockoutUntil });
             unlockBtn.disabled = false;
             unlockBtn.textContent = 'Unlock';
             return;
@@ -591,6 +594,7 @@ async function handleUnlock() {
         // Success — reset counter
         failedAttempts = 0;
         lockoutUntil = 0;
+        await clearLockoutState();
         setSessionKey(key);
         setAutoLockMinutes(settings.autoLockMinutes);
         accounts = await loadAccounts(key);
@@ -630,6 +634,18 @@ async function setupLockScreen() {
         unlockPassphraseInput.focus();
     }
     hideElement(biometricError);
+
+    // Hydrate persisted lockout state so closing the panel can't reset it.
+    const persisted = await loadLockoutState();
+    failedAttempts = persisted.failedAttempts;
+    lockoutUntil = persisted.lockoutUntil;
+    const now = Date.now();
+    if (now < lockoutUntil) {
+        const remaining = Math.ceil((lockoutUntil - now) / 1000);
+        showElement(unlockError, `Too many failed attempts. Try again in ${remaining}s.`);
+    } else {
+        hideElement(unlockError);
+    }
 }
 
 /**
@@ -681,6 +697,10 @@ async function handleBiometricUnlock() {
             return;
         }
 
+        // Successful biometric proves user presence — clear the lockout state.
+        failedAttempts = 0;
+        lockoutUntil = 0;
+        await clearLockoutState();
         setSessionKey(key);
         setAutoLockMinutes(settings.autoLockMinutes);
         accounts = await loadAccounts(key);
