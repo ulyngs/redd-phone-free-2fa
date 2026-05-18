@@ -546,6 +546,11 @@ async function handleSetup() {
         setSessionKey(key);
         setAutoLockMinutes(settings.autoLockMinutes);
         accounts = [];
+        // Clear the plaintext passphrase out of the hidden input values now
+        // that it's been derived into the session key. The screen is hidden
+        // by showScreen('main') but the DOM nodes (and their .value) live on.
+        setupPassphraseInput.value = '';
+        setupPassphraseConfirm.value = '';
         showScreen('main');
         renderAccounts();
 
@@ -1788,6 +1793,8 @@ function wipeSensitiveState() {
     clearValue(exportPassword);
     clearValue(exportPasswordConfirm);
     clearValue(importPassword);
+    clearValue(setupPassphraseInput);
+    clearValue(setupPassphraseConfirm);
     clearValue($('current-passphrase'));
     clearValue($('new-passphrase'));
     clearValue($('new-passphrase-confirm'));
