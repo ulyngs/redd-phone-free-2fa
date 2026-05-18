@@ -1766,6 +1766,20 @@ function wipeSensitiveState() {
     }
     flushClipboardClear();
 
+    // Close any in-flight biometric tab and clear its state. Without this,
+    // (a) the stale biometricTab id can cause the next "Enable Touch ID" click
+    //     to silently no-op while openBiometricTab tries to focus a gone tab,
+    // (b) a tab that completes setup after the side panel locks would dispatch
+    //     biometric-setup-done and "succeed" against a locked panel that can't
+    //     surface the result to the user.
+    // Detach the onRemoved listener before removing the tab so we don't trip
+    // the "Touch ID setup cancelled" toast on the lock screen we're transitioning to.
+    if (biometricTab) {
+        const closingTabId = biometricTab.id;
+        clearBiometricTab();
+        try { browser.tabs.remove(closingTabId).catch(() => { }); } catch { /* ignore */ }
+    }
+
     // Clear any inputs that may hold a secret or passphrase.
     const clearValue = (el) => { if (el) el.value = ''; };
     clearValue(manualLabel);
