@@ -1636,12 +1636,19 @@ function hideElement(el) {
     el.style.display = 'none';
 }
 
+let toastHideTimer = null;
+
 function showToast(message) {
     toast.textContent = message;
     toast.style.display = 'block';
-    setTimeout(() => {
+    // Duration scales with length so long error messages stay readable.
+    // Roughly 50ms/char + 1500ms base, clamped to a comfortable range.
+    const duration = Math.max(2000, Math.min(7000, 1500 + message.length * 50));
+    if (toastHideTimer) clearTimeout(toastHideTimer);
+    toastHideTimer = setTimeout(() => {
         toast.style.display = 'none';
-    }, 2000);
+        toastHideTimer = null;
+    }, duration);
 }
 
 function formatCode(code) {
