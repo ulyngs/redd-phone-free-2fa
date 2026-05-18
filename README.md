@@ -13,12 +13,12 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 ### Security
 - **Strong encryption** — AES-256-GCM via Web Crypto API with PBKDF2 key derivation (600,000 iterations, SHA-256)
 - **Local-only** — never makes network requests; all data stays on your device
-- **Minimal permissions** — only requests `storage` and `tabs`; no host permissions, no remote code
+- **Minimal permissions** — only requests `storage`, `tabs`, and `sidePanel`; no host permissions, no remote code
 - **Master passphrase** — all account data encrypted at rest; decrypted only while unlocked
 - **Passphrase never stored** — only a derived verification token is persisted
-- **Memory safety** — derived key is held in memory only while unlocked; wiped on lock or when the tab is closed
-- **Auto-lock** — configurable inactivity timeout (1, 5, 15, 30 minutes, or never)
-- **Brute-force protection** — progressive lockout after failed unlock attempts (5s → 30s → 5min)
+- **Memory safety** — encryption key, decrypted TOTP secrets, and in-flight modal inputs (passphrases, secrets) are all wiped from memory on lock or when the side panel is closed
+- **Auto-lock** — configurable inactivity timeout (1, 5, 15, 30 minutes, or never) while the side panel is open. Closing the panel wipes the key immediately, so the timeout only matters when the panel is left open and idle
+- **Lockout on failed attempts** — progressive cooldown (5s → 30s → 5min), persisted across panel restarts. This deters guessing through the extension UI; an attacker with disk access can copy the encrypted blob and attack it offline at GPU speeds, so passphrase strength remains the primary defense
 - **Clipboard auto-clear** — copied codes are removed from clipboard after 30 seconds
 - **Constant-time comparison** — passphrase hash verification uses XOR-based comparison to prevent timing attacks
 - **Strength-checked passphrases** — new passphrases are validated with hand-rolled, fully-auditable checks for common-password substrings, keyboard walks, repeating patterns, and low character diversity (see `src/passphrase-strength.js`)
