@@ -806,10 +806,17 @@ async function needsTabWorkaroundForWebAuthn() {
 
 async function openBiometricTab(mode) {
     if (biometricTab) {
-        // Focus the existing tab rather than spawn a duplicate.
-        try { await browser.tabs.update(biometricTab.id, { active: true }); }
-        catch { clearBiometricTab(); }
-        return;
+        // Focus the existing tab rather than spawn a duplicate. If the tracked
+        // tab is gone (closed before our onRemoved handler ran, or some other
+        // race), clear the stale state and fall through to creating a new tab
+        // — otherwise the user's first click after such a race would silently
+        // no-op and they'd have to click again.
+        try {
+            await browser.tabs.update(biometricTab.id, { active: true });
+            return;
+        } catch {
+            clearBiometricTab();
+        }
     }
     const url = browser.runtime.getURL(`biometric-tab.html?mode=${mode}`);
     const tab = await browser.tabs.create({ url, active: true });
