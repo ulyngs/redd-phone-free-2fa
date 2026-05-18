@@ -126,7 +126,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     initEventListeners();
     initBiometricListeners();
     initHelpTabs();
-    setOnLockCallback(() => { showScreen('lock'); setupLockScreen(); });
+    setOnLockCallback(() => {
+        wipeSensitiveState();
+        showScreen('lock');
+        setupLockScreen();
+    });
 
     // Check EULA acceptance before showing any screen
     if (!await hasAcceptedEula()) {
@@ -347,6 +351,7 @@ function initEventListeners() {
 
     $('lock-btn').addEventListener('click', async () => {
         lock();
+        wipeSensitiveState();
         settingsDropdown.style.display = 'none';
         showScreen('lock');
         await setupLockScreen();
@@ -1494,6 +1499,57 @@ async function importMerge(imported, key) {
 // ========================================
 // Helpers
 // ========================================
+
+/**
+ * Wipe every piece of decrypted state held in the popup on lock.
+ * The session key alone isn't enough — `accounts` holds plaintext TOTP
+ * secrets, rendered DOM holds the live codes, modal inputs may hold a
+ * freshly-typed secret or passphrase, and the biometric-prompt path
+ * briefly retains the passphrase. Clear all of it.
+ */
+function wipeSensitiveState() {
+    accounts = [];
+    lastCounters.clear();
+    if (accountList) accountList.replaceChildren();
+    stopTOTPRefresh();
+
+    editingAccountId = null;
+    deletingAccountId = null;
+
+    pendingPassphrase = null;
+    if (pendingPassphraseTimer) {
+        clearTimeout(pendingPassphraseTimer);
+        pendingPassphraseTimer = null;
+    }
+    if (clipboardClearTimer) {
+        clearTimeout(clipboardClearTimer);
+        clipboardClearTimer = null;
+    }
+
+    // Clear any inputs that may hold a secret or passphrase.
+    const clearValue = (el) => { if (el) el.value = ''; };
+    clearValue(manualLabel);
+    clearValue(manualSecret);
+    clearValue(searchInput);
+    clearValue(exportPassword);
+    clearValue(exportPasswordConfirm);
+    clearValue(importPassword);
+    clearValue($('current-passphrase'));
+    clearValue($('new-passphrase'));
+    clearValue($('new-passphrase-confirm'));
+
+    // Close any open modal overlays so they don't reappear over the lock screen.
+    accountModalOverlay.style.display = 'none';
+    deleteModalOverlay.style.display = 'none';
+    exportModalOverlay.style.display = 'none';
+    importModalOverlay.style.display = 'none';
+    biometricPromptOverlay.style.display = 'none';
+    const changePassphraseOverlay = $('change-passphrase-overlay');
+    if (changePassphraseOverlay) changePassphraseOverlay.style.display = 'none';
+    const windowsHintOverlay = $('windows-hint-overlay');
+    if (windowsHintOverlay) windowsHintOverlay.style.display = 'none';
+}
+
 function showElement(el, text) {
     if (text) el.textContent = text;
     el.style.display = 'block';
