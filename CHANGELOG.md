@@ -1,0 +1,93 @@
+# Changelog
+
+All notable changes to Phone-Free 2FA by ReDD are documented here.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.2] - 2026-06-10
+
+### Changed
+
+- Rebranded from **ReDD 2FA** to **Phone-Free 2FA by ReDD** for store listings and external docs.
+- In-app UI now uses the shorter name **Phone-Free 2FA**; attribution remains in the footer and onboarding copy.
+- Updated GitHub repository links to [redd-phone-free-2fa](https://github.com/ulyngs/redd-phone-free-2fa).
+
+## [2.1] - 2026-05-18
+
+### Added
+
+- README install instructions now distinguish Chrome/Edge/Chromium browsers from Firefox.
+
+### Fixed
+
+- Restored Touch ID / biometric unlock via a dedicated tab (Chrome does not show WebAuthn prompts from side panels).
+- Touch ID setup: prevent double-click races, show progress, and surface clearer retry-friendly errors.
+- Handle concurrent WebAuthn ceremonies (`OperationError`) explicitly.
+- Reuse disabled biometric credentials during tab setup instead of creating duplicates.
+- Close in-flight biometric tabs on lock and clear their state.
+- Clear setup passphrase from the DOM after successful first-time setup.
+- Apply `noopener`/`noreferrer` when opening external links.
+
+### Changed
+
+- Toast duration now scales with message length.
+- EULA and lock/setup screens harmonised with the unlocked UI.
+
+### Security
+
+- Persist brute-force lockout state across panel restarts.
+- Wipe decrypted account state from popup memory on lock.
+- Wire up clipboard auto-clear on panel close.
+- Tightened security documentation around lockout scope, auto-lock semantics, and memory wiping.
+
+## [2.0] - 2026-04-17
+
+### Added
+
+- Hand-rolled, auditable passphrase strength checks (common passwords, keyboard walks, repeating patterns, low character diversity).
+
+### Changed
+
+- Minimum master passphrase length increased to 12 characters.
+
+### Fixed
+
+- EULA acceptance flow works correctly in Microsoft Edge.
+
+## [1.9.1] - 2026-04-16
+
+### Fixed
+
+- EULA acceptance on first launch in Edge.
+
+## [1.9] - 2026-04-12
+
+### Added
+
+- EULA acceptance prompt on first launch.
+- Tabbed in-app instructions (How to use / How it works).
+- Clearer backup export dialog and backup-status prompts.
+- Provenance notes on onboarding and unlock screens.
+
+### Changed
+
+- Extension UI moved from popup to browser side panel for a better day-to-day experience.
+- Settings overlay is now full width.
+- Export and instruction wording clarified.
+
+## [1.0.0] - 2026-02-09
+
+### Added
+
+- Local-only TOTP authenticator browser extension (Chrome, Firefox, Edge).
+- AES-256-GCM encryption with PBKDF2 key derivation (600,000 iterations).
+- Master passphrase unlock with progressive lockout on failed attempts.
+- Optional Touch ID / Windows Hello unlock via WebAuthn PRF.
+- Account search, copy-on-click codes, and visual TOTP countdown rings.
+- Encrypted backup/restore and plain `otpauth://` URI export for migration.
+- Dark/light theme with system auto-detection.
+- Configurable auto-lock timeout and clipboard auto-clear after 30 seconds.
+- Zero-dependency implementation using Web Crypto API only.
+
+[2.2]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.2
