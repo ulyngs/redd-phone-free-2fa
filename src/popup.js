@@ -1,5 +1,5 @@
 /**
- * ReDD 2FA — Main popup controller
+ * Phone-Free 2FA by ReDD — Main popup controller
  *
  * Manages all popup UI: setup, lock/unlock, account list,
  * TOTP code generation, modals, search, clipboard, and settings.
@@ -773,12 +773,12 @@ function biometricErrorMessage(err) {
         return 'Another passkey prompt is already open. Finish or cancel it, then try again.';
     }
     if (name === 'InvalidStateError') {
-        return 'A Touch ID credential already exists for this extension. Remove old ReDD 2FA passkeys in your OS or browser settings, then try again.';
+        return 'A Touch ID credential already exists for this extension. Remove old Phone-Free 2FA passkeys in your OS or browser settings, then try again.';
     }
     if (message.includes('PRF')) {
         return 'Your browser does not support secure biometric unlock (PRF). Touch ID is unavailable.';
     }
-    return 'Biometric setup failed. If this persists, remove old ReDD 2FA passkeys in your OS/browser settings.';
+    return 'Biometric setup failed. If this persists, remove old Phone-Free 2FA passkeys in your OS/browser settings.';
 }
 
 // =================================================================

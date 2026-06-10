@@ -1,4 +1,4 @@
-# ReDD 2FA
+# Phone-Free 2FA by ReDD
 
 Simple, secure, local-only authenticator browser extension for time-based one-time passwords (TOTP). Lets you use your computer for 2FA, so you can put your phone away when you need to focus.
 
@@ -47,12 +47,12 @@ Built by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and th
 ## Screenshots
 
 <p align="center">
-  <img src="./docs/screenshots/R2FA-git-1.png" alt="ReDD 2FA - 1" width="49%" />
-  <img src="./docs/screenshots/R2FA-git-3.png" alt="ReDD 2FA - 2" width="49%" />
+  <img src="./docs/screenshots/R2FA-git-1.png" alt="Phone-Free 2FA by ReDD - 1" width="49%" />
+  <img src="./docs/screenshots/R2FA-git-3.png" alt="Phone-Free 2FA by ReDD - 2" width="49%" />
 </p>
 <p align="center">
-  <img src="./docs/screenshots/R2FA-git-4.png" alt="ReDD 2FA - 3" width="49%" />
-  <img src="./docs/screenshots/R2FA-git-5.png" alt="ReDD 2FA - 4" width="49%" />
+  <img src="./docs/screenshots/R2FA-git-4.png" alt="Phone-Free 2FA by ReDD - 3" width="49%" />
+  <img src="./docs/screenshots/R2FA-git-5.png" alt="Phone-Free 2FA by ReDD - 4" width="49%" />
 </p>
 
 ## How It Works

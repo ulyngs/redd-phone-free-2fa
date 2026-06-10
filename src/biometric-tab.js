@@ -1,5 +1,5 @@
 /**
- * ReDD 2FA — Biometric setup/unlock tab
+ * Phone-Free 2FA by ReDD — Biometric setup/unlock tab
  *
  * Chrome doesn't show WebAuthn prompts from extension side panels — the
  * navigator.credentials.create()/get() call hangs silently. This page is
@@ -56,7 +56,7 @@ function errorToMessage(err) {
         return 'Another passkey prompt is already open. Finish or cancel it, then click Try again.';
     }
     if (name === 'InvalidStateError') {
-        return 'A Touch ID credential already exists for this extension. Remove old ReDD 2FA passkeys in your OS or browser settings, then try again.';
+        return 'A Touch ID credential already exists for this extension. Remove old Phone-Free 2FA passkeys in your OS or browser settings, then try again.';
     }
     if (name === 'SecurityError') {
         return 'Your browser does not allow Touch ID from this extension.';

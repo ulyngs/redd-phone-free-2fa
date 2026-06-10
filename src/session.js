@@ -1,5 +1,5 @@
 /**
- * ReDD 2FA — Session manager
+ * Phone-Free 2FA by ReDD — Session manager
  *
  * Manages in-memory encryption key and auto-lock behavior.
  * The key is never persisted — only held in memory while unlocked.

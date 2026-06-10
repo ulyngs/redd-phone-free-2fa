@@ -1,5 +1,5 @@
 /**
- * ReDD 2FA — Crypto module
+ * Phone-Free 2FA by ReDD — Crypto module
  *
  * Uses Web Crypto API for all cryptographic operations:
  * - PBKDF2 (600,000 iterations) for key derivation

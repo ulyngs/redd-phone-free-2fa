@@ -1,5 +1,5 @@
 /**
- * ReDD 2FA — Biometric unlock via WebAuthn
+ * Phone-Free 2FA by ReDD — Biometric unlock via WebAuthn
  *
  * Uses WebAuthn PRF extension (Chrome 118+, Edge 118+) to derive a key
  * from the biometric gesture itself.
@@ -43,11 +43,11 @@ export async function registerBiometric(passphrase) {
     const credential = await navigator.credentials.create({
         publicKey: {
             challenge: crypto.getRandomValues(new Uint8Array(32)),
-            rp: { name: 'ReDD 2FA' },
+            rp: { name: 'Phone-Free 2FA' },
             user: {
                 id: crypto.getRandomValues(new Uint8Array(16)),
                 name: 'redd-2fa-user',
-                displayName: 'ReDD 2FA',
+                displayName: 'Phone-Free 2FA',
             },
             pubKeyCredParams: [
                 { alg: -7, type: 'public-key' },   // ES256
