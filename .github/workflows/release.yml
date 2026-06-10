@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag matches manifest version
+        id: meta
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION=$(jq -r .version src/manifest.json)
+          if [ "$TAG" != "$MANIFEST_VERSION" ]; then
+            echo "::error::Tag v${TAG} does not match src/manifest.json version ${MANIFEST_VERSION}"
+            exit 1
+          fi
+          echo "version=${MANIFEST_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "zip_name=phone-free-2fa-redd-v${MANIFEST_VERSION}.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Build extension zip
+        run: |
+          set -euo pipefail
+          cd src
+          zip -r "../${{ steps.meta.outputs.zip_name }}" . -x "*.DS_Store"
+
+      - name: Write release notes
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.meta.outputs.version }}"
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > /tmp/changelog-section.md
+
+          if [ ! -s /tmp/changelog-section.md ]; then
+            echo "No changelog section found for version ${VERSION}." > /tmp/changelog-section.md
+          fi
+
+          {
+            cat /tmp/changelog-section.md
+            echo ""
+            echo "---"
+            echo ""
+            echo "### Install"
+            echo "Download \`phone-free-2fa-redd-v${VERSION}.zip\` below for Chrome Web Store, Firefox Add-ons, or sideloading."
+            echo ""
+            echo "**Full changelog:** https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md"
+          } > release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v${{ steps.meta.outputs.version }} — Phone-Free 2FA by ReDD"
+          body_path: release-notes.md
+          files: ${{ steps.meta.outputs.zip_name }}

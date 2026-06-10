@@ -5,6 +5,15 @@ All notable changes to Phone-Free 2FA by ReDD are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Releasing
+
+1. Bump `version` in `src/manifest.json`.
+2. Add a `## [x.y]` section above (with date and changes).
+3. Commit and push to `main`.
+4. Tag and push: `git tag vX.Y && git push origin vX.Y`
+
+Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml), which checks the tag matches `manifest.json`, builds `phone-free-2fa-redd-vX.Y.zip`, and publishes a GitHub Release with that zip attached.
+
 ## [2.2] - 2026-06-10
 
 ### Changed
