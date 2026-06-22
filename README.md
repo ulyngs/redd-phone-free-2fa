@@ -87,7 +87,7 @@ flowchart TD
 
 ## Loading the Extension
 
-No build step required — the extension runs as vanilla ES modules, and every file that ships is human-readable.
+No build step required — the extension runs as vanilla ES modules, and every file that ships is meant to be human-readable.
 
 ### Chrome / Edge
 
