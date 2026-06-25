@@ -14,6 +14,12 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml), which checks the tag matches `manifest.json`, builds `phone-free-2fa-redd-vX.Y.zip`, and publishes a GitHub Release with that zip attached.
 
+## [2.3] - 2026-06-25
+
+### Changed
+
+- Updated extension icons.
+
 ## [2.2] - 2026-06-10
 
 ### Changed
@@ -99,4 +105,5 @@ Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/
 - Configurable auto-lock timeout and clipboard auto-clear after 30 seconds.
 - Zero-dependency implementation using Web Crypto API only.
 
+[2.3]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.3
 [2.2]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.2
