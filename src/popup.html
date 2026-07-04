@@ -541,11 +541,16 @@
       <h3>Enable Touch ID?</h3>
       <p class="biometric-prompt-text">Unlock Phone-Free 2FA with your fingerprint instead of typing your passphrase each
         time.</p>
+      <div id="biometric-passphrase-group" class="form-group" style="display: none;">
+        <label for="biometric-setup-passphrase">Passphrase</label>
+        <input type="password" id="biometric-setup-passphrase" placeholder="Enter your passphrase"
+          autocomplete="current-password" spellcheck="false">
+      </div>
       <div class="modal-actions">
         <button id="biometric-skip-btn" class="btn-secondary">Not now</button>
         <button id="biometric-enable-btn" class="btn-primary">Enable Touch ID</button>
       </div>
-      <label
+      <label id="biometric-dont-ask-label"
         style="display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 13px; color: var(--text-secondary); cursor: pointer;">
         <input type="checkbox" id="biometric-dont-ask-checkbox">
         Don't ask again

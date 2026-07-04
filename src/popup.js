@@ -859,6 +859,18 @@ async function setupLockScreen() {
  */
 let pendingPassphraseTimer = null;
 
+function resetBiometricPromptUI({ showPassphraseField = false, showDontAsk = true } = {}) {
+    $('biometric-passphrase-group').style.display = showPassphraseField ? 'block' : 'none';
+    $('biometric-dont-ask-label').style.display = showDontAsk ? 'flex' : 'none';
+    if (showPassphraseField) $('biometric-setup-passphrase').value = '';
+    $('biometric-dont-ask-checkbox').checked = false;
+}
+
+function showBiometricSetupFromSettings() {
+    resetBiometricPromptUI({ showPassphraseField: true, showDontAsk: false });
+    biometricPromptOverlay.style.display = 'flex';
+}
+
 async function promptBiometricSetup(passphrase) {
     try {
         const available = await isBiometricAvailable();
@@ -869,7 +881,7 @@ async function promptBiometricSetup(passphrase) {
         if (redd2fa_biometric_dont_ask) return;
 
         pendingPassphrase = passphrase;
-        $('biometric-dont-ask-checkbox').checked = false;
+        resetBiometricPromptUI({ showPassphraseField: false, showDontAsk: true });
         biometricPromptOverlay.style.display = 'flex';
 
         // Auto-clear passphrase from memory after 60s if user doesn't act
@@ -882,6 +894,31 @@ async function promptBiometricSetup(passphrase) {
     } catch {
         // Biometric not available — silently skip
     }
+}
+
+async function beginBiometricRegistration() {
+    if (isWindowsPlatform()) {
+        biometricPromptOverlay.style.display = 'none';
+        $('windows-hint-overlay').style.display = 'flex';
+    } else {
+        await performBiometricRegistration();
+    }
+}
+
+/**
+ * Enable Touch ID from settings — bypasses the post-unlock "don't ask again"
+ * preference and starts setup immediately when possible.
+ */
+async function enableBiometricFromSettings() {
+    const raw = await loadBiometricDataRaw();
+    const canReEnableDisabled = !!(raw?.disabled && raw.credentialId);
+
+    if (pendingPassphrase || canReEnableDisabled) {
+        await beginBiometricRegistration();
+        return;
+    }
+
+    showBiometricSetupFromSettings();
 }
 
 /**
@@ -1199,16 +1236,20 @@ function initBiometricListeners() {
     biometricUnlockBtn.addEventListener('click', handleBiometricUnlock);
 
     $('biometric-enable-btn').addEventListener('click', async () => {
-        if (!pendingPassphrase) return;
-
-        const isWindows = navigator.userAgent.includes('Windows');
-        if (isWindows) {
-            // Show Windows hint before proceeding
-            biometricPromptOverlay.style.display = 'none';
-            $('windows-hint-overlay').style.display = 'flex';
-        } else {
-            await performBiometricRegistration();
+        if (!pendingPassphrase) {
+            const entered = $('biometric-setup-passphrase').value.trim();
+            if (!entered) return;
+            const key = await unlockWithPassphrase(entered);
+            if (!key) {
+                showToast('Incorrect passphrase.');
+                return;
+            }
+            pendingPassphrase = entered;
+            $('biometric-setup-passphrase').value = '';
+            $('biometric-passphrase-group').style.display = 'none';
         }
+
+        await beginBiometricRegistration();
     });
 
     // Windows hint buttons
@@ -1227,7 +1268,8 @@ function initBiometricListeners() {
         if ($('biometric-dont-ask-checkbox').checked) {
             await browser.storage.local.set({ redd2fa_biometric_dont_ask: true });
         }
-        pendingPassphrase = null;
+        // Keep pendingPassphrase for this session so settings can enable Touch ID
+        // without another unlock. It is cleared on lock via wipeSensitiveState().
         if (pendingPassphraseTimer) { clearTimeout(pendingPassphraseTimer); pendingPassphraseTimer = null; }
         biometricPromptOverlay.style.display = 'none';
     });
@@ -1239,14 +1281,7 @@ function initBiometricListeners() {
             showToast('Touch ID disabled.');
             updateBiometricToggle();
         } else {
-            const biometricDataRaw = await loadBiometricDataRaw();
-            if (biometricDataRaw?.disabled) {
-                showToast('Lock and unlock with passphrase to re-enable Touch ID.');
-            } else if (isWindowsPlatform()) {
-                showToast(getWindowsBiometricGuidance());
-            } else {
-                showToast('Lock and unlock with passphrase to enable Touch ID.');
-            }
+            await enableBiometricFromSettings();
         }
     });
 }
@@ -2003,6 +2038,7 @@ function wipeSensitiveState() {
     clearValue($('current-passphrase'));
     clearValue($('new-passphrase'));
     clearValue($('new-passphrase-confirm'));
+    clearValue($('biometric-setup-passphrase'));
     updateAllVisibilityToggles();
 
     // Close any open modal overlays so they don't reappear over the lock screen.
