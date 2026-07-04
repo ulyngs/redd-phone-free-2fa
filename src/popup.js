@@ -119,8 +119,70 @@ const themeSelect = $('theme-select');
 const autoLockSelect = $('auto-lock-select');
 const popupFooter = $('popup-footer');
 
+const EYE_ICON = `
+    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>`;
+
+const EYE_OFF_ICON = `
+    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a20.29 20.29 0 0 1 5.06-5.94" />
+      <path d="M9.9 4.24A10.75 10.75 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.23 4.31" />
+      <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24" />
+      <path d="M1 1l22 22" />
+    </svg>`;
+
 function setFooterVisible(visible) {
     if (popupFooter) popupFooter.style.display = visible ? 'block' : 'none';
+}
+
+function restoreInputSelection(input, start, end, direction) {
+    const len = input.value.length;
+    const selStart = start == null ? len : Math.min(start, len);
+    const selEnd = end == null ? selStart : Math.min(end, len);
+
+    try {
+        input.focus({ preventScroll: true });
+        input.setSelectionRange(selStart, selEnd, direction || 'none');
+    } catch {
+        // Selection restore is best-effort across browsers.
+    }
+}
+
+function setInputRevealed(input, revealed, selection) {
+    const nextType = revealed ? 'text' : 'password';
+    if (input.type === nextType) return;
+
+    const start = selection?.start ?? input.selectionStart;
+    const end = selection?.end ?? input.selectionEnd;
+    const direction = selection?.direction ?? input.selectionDirection;
+
+    input.type = nextType;
+    restoreInputSelection(input, start, end, direction);
+    requestAnimationFrame(() => restoreInputSelection(input, start, end, direction));
+    setTimeout(() => restoreInputSelection(input, start, end, direction), 0);
+}
+
+function updateVisibilityToggle(btn, input) {
+    const hasValue = input.value.length > 0;
+    if (!hasValue && input.type === 'text') input.type = 'password';
+
+    const isRevealed = input.type === 'text';
+    btn.classList.toggle('is-visible', hasValue);
+    btn.innerHTML = isRevealed ? EYE_OFF_ICON : EYE_ICON;
+    btn.title = isRevealed ? 'Hide passphrase' : 'Show passphrase';
+    btn.setAttribute('aria-label', btn.title);
+    btn.setAttribute('aria-pressed', String(isRevealed));
+}
+
+function updateAllVisibilityToggles() {
+    document.querySelectorAll('.toggle-visibility').forEach((btn) => {
+        const input = $(btn.dataset.target);
+        if (input) updateVisibilityToggle(btn, input);
+    });
 }
 
 function updateSetupStrengthMeter(passphrase) {
@@ -506,10 +568,35 @@ function initEventListeners() {
 
     // Toggle visibility buttons
     document.querySelectorAll('.toggle-visibility').forEach((btn) => {
+        const targetId = btn.dataset.target;
+        const input = $(targetId);
+        if (!input) return;
+        let pendingSelection = null;
+
+        const captureSelection = () => {
+            pendingSelection = {
+                start: input.selectionStart,
+                end: input.selectionEnd,
+                direction: input.selectionDirection,
+            };
+        };
+
+        updateVisibilityToggle(btn, input);
+        input.addEventListener('input', () => updateVisibilityToggle(btn, input));
+        btn.addEventListener('pointerdown', (e) => {
+            captureSelection();
+            e.preventDefault();
+        });
+        btn.addEventListener('mousedown', (e) => {
+            captureSelection();
+            e.preventDefault();
+        });
         btn.addEventListener('click', () => {
-            const targetId = btn.dataset.target;
-            const input = $(targetId);
-            input.type = input.type === 'password' ? 'text' : 'password';
+            if (!input.value) return;
+            if (!pendingSelection) captureSelection();
+            setInputRevealed(input, input.type === 'password', pendingSelection);
+            updateVisibilityToggle(btn, input);
+            pendingSelection = null;
         });
     });
 
@@ -597,6 +684,7 @@ async function handleSetup() {
         // by showScreen('main') but the DOM nodes (and their .value) live on.
         setupPassphraseInput.value = '';
         setupPassphraseConfirm.value = '';
+        updateAllVisibilityToggles();
         showScreen('main');
         renderAccounts();
 
@@ -663,6 +751,7 @@ async function handleUnlock() {
         setAutoLockMinutes(settings.autoLockMinutes);
         accounts = await loadAccounts(key);
         unlockPassphraseInput.value = '';
+        updateAllVisibilityToggles();
         hideElement(unlockError);
         showScreen('main');
         renderAccounts();
@@ -1442,6 +1531,7 @@ function openAccountModal(editId) {
         modalTitle.textContent = 'Add Account';
     }
 
+    updateAllVisibilityToggles();
     accountModalOverlay.style.display = 'flex';
     manualLabel.focus();
 }
@@ -1455,6 +1545,7 @@ function resetModal() {
     manualLabel.value = '';
     manualSecret.value = '';
     manualSecret.type = 'password';
+    updateAllVisibilityToggles();
     hideElement(secretValidation);
     hideElement(modalError);
 }
@@ -1851,6 +1942,7 @@ function wipeSensitiveState() {
     clearValue($('current-passphrase'));
     clearValue($('new-passphrase'));
     clearValue($('new-passphrase-confirm'));
+    updateAllVisibilityToggles();
 
     // Close any open modal overlays so they don't reappear over the lock screen.
     accountModalOverlay.style.display = 'none';

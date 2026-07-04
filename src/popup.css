@@ -271,15 +271,6 @@ body {
   margin-top: 4px;
 }
 
-.setup-btn:disabled {
-  background-color: var(--bg-tertiary);
-  color: var(--text-muted);
-  opacity: 1;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
 .setup-tip-box {
   width: 100%;
   margin-top: 20px;
@@ -430,7 +421,7 @@ body {
 }
 
 .app-footer-line + .app-footer-line {
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 .trust-badges {
@@ -565,6 +556,12 @@ body {
   padding-right: 40px;
 }
 
+/* Avoid duplicate password reveal controls in browsers that add their own. */
+.input-with-toggle input[type="password"]::-ms-reveal,
+.input-with-toggle input[type="password"]::-ms-clear {
+  display: none;
+}
+
 .toggle-visibility {
   position: absolute;
   right: 5px;
@@ -580,6 +577,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.toggle-visibility.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .toggle-visibility:hover {
@@ -622,8 +629,23 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-.btn-primary:disabled {
+.btn-primary:disabled,
+.btn-primary:disabled:hover,
+.btn-primary:disabled:active {
   opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.setup-btn:disabled,
+.setup-btn:disabled:hover,
+.setup-btn:disabled:active {
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+  opacity: 1;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -2092,7 +2114,9 @@ button.backup-badge:hover {
   width: 100%;
 }
 
-.eula-card .btn-primary:disabled {
+.eula-card .btn-primary:disabled,
+.eula-card .btn-primary:disabled:hover,
+.eula-card .btn-primary:disabled:active {
   background-color: var(--bg-tertiary);
   color: var(--text-muted);
   opacity: 1;
