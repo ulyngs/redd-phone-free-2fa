@@ -62,6 +62,7 @@ const setupPassphraseInput = $('setup-passphrase');
 const setupPassphraseConfirm = $('setup-passphrase-confirm');
 const setupError = $('setup-error');
 const setupBtn = $('setup-btn');
+const setupStrengthFill = $('setup-strength-fill');
 
 // Lock
 const unlockPassphraseInput = $('unlock-passphrase');
@@ -116,6 +117,64 @@ const toast = $('toast');
 // Settings
 const themeSelect = $('theme-select');
 const autoLockSelect = $('auto-lock-select');
+const popupFooter = $('popup-footer');
+
+function setFooterVisible(visible) {
+    if (popupFooter) popupFooter.style.display = visible ? 'block' : 'none';
+}
+
+function updateSetupStrengthMeter(passphrase) {
+    if (!setupStrengthFill) return;
+    if (!passphrase) {
+        setupStrengthFill.style.width = '0%';
+        setupStrengthFill.classList.remove('is-weak', 'is-strong');
+        return;
+    }
+
+    let percent = Math.min((passphrase.length / MIN_PASSPHRASE_LENGTH) * 55, 55);
+    const strength = passphrase.length >= MIN_PASSPHRASE_LENGTH
+        ? checkPassphraseStrength(passphrase)
+        : { ok: false };
+
+    if (passphrase.length >= MIN_PASSPHRASE_LENGTH) {
+        percent = strength.ok ? 100 : 38;
+        setupStrengthFill.classList.toggle('is-weak', !strength.ok);
+        setupStrengthFill.classList.toggle('is-strong', strength.ok);
+    } else {
+        setupStrengthFill.classList.remove('is-weak', 'is-strong');
+    }
+
+    setupStrengthFill.style.width = `${percent}%`;
+}
+
+function getSetupButtonLabel(passphrase, confirm, tooShort, isExample, strengthOk, matches) {
+    if (passphrase.length === 0) return 'Enter a passphrase to continue';
+    if (tooShort) return 'Use at least 12 characters';
+    if (isExample) return 'Choose your own passphrase';
+    if (!strengthOk) return 'Choose a stronger passphrase';
+    if (confirm.length === 0) return 'Confirm your passphrase';
+    if (!matches) return 'Passphrases must match';
+    return 'Create & Unlock';
+}
+
+function validateSetup() {
+    const p = setupPassphraseInput.value;
+    const c = setupPassphraseConfirm.value;
+    const tooShort = p.length < MIN_PASSPHRASE_LENGTH;
+    const isExample = p.length > 0 && isExamplePassphrase(p);
+    const strength = p.length >= MIN_PASSPHRASE_LENGTH ? checkPassphraseStrength(p) : { ok: false };
+    const matches = p === c;
+
+    updateSetupStrengthMeter(p);
+    setupBtn.disabled = tooShort || isExample || !strength.ok || !matches || c.length === 0;
+    setupBtn.textContent = getSetupButtonLabel(p, c, tooShort, isExample, strength.ok, matches);
+
+    if (p.length >= MIN_PASSPHRASE_LENGTH && !strength.ok) {
+        showElement(setupError, strength.message);
+    } else {
+        hideElement(setupError);
+    }
+}
 
 // ========================================
 // Initialization
@@ -155,6 +214,7 @@ function showScreen(screen) {
     setupScreen.style.display = screen === 'setup' ? 'block' : 'none';
     lockScreen.style.display = screen === 'lock' ? 'block' : 'none';
     mainScreen.style.display = screen === 'main' ? 'block' : 'none';
+    setFooterVisible(screen === 'setup' || screen === 'lock' || screen === 'main');
 
     if (screen === 'main') {
         startTOTPRefresh();
@@ -213,6 +273,7 @@ function showEulaOverlay() {
     setupScreen.style.display = 'none';
     lockScreen.style.display = 'none';
     mainScreen.style.display = 'none';
+    setFooterVisible(false);
     // Reset checkbox state
     const checkbox = $('eula-agree-checkbox');
     const continueBtn = $('eula-continue-btn');
@@ -276,22 +337,6 @@ function initEventListeners() {
     }
 
     // Setup screen
-    const validateSetup = () => {
-        const p = setupPassphraseInput.value;
-        const c = setupPassphraseConfirm.value;
-        const tooShort = p.length < MIN_PASSPHRASE_LENGTH;
-        const isExample = p.length > 0 && isExamplePassphrase(p);
-        setupBtn.disabled = tooShort || isExample || p !== c;
-        if (p.length > 0 && tooShort) {
-            showElement(setupError, `Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters.`);
-        } else if (isExample) {
-            showElement(setupError, 'Please choose your own passphrase, not one of the example phrases.');
-        } else if (c.length > 0 && p !== c) {
-            showElement(setupError, 'Passphrases do not match.');
-        } else {
-            hideElement(setupError);
-        }
-    };
     setupPassphraseInput.addEventListener('input', validateSetup);
     setupPassphraseConfirm.addEventListener('input', validateSetup);
     setupBtn.addEventListener('click', handleSetup);
@@ -529,7 +574,7 @@ async function handleSetup() {
         return;
     }
     if (isExamplePassphrase(passphrase)) {
-        showElement(setupError, 'Please choose your own passphrase, not one of the example phrases.');
+        showElement(setupError, 'Please choose your own passphrase, not the example phrase.');
         return;
     }
 
@@ -540,7 +585,6 @@ async function handleSetup() {
     }
 
     setupBtn.disabled = true;
-    const originalSetupText = setupBtn.textContent;
     setupBtn.textContent = 'Setting up...';
 
     try {
@@ -561,7 +605,7 @@ async function handleSetup() {
     } catch (err) {
         showElement(setupError, 'Setup failed. Please try again.');
         setupBtn.disabled = false;
-        setupBtn.textContent = originalSetupText;
+        validateSetup();
     }
 }
 

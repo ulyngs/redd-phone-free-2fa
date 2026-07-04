@@ -168,7 +168,7 @@ body {
   max-width: 470px;
   min-height: 360px;
   margin: 0 auto;
-  padding: 0 0 52px;
+  padding: 0 0 88px;
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
@@ -193,7 +193,122 @@ body {
 #lock-screen .screen-container {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 52px);
+  min-height: calc(100vh - 88px);
+}
+
+#setup-screen .setup-screen-container {
+  align-items: center;
+  text-align: center;
+}
+
+.setup-hero {
+  width: 100%;
+  margin-bottom: 22px;
+}
+
+.setup-hero-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.setup-hero-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.setup-hero-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+
+.setup-hero-subtitle {
+  margin: 0;
+  font-size: 1em;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.setup-form {
+  width: 100%;
+  text-align: left;
+}
+
+.setup-strength-meter {
+  height: 4px;
+  margin: -6px 0 14px;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.setup-strength-fill {
+  width: 0;
+  height: 100%;
+  background-color: var(--border-hover);
+  border-radius: var(--radius-pill);
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.setup-strength-fill.is-weak {
+  background-color: var(--ring-warn);
+}
+
+.setup-strength-fill.is-strong {
+  background-color: var(--accent-primary);
+}
+
+.setup-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.setup-btn:disabled {
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+  opacity: 1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.setup-tip-box {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 16px;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius);
+  font-size: 0.9em;
+  line-height: 1.55;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.setup-tip-example {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.setup-security-note {
+  width: 100%;
+  margin: 16px 0 0;
+  font-size: 0.88em;
+  line-height: 1.55;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.setup-security-note strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .logo-header {
@@ -303,21 +418,19 @@ body {
   line-height: 1.55;
 }
 
-.assurance-copy {
-  margin: auto 0 0 0;
-  padding-top: 32px;
+.app-footer {
+  text-align: center;
   font-size: 0.82em;
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--text-muted);
 }
 
-.assurance-copy a {
-  color: var(--link-color);
-  text-decoration: underline;
+.app-footer-line {
+  margin: 0;
 }
 
-.assurance-copy a:hover {
-  color: var(--link-hover);
+.app-footer-line + .app-footer-line {
+  margin-top: 2px;
 }
 
 .trust-badges {
@@ -1795,8 +1908,8 @@ button.backup-badge:hover {
    ======================================== */
 .popup-footer {
   text-align: center;
-  padding: 6px 16px;
-  font-size: 0.73em;
+  padding: 10px 16px 12px;
+  font-size: 0.82em;
   color: var(--text-muted);
   background-color: var(--bg-primary);
   width: 470px;
@@ -1805,16 +1918,6 @@ button.backup-badge:hover {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.popup-footer a {
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-.popup-footer a:hover {
-  color: var(--link-hover);
-  text-decoration: underline;
 }
 
 /* ========================================
@@ -1834,11 +1937,82 @@ button.backup-badge:hover {
 .eula-screen-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   min-height: 100vh;
-  padding: 24px 24px 88px;
-  text-align: left;
+  padding: 0 24px 32px;
+  text-align: center;
+}
+
+.eula-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: calc(100% + 48px);
+  margin: 0 -24px 0;
+  padding: 12px 24px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.eula-top-bar-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.eula-top-bar-title {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.eula-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   max-width: 470px;
-  margin: 0 auto;
+  padding: 28px 0 20px;
+}
+
+.eula-hero {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.eula-hero-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.eula-hero-icon {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.eula-hero-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 2em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+
+.eula-hero-subtitle {
+  margin: 0;
+  font-size: 1em;
+  line-height: 1.55;
+  color: var(--text-muted);
 }
 
 .eula-card {
@@ -1847,7 +2021,7 @@ button.backup-badge:hover {
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-sm);
   padding: 20px 20px 18px;
-  margin: 8px 0 0;
+  width: 100%;
   text-align: left;
 }
 
@@ -1878,35 +2052,50 @@ button.backup-badge:hover {
 }
 
 .eula-link {
-  color: var(--text-primary);
+  color: var(--text-secondary);
   font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.2s ease;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-hover);
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .eula-link:hover {
-  color: var(--link-hover);
-  text-decoration: none;
+  color: var(--text-primary);
+  border-bottom-color: transparent;
 }
 
-.eula-note {
+.eula-privacy-text {
   margin: 14px 0 0;
+  padding: 12px 14px;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius);
   font-size: 0.9em;
   line-height: 1.55;
   color: var(--text-muted);
 }
 
-.eula-note .eula-link {
-  font-weight: 400;
+.eula-footer-copy {
+  margin-top: auto;
+  width: 100%;
+  max-width: 34rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 24px;
+  font-size: 0.82em;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--text-muted);
 }
 
 .eula-card .btn-primary {
   margin-top: 16px;
+  width: 100%;
 }
 
 .eula-card .btn-primary:disabled {
-  opacity: 0.45;
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+  opacity: 1;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;

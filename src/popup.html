@@ -13,39 +13,42 @@
        EULA Acceptance Overlay
        ======================================== -->
   <div id="eula-overlay" class="eula-overlay" style="display: none;">
-    <div class="screen-container eula-screen-container">
-      <div class="top-bar top-bar-no-border">
-        <div class="top-title-group top-title-group-screen">
-          <img class="top-logo" src="icons/icon-128.png" alt="Phone-Free 2FA">
-          <div class="top-title-block">
-            <h2 class="top-title">Welcome to Phone-Free 2FA</h2>
+    <div class="eula-screen-container">
+      <header class="eula-top-bar">
+        <img class="eula-top-bar-icon" src="icons/icon-32.png" alt="">
+        <span class="eula-top-bar-title">Phone-Free 2FA by ReDD</span>
+      </header>
+
+      <div class="eula-body">
+        <div class="eula-hero">
+          <div class="eula-hero-brand">
+            <img class="eula-hero-icon" src="icons/icon-128.png" alt="Phone-Free 2FA">
+            <h2 class="eula-hero-title">Phone-Free 2FA</h2>
           </div>
+          <p class="eula-hero-subtitle">Welcome. One thing before you start:</p>
+        </div>
+
+        <div class="eula-card">
+          <div class="eula-checkbox-row">
+            <input type="checkbox" id="eula-agree-checkbox"
+              aria-label="I agree to the End User License Agreement">
+            <span class="eula-checkbox-text">
+              I agree to the ReDD Project's
+              <a href="https://reddfocus.org/eula" target="_blank" rel="noopener noreferrer" class="eula-link">End User
+                License Agreement</a>
+            </span>
+          </div>
+          <p class="eula-privacy-text">
+            We don't collect any user data — everything stays on your device.
+            <a href="http://reddfocus.org/privacy-policy?from=tools" target="_blank" rel="noopener noreferrer"
+              class="eula-link">Privacy Policy</a>
+          </p>
+          <button id="eula-continue-btn" class="btn-primary eula-continue-btn" disabled>Agree to continue</button>
         </div>
       </div>
 
-      <div class="eula-card">
-        <div class="eula-checkbox-row">
-          <input type="checkbox" id="eula-agree-checkbox"
-            aria-label="I agree to the End User License Agreement and Privacy Policy">
-          <span class="eula-checkbox-text">
-            I agree to the ReDD Project's
-            <a href="https://reddfocus.org/eula" target="_blank" rel="noopener noreferrer" class="eula-link">End User
-              License Agreement</a>
-          </span>
-        </div>
-        <p class="eula-note">
-          <em>Note that we do not collect any user data, as per our
-          <a href="https://reddfocus.org/privacy-policy" target="_blank" rel="noopener noreferrer"
-            class="eula-link">Privacy Policy</a>.</em>
-        </p>
-        <button id="eula-continue-btn" class="btn-primary" disabled>Continue</button>
-      </div>
-
-      <p class="assurance-copy">
-        <em>Phone-Free 2FA is developed by the <a href="https://reddfocus.org" target="_blank" rel="noopener noreferrer" class="eula-link">Reduce Digital Distraction Project</a>, in collaboration with
-        researchers at the University of Oxford and University of Maastricht. The ReDD Project is a
-        not-for-profit creating insights &amp; open-source digital focus tools for everyone to thrive in
-        the digital world.</em>
+      <p class="eula-footer-copy">
+        Built by the <a href="https://reddfocus.org" target="_blank" rel="noopener noreferrer" class="eula-link">Reduce Digital Distraction Project</a> — a not-for-profit developing open-source digital focus tools, with researchers at the University of Oxford and Maastricht University.
       </p>
     </div>
   </div>
@@ -54,65 +57,66 @@
        Setup Screen (First Launch)
        ======================================== -->
   <div id="setup-screen" style="display: none;">
-    <div class="screen-container">
-      <div class="top-bar top-bar-no-border">
-        <div class="top-title-group top-title-group-screen">
-          <img class="top-logo" src="icons/icon-128.png" alt="Phone-Free 2FA">
-          <div class="top-title-block">
-            <h2 class="top-title">Phone-Free 2FA</h2>
+    <div class="screen-container setup-screen-container">
+      <div class="setup-hero">
+        <div class="setup-hero-brand">
+          <img class="setup-hero-icon" src="icons/icon-128.png" alt="Phone-Free 2FA">
+          <h2 class="setup-hero-title">Phone-Free 2FA</h2>
+        </div>
+        <p class="setup-hero-subtitle">Create a master passphrase to encrypt your accounts.</p>
+      </div>
+
+      <div class="setup-form">
+        <div class="form-group">
+          <label for="setup-passphrase">Master passphrase</label>
+          <div class="input-with-toggle">
+            <input type="password" id="setup-passphrase" placeholder="e.g. correct-horse-battery-staple" autocomplete="off"
+              spellcheck="false">
+            <button type="button" class="toggle-visibility" data-target="setup-passphrase" title="Show/hide passphrase">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
           </div>
         </div>
-      </div>
-      <p class="subtitle">Create a master passphrase to encrypt your accounts.</p>
 
-      <div class="form-group">
-        <label for="setup-passphrase">Master passphrase</label>
-        <div class="input-with-toggle">
-          <input type="password" id="setup-passphrase" placeholder="Enter a strong passphrase" autocomplete="off"
-            spellcheck="false">
-          <button type="button" class="toggle-visibility" data-target="setup-passphrase" title="Show/hide passphrase">
-            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
+        <div class="setup-strength-meter" aria-hidden="true">
+          <div id="setup-strength-fill" class="setup-strength-fill"></div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="setup-passphrase-confirm">Confirm passphrase</label>
-        <div class="input-with-toggle">
-          <input type="password" id="setup-passphrase-confirm" placeholder="Confirm your passphrase" autocomplete="off"
-            spellcheck="false">
-          <button type="button" class="toggle-visibility" data-target="setup-passphrase-confirm"
-            title="Show/hide passphrase">
-            <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <p id="setup-error" class="error-text" style="display: none;"></p>
-      <button id="setup-btn" class="btn-primary" disabled>Create & Unlock</button>
 
-      <div class="passphrase-tips">
-        <p class="tip-heading">Tips for a strong passphrase:</p>
-        <p class="tip-example">"correct-horse-battery-staple"</p>
-        <p class="tip-example">"My dog loves chasing squirrels in the park!"</p>
-        <p class="tip-note">Use at least 12 characters. Multiple words separated by spaces, dashes, or numbers work well.
-          Avoid common quotes or lyrics.
-        </p>
-        <p class="tip-note tip-warning">⚠️ If you forget this passphrase and don't have Touch ID enabled, your 2FA
-          accounts cannot be recovered. You would need to set up 2FA again with each service.</p>
+        <div class="form-group">
+          <label for="setup-passphrase-confirm">Confirm passphrase</label>
+          <div class="input-with-toggle">
+            <input type="password" id="setup-passphrase-confirm" placeholder="Type it again" autocomplete="off"
+              spellcheck="false">
+            <button type="button" class="toggle-visibility" data-target="setup-passphrase-confirm"
+              title="Show/hide passphrase">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <p id="setup-error" class="error-text" style="display: none;"></p>
+        <button id="setup-btn" class="btn-primary setup-btn" disabled>Enter a passphrase to continue</button>
       </div>
-      <p class="assurance-copy">
-        <em>Phone-Free 2FA is developed by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of
-        Maastricht (Dr Konrad Kollnig, Henry Tari), as part of their work with the
-        <a href="https://www.reddproject.org" target="_blank">Reduce Digital Distraction Project</a>. The source code
-        is available at <a href="https://github.com/ulyngs/redd-phone-free-2fa"
-          target="_blank">https://github.com/ulyngs/redd-phone-free-2fa</a>.</em>
+
+      <div class="setup-tip-box">
+        A few unrelated words makes for a strong and easy to remember passphrase — like
+        <span class="setup-tip-example">My dog loves chasing squirrels in the park!</span> or
+        <span class="setup-tip-example">correct-horse-battery-staple</span>.
+        Use 12+ characters and avoid famous quotes or lyrics.
+      </div>
+
+      <p class="setup-security-note">
+        <strong>Keep it safe — there's no reset.</strong>
+        We can't recover this passphrase for you. Once you're set up, export an encrypted backup so you can always
+        restore your accounts.
       </p>
     </div>
   </div>
@@ -165,13 +169,6 @@
         <p id="unlock-error" class="error-text" style="display: none;"></p>
         <button id="unlock-btn" class="btn-primary">Unlock</button>
       </div>
-      <p class="assurance-copy">
-        <em>Phone-Free 2FA is developed by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of
-        Maastricht (Dr Konrad Kollnig, Henry Tari), as part of their work with the
-        <a href="https://www.reddproject.org" target="_blank">Reduce Digital Distraction Project</a>. The source code
-        is available at <a href="https://github.com/ulyngs/redd-phone-free-2fa"
-          target="_blank">https://github.com/ulyngs/redd-phone-free-2fa</a>.</em>
-      </p>
     </div>
   </div>
 
@@ -580,8 +577,14 @@
     </div>
   </div>
 
-  <footer class="popup-footer">
-    Made with ❤️ by <a href="https://reddfocus.org" target="_blank">reddfocus.org</a>
+  <footer id="popup-footer" class="popup-footer app-footer" style="display: none;">
+    <p class="app-footer-line">Built by researchers at the University of Oxford and Maastricht University,</p>
+    <p class="app-footer-line">part of the <a href="https://reddfocus.org" target="_blank" rel="noopener noreferrer"
+        class="eula-link">Reduce Digital Distraction Project</a> · <a
+        href="https://github.com/ulyngs/redd-phone-free-2fa" target="_blank" rel="noopener noreferrer"
+        class="eula-link">View source on GitHub</a></p>
+    <p class="app-footer-line">Made with ❤️ by <a href="https://reddfocus.org" target="_blank" rel="noopener noreferrer"
+        class="eula-link">reddfocus.org</a></p>
   </footer>
 
   <!-- Toast notification -->
