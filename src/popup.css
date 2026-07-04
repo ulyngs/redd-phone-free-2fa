@@ -1502,7 +1502,8 @@ body {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: 100vw;
+  width: 100%;
+  max-width: 470px;
   transform: translateX(-50%);
   background-color: var(--bg-primary);
   z-index: 100;
@@ -1511,9 +1512,9 @@ body {
 
 .settings-panel {
   position: relative;
-  max-width: 360px;
-  margin: 0 auto;
-  padding: 24px 18px 80px;
+  width: 100%;
+  margin: 0;
+  padding: 24px 12px 80px;
 }
 
 .settings-kicker {
