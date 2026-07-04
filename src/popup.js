@@ -135,6 +135,43 @@ const EYE_OFF_ICON = `
       <path d="M1 1l22 22" />
     </svg>`;
 
+const WARNING_TRIANGLE_ICON = `
+    <svg class="backup-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </svg>`;
+
+const COPY_ICON = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round" aria-hidden="true">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+    </svg>`;
+
+const CHECK_ICON = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>`;
+
+function flashCopyButton(btn) {
+    if (!btn) return;
+    if (btn._copyFlashTimer) clearTimeout(btn._copyFlashTimer);
+    btn.classList.add('is-copied');
+    btn.innerHTML = CHECK_ICON;
+    btn._copyFlashTimer = setTimeout(() => {
+        btn._copyFlashTimer = null;
+        btn.classList.remove('is-copied');
+        btn.innerHTML = COPY_ICON;
+    }, 600);
+}
+
+function setBackupBadgeLabel(badge, text) {
+    badge.innerHTML = `${WARNING_TRIANGLE_ICON}<span>${text}</span>`;
+}
+
 function setFooterVisible(visible) {
     if (popupFooter) popupFooter.style.display = visible ? 'block' : 'none';
 }
@@ -295,11 +332,11 @@ async function updateTopBarBackupBadge() {
     try {
         const status = await getBackupStatus(accounts);
         if (status === 'never') {
-            badge.textContent = 'no backup exported';
-            badge.style.display = 'inline';
+            setBackupBadgeLabel(badge, 'no backup exported');
+            badge.style.display = 'inline-flex';
         } else if (status === 'stale') {
-            badge.textContent = 'changes since last export';
-            badge.style.display = 'inline';
+            setBackupBadgeLabel(badge, 'Changes since last backup');
+            badge.style.display = 'inline-flex';
         } else {
             badge.style.display = 'none';
         }
@@ -427,11 +464,11 @@ function initEventListeners() {
             const status = await getBackupStatus(accounts);
             const badge = $('backup-badge');
             if (status === 'never') {
-                badge.textContent = 'no backup exported';
-                badge.style.display = 'inline';
+                setBackupBadgeLabel(badge, 'no backup exported');
+                badge.style.display = 'inline-flex';
             } else if (status === 'stale') {
-                badge.textContent = 'changes since last export';
-                badge.style.display = 'inline';
+                setBackupBadgeLabel(badge, 'Changes since last backup');
+                badge.style.display = 'inline-flex';
             } else {
                 badge.style.display = 'none';
             }
@@ -795,9 +832,11 @@ async function setupLockScreen() {
     if (biometricData) {
         biometricUnlockBtn.style.display = 'flex';
         passphraseDivider.style.display = 'flex';
+        unlockBtn.classList.remove('is-primary');
     } else {
         biometricUnlockBtn.style.display = 'none';
         passphraseDivider.style.display = 'none';
+        unlockBtn.classList.add('is-primary');
         unlockPassphraseInput.focus();
     }
     hideElement(biometricError);
@@ -1277,18 +1316,6 @@ async function renderAccounts() {
         const actions = document.createElement('div');
         actions.className = 'account-actions';
 
-        const editQuickBtn = document.createElement('button');
-        editQuickBtn.className = 'account-edit-btn';
-        editQuickBtn.dataset.id = account.id;
-        editQuickBtn.title = 'Edit account';
-        editQuickBtn.setAttribute('aria-label', 'Edit account');
-        editQuickBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3Z" />
-                <path d="m15 5 4 4" />
-            </svg>
-        `;
-
         const more = document.createElement('div');
         more.className = 'account-more';
         const moreBtn = document.createElement('button');
@@ -1299,13 +1326,19 @@ async function renderAccounts() {
         const menu = document.createElement('div');
         menu.className = 'more-menu';
         menu.dataset.id = account.id;
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'more-menu-item edit-btn';
+        editBtn.dataset.id = account.id;
+        editBtn.textContent = 'Edit';
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'more-menu-item delete-btn';
         deleteBtn.dataset.id = account.id;
         deleteBtn.textContent = 'Delete';
-        menu.append(deleteBtn);
+        menu.append(editBtn, deleteBtn);
         more.append(moreBtn, menu);
-        actions.append(editQuickBtn, more);
+        actions.append(more);
 
         // Info
         const info = document.createElement('div');
@@ -1345,9 +1378,17 @@ async function renderAccounts() {
         text.setAttribute('y', '13');
         text.dataset.accountId = account.id;
         svg.append(track, fill, text);
-        codeSection.append(codeSpan, svg);
 
-        card.append(actions, info, codeSection);
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'account-copy-btn';
+        copyBtn.dataset.id = account.id;
+        copyBtn.title = 'Copy code';
+        copyBtn.setAttribute('aria-label', 'Copy code');
+        copyBtn.innerHTML = COPY_ICON;
+
+        codeSection.append(codeSpan, svg, copyBtn);
+
+        card.append(info, codeSection, actions);
         fragment.appendChild(card);
     });
     accountList.replaceChildren(fragment);
@@ -1357,13 +1398,22 @@ async function renderAccounts() {
         card.addEventListener('click', (e) => {
             const target = e.target;
             // Don't copy if clicking row action buttons or menus
-            if (target.closest('.account-actions')) return;
+            if (target.closest('.account-actions') || target.closest('.account-copy-btn')) return;
             const id = card.dataset.id;
             copyCode(id, card);
         });
     });
 
-    accountList.querySelectorAll('.account-edit-btn').forEach((btn) => {
+    accountList.querySelectorAll('.account-copy-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            const card = btn.closest('.account-card');
+            if (card) copyCode(id, card);
+        });
+    });
+
+    accountList.querySelectorAll('.edit-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const id = btn.dataset.id;
@@ -1516,12 +1566,9 @@ async function copyCode(accountId, cardElement) {
 
     try {
         await navigator.clipboard.writeText(code);
-        showToast('Copied!');
-
-        // Flash card
+        flashCopyButton(cardElement?.querySelector('.account-copy-btn'));
         cardElement.classList.add('copied');
         setTimeout(() => cardElement.classList.remove('copied'), 600);
-
         scheduleClipboardClear();
     } catch {
         showToast('Failed to copy');

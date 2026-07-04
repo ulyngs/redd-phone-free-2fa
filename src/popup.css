@@ -300,6 +300,26 @@ body {
   border-color: var(--accent-primary);
 }
 
+.unlock-btn.is-primary {
+  color: var(--btn-primary-text);
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+}
+
+.unlock-btn.is-primary:hover:not(:disabled) {
+  background-color: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
+  transform: translateY(-1px);
+}
+
+.unlock-btn.is-primary:disabled,
+.unlock-btn.is-primary:disabled:hover,
+.unlock-btn.is-primary:disabled:active {
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
+}
+
 .lock-security-note {
   display: flex;
   align-items: center;
@@ -846,7 +866,7 @@ body {
 
 #add-account-btn .icon-btn-label {
   display: inline;
-  font-size: 0.98em;
+  font-size: 1.02em;
   font-weight: 600;
   line-height: 1;
 }
@@ -983,7 +1003,7 @@ body {
 
 .account-issuer {
   font-size: 1em;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--text-primary);
 }
 
@@ -999,18 +1019,23 @@ body {
 
 .account-code {
   font-family: var(--font-mono);
-  font-size: 1.15em;
+  font-size: 1.25em;
   font-weight: 600;
   letter-spacing: 0.08em;
   color: var(--code-color);
   min-width: 80px;
   text-align: right;
+  transition: color 0.12s ease;
+}
+
+.account-card.copied .account-code {
+  color: var(--accent-primary);
 }
 
 /* Progress Ring */
 .progress-ring {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
 }
 
@@ -1031,7 +1056,7 @@ body {
 }
 
 .progress-ring__text {
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 600;
   fill: var(--text-muted);
   text-anchor: middle;
@@ -1044,20 +1069,14 @@ body {
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  margin-right: -4px;
+  margin-left: auto;
 }
 
-.account-edit-btn,
-.account-more {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.account-edit-btn {
-  width: 28px;
-  height: 28px;
+.account-copy-btn {
+  width: 30px;
+  height: 30px;
   padding: 0;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 4px;
   background: none;
   color: var(--text-subtle);
@@ -1065,17 +1084,30 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.12s ease;
+  flex-shrink: 0;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
-.account-edit-btn:hover {
+.account-copy-btn:hover {
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
 }
 
-.account-edit-btn svg {
-  width: 16px;
-  height: 16px;
+.account-copy-btn.is-copied,
+.account-copy-btn.is-copied:hover {
+  background-color: var(--bg-accent-soft);
+  border-color: var(--accent-secondary);
+  color: var(--accent-primary);
+}
+
+.account-copy-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.account-more {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .more-btn {
@@ -1105,7 +1137,8 @@ body {
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0;
+  left: auto;
   margin-top: 6px;
   min-width: 120px;
   background-color: var(--modal-bg);
@@ -1588,9 +1621,12 @@ body {
    Backup Badge (inline with Export button)
    ======================================== */
 .backup-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
   padding: 3px 8px;
-  font-size: 0.72em;
+  font-size: 0.76em;
   font-weight: 600;
   color: var(--warning-text);
   background: var(--warning-bg);
@@ -1599,6 +1635,17 @@ body {
   white-space: nowrap;
   cursor: pointer;
   transition: opacity 0.2s ease;
+}
+
+.backup-badge-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.backup-badge-topbar {
+  flex-shrink: 0;
+  padding: 5px 10px;
 }
 
 button.backup-badge:hover {
@@ -1901,18 +1948,6 @@ button.backup-badge:hover {
 
 .account-list::-webkit-scrollbar-thumb:hover {
   background-color: var(--border-hover);
-}
-
-/* ========================================
-   Copied state flash on account card
-   ======================================== */
-.account-card.copied {
-  border-color: var(--accent-primary);
-  background-color: var(--bg-accent-soft);
-}
-
-.account-card.copied .account-code {
-  color: var(--accent-primary);
 }
 
 /* ========================================
