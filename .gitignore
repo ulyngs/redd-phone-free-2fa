@@ -4,3 +4,6 @@ xcuserdata/
 DerivedData/
 build/
 *.zip
+
+# Exploratory logo concepts (not part of shipped extension)
+docs/logo-concepts/
