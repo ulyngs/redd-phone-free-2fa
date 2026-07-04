@@ -14,6 +14,20 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml), which checks the tag matches `manifest.json`, builds `phone-free-2fa-redd-vX.Y.zip`, and publishes a GitHub Release with that zip attached.
 
+## [2.4] - 2026-07-04
+
+### Changed
+
+- Redesigned EULA and passphrase setup screens for clearer onboarding.
+- Refined main and lock screens and reorganized in-app guidance.
+- Aligned settings panel with the main app layout.
+- Polished account cards, copy feedback, and lock screen actions.
+- Improved passphrase visibility toggle and footer behavior.
+
+### Fixed
+
+- Touch ID can now be re-enabled from Settings after dismissing the post-unlock setup prompt with "Don't ask again".
+
 ## [2.3] - 2026-06-25
 
 ### Changed
@@ -105,5 +119,6 @@ Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/
 - Configurable auto-lock timeout and clipboard auto-clear after 30 seconds.
 - Zero-dependency implementation using Web Crypto API only.
 
+[2.4]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.4
 [2.3]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.3
 [2.2]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.2

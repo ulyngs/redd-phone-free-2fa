@@ -41,7 +41,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for release history.
 - **Progress ring** — visual countdown showing time remaining for each code
 - **Change passphrase** — re-encrypts all accounts with a new key
 - **Backup / restore** — encrypted JSON export (stores only label + secret pairs); import supports both encrypted backups and plain `otpauth://` URI text files from other authenticator apps
-- **Backup status** — inline badge on the Export button warns if no backup has been exported, or if accounts have changed since the last export
+- **Backup status** — warning badge in the top bar and on the Export button if no backup has been exported, or if accounts have changed since the last export
 - **Plain text URI export** — export accounts as standard `otpauth://` URIs for migrating to another authenticator app
 - **Account migration** — view secret keys in the edit view for manual transfer, or use plain text URI export
 - **Data loss warning** — clear warning during setup about passphrase recovery
@@ -68,7 +68,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for release history.
 
 ```mermaid
 flowchart TD
-    click(["Click extension icon"]) --> background.js["background.js<br>Opens extension tab"]
+    click(["Click extension icon"]) --> background.js["background.js<br>Opens side panel (Chrome)<br>or sidebar (Firefox)"]
     background.js --> popup.js["popup.js<br>UI controller"]
     popup.js --> Unlock
 
@@ -82,7 +82,7 @@ flowchart TD
     storage.js --> |"decrypted secrets"| totp.js["totp.js<br>HMAC-SHA1/256/512 → 6-digit code"]
     totp.js --> |"codes"| popup.js
 
-    session.js -. "lock / timeout / tab close" .-> Unlock
+    session.js -. "lock / timeout / panel close" .-> Unlock
 ```
 
 ## Loading the Extension
@@ -129,20 +129,23 @@ No build step required — the extension runs as vanilla ES modules, and every f
 ```
 src/
 ├── manifest.json       # Extension manifest (MV3)
-├── popup.html          # Main UI (opens in a tab)
+├── popup.html          # Main UI (opens in the side panel / sidebar)
 ├── popup.css           # Styles (light/dark themes)
 ├── popup.js            # UI controller (events, TOTP refresh)
-├── background.js       # Service worker (tab management)
+├── background.js       # Service worker (opens the side panel / sidebar)
 ├── crypto.js           # Encryption/decryption (AES-GCM, PBKDF2)
 ├── totp.js             # TOTP engine (Base32, HMAC, RFC 6238)
 ├── storage.js          # Encrypted storage manager + backup fingerprinting
 ├── session.js          # In-memory session & auto-lock
 ├── biometric.js        # WebAuthn biometric unlock (PRF hardware integration)
+├── biometric-tab.html  # Dedicated tab for WebAuthn prompts (Chrome can't show them from side panels)
+├── biometric-tab.js    # Controller for the biometric tab
 ├── browser.js          # Minimal browser API shim
-├── passphrase-strength.js  # Hand-rolled strength check (~170 lines)
+├── passphrase-strength.js  # Hand-rolled strength check (~190 lines)
+├── step1-3.png         # In-app setup instruction images
 └── icons/              # Extension icons
 ```
 
 ### Auditability
 
-Every file that ships in the extension is plain, readable source — no bundlers, no minification, no build step, no vendored third-party code. The passphrase strength check (`src/passphrase-strength.js`) is ~170 lines of commented JavaScript covering: a `"password"` substring check (including leet-speak variants), an exact-match lookup against a 10-entry constant derived from the SecLists top-10k list filtered to `length >= 12`, keyboard-walk detection, repeating-pattern detection, and a minimum unique-character count. The derivation of the 10-entry list is documented inline with a one-line `curl | awk` command an auditor can run to reproduce it.
+Every file that ships in the extension is plain, readable source — no bundlers, no minification, no build step, no vendored third-party code. The passphrase strength check (`src/passphrase-strength.js`) is ~190 lines of commented JavaScript covering: a `"password"` substring check (including leet-speak variants), an exact-match lookup against a 10-entry constant derived from the SecLists top-10k list filtered to `length >= 12`, keyboard-walk detection, repeating-pattern detection, and a minimum unique-character count. The derivation of the 10-entry list is documented inline with a one-line `curl | awk` command an auditor can run to reproduce it.
