@@ -414,7 +414,6 @@ function initEventListeners() {
 
     // Add account
     $('add-account-btn').addEventListener('click', () => openAccountModal());
-    $('empty-add-btn').addEventListener('click', () => openAccountModal());
 
 
 
@@ -627,27 +626,42 @@ function initEventListeners() {
 /**
  * Initialise help tab switching.
  */
-function initHelpTabs() {
-    const tabs = document.querySelectorAll('.help-tab');
-    const panels = document.querySelectorAll('.help-tab-panel');
+function initTabGroup(tabSelector, panelSelector) {
+    const tabs = document.querySelectorAll(tabSelector);
+    const panels = document.querySelectorAll(panelSelector);
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+            });
             panels.forEach(p => { p.style.display = 'none'; });
             tab.classList.add('active');
             tab.setAttribute('aria-selected', 'true');
             $(tab.getAttribute('aria-controls')).style.display = 'block';
         });
     });
+}
 
-    // Show/hide toggle
-    const toggleBtn = $('help-toggle-btn');
-    const collapsible = $('help-tabs-content');
+function initHelpCollapsible(toggleBtnId, contentId, defaultVisible = true) {
+    const toggleBtn = $(toggleBtnId);
+    const collapsible = $(contentId);
+    if (!toggleBtn || !collapsible) return;
+
+    collapsible.style.display = defaultVisible ? 'block' : 'none';
+    toggleBtn.textContent = defaultVisible ? 'hide' : 'show';
+
     toggleBtn.addEventListener('click', () => {
         const isVisible = collapsible.style.display !== 'none';
         collapsible.style.display = isVisible ? 'none' : 'block';
         toggleBtn.textContent = isVisible ? 'show' : 'hide';
     });
+}
+
+function initHelpTabs() {
+    initTabGroup('.help-subtab', '.help-subtab-panel');
+    initHelpCollapsible('help-toggle-btn', 'help-tabs-content', true);
+    initHelpCollapsible('how-works-toggle-btn', 'how-works-content', false);
 }
 
 // ========================================

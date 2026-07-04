@@ -125,49 +125,60 @@
        Lock Screen
        ======================================== -->
   <div id="lock-screen" style="display: none;">
-    <div class="screen-container">
-      <div class="top-bar top-bar-no-border">
-        <div class="top-title-group top-title-group-screen">
-          <img class="top-logo" src="icons/icon-128.png" alt="Phone-Free 2FA">
-          <div class="top-title-block">
-            <h2 class="top-title">Phone-Free 2FA</h2>
+    <div class="screen-container lock-screen-container">
+      <div class="lock-body">
+        <div class="lock-hero">
+          <div class="lock-hero-brand">
+            <img class="lock-hero-icon" src="icons/icon-128.png" alt="Phone-Free 2FA">
+            <h2 class="lock-hero-title">Phone-Free 2FA</h2>
+          </div>
+          <p class="lock-hero-subtitle">Unlock your accounts with Touch ID or your passphrase.</p>
+        </div>
+
+        <div class="lock-form">
+          <button id="biometric-unlock-btn" class="btn-biometric" style="display: none;">
+            <svg class="biometric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 10a2 2 0 0 1 2 2c0 1.02-.1 2.51-.26 4" />
+              <path d="M14 17.5c-.74 3-2.08 4.5-3.5 4.5-2.76 0-5-4.48-5-10S6.24 2 9 2" />
+              <path d="M8.65 14c.2-1.3.65-2.05 1.35-2.05.7 0 1.15.75 1.35 2.05" />
+              <path d="M17.94 14a7 7 0 0 0-10.88-5.83" />
+              <path d="M22 12c0-5.52-4.48-10-10-10" />
+            </svg>
+            Unlock with Touch ID
+          </button>
+          <p id="biometric-error" class="error-text" style="display: none;"></p>
+
+          <p id="passphrase-divider" class="lock-divider" style="display: none;"><span>or use passphrase</span></p>
+
+          <div id="passphrase-section" class="lock-passphrase-section">
+            <div class="form-group lock-form-group">
+              <div class="input-with-toggle">
+                <input type="password" id="unlock-passphrase" placeholder="Master passphrase" autocomplete="off"
+                  spellcheck="false">
+                <button type="button" class="toggle-visibility" data-target="unlock-passphrase"
+                  title="Show/hide passphrase">
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p id="unlock-error" class="error-text" style="display: none;"></p>
+            <button id="unlock-btn" class="unlock-btn">Unlock</button>
           </div>
         </div>
-      </div>
-      <p class="subtitle">Unlock your encrypted accounts with your passphrase or Touch ID.</p>
 
-      <!-- Biometric unlock button (shown if biometric is set up) -->
-      <button id="biometric-unlock-btn" class="btn-biometric" style="display: none;">
-        <svg class="biometric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 10a2 2 0 0 1 2 2c0 1.02-.1 2.51-.26 4" />
-          <path d="M14 17.5c-.74 3-2.08 4.5-3.5 4.5-2.76 0-5-4.48-5-10S6.24 2 9 2" />
-          <path d="M8.65 14c.2-1.3.65-2.05 1.35-2.05.7 0 1.15.75 1.35 2.05" />
-          <path d="M17.94 14a7 7 0 0 0-10.88-5.83" />
-          <path d="M22 12c0-5.52-4.48-10-10-10" />
-        </svg>
-        Unlock with Touch ID
-      </button>
-      <p id="biometric-error" class="error-text" style="display: none;"></p>
-
-      <div id="passphrase-section">
-        <p id="passphrase-divider" class="lock-divider" style="display: none;"><span>or use passphrase</span></p>
-        <div class="form-group">
-          <div class="input-with-toggle">
-            <input type="password" id="unlock-passphrase" placeholder="Master passphrase" autocomplete="off"
-              spellcheck="false">
-            <button type="button" class="toggle-visibility" data-target="unlock-passphrase"
-              title="Show/hide passphrase">
-              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <p id="unlock-error" class="error-text" style="display: none;"></p>
-        <button id="unlock-btn" class="btn-primary">Unlock</button>
+        <p class="lock-security-note">
+          <svg class="lock-security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+          </svg>
+          Your codes are encrypted and never leave this device.
+        </p>
       </div>
     </div>
   </div>
@@ -217,99 +228,114 @@
     <!-- Empty State -->
     <div id="empty-state" class="empty-state" style="display: none;">
       <p class="empty-title">No accounts yet</p>
-      <p class="empty-subtitle">Add your first account to start generating secure one-time codes on this device.</p>
-      <button id="empty-add-btn" class="btn-secondary">Add your first account</button>
+      <p class="empty-subtitle">Click <strong>Add account</strong> above to start generating secure one-time codes with Phone-Free 2FA. (Instructions below)</p>
     </div>
 
     <div class="help-tabs-wrapper">
-      <div class="help-header-row">
-        <h3 class="help-header-title">Instructions</h3>
-        <button id="help-toggle-btn" class="help-toggle-btn" type="button">hide</button>
-      </div>
-      <div id="help-tabs-content" class="help-tabs-collapsible">
-        <div class="help-tabs-bar" role="tablist">
-          <button id="tab-use" class="help-tab active" role="tab" aria-selected="true" aria-controls="tab-panel-use">How
-            to use</button>
-          <button id="tab-works" class="help-tab" role="tab" aria-selected="false" aria-controls="tab-panel-works">How
-            it works</button>
+      <div class="help-section">
+        <div class="help-header-row">
+          <h3 class="help-header-title">Instructions</h3>
+          <button id="help-toggle-btn" class="help-toggle-btn" type="button">hide</button>
         </div>
+        <div id="help-tabs-content" class="help-collapsible">
+          <div class="help-subtabs-bar" role="tablist" aria-label="Instruction topics">
+            <button id="tab-use-microsoft" class="help-subtab active" role="tab" aria-selected="true"
+              aria-controls="tab-panel-use-microsoft">Steps for Microsoft accounts</button>
+            <button id="tab-use-general" class="help-subtab" role="tab" aria-selected="false"
+              aria-controls="tab-panel-use-general">General steps</button>
+          </div>
 
-        <div id="tab-panel-use" class="help-tab-panel" role="tabpanel" aria-labelledby="tab-use">
-          <div class="account-help-detail-block">
-            <h4 class="account-help-subheading">Instructions for Microsoft accounts</h4>
-            <p class="account-help-subtitle">If the below instructions do not work, search for specific guidance from your
-              local IT service.</p>
-            <ol class="account-help-detail-list">
-              <li>Go to <a href="https://mysignins.microsoft.com/security-info"
-                  target="_blank">mysignins.microsoft.com/security-info</a>, sign in, and click <strong>Add sign-in
-                  method</strong>
-                (if you don't see it and the page, click 'Security info').</li>
-              <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication
-                  app</strong>
-                → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
-              <li>In Phone-Free 2FA, <strong>Add account</strong> → paste the secret key → Phone-Free 2FA now generates codes</li>
-              <li>On your Microsoft account page, click <strong>Next</strong> → then enter a code Phone-Free 2FA generates.
-                Done!
-                🥳
-              </li>
-            </ol>
-            <div class="callout-box">
-              <span class="callout-icon" aria-hidden="true">ℹ️</span>
-              <p>When you next log in, your Microsoft account will probably still default to the Authenticator
-                app. Click <strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use
-                  a verification code</strong>.</p>
+          <div class="help-instructions-panel">
+            <div id="tab-panel-use-microsoft" class="help-subtab-panel" role="tabpanel" aria-labelledby="tab-use-microsoft">
+              <div class="account-help-detail-block">
+                <p class="account-help-subtitle">If these steps don't work, check guidance from your local IT service.</p>
+                <ol class="account-help-detail-list">
+                  <li>Go to <a href="https://mysignins.microsoft.com/security-info"
+                      target="_blank">mysignins.microsoft.com/security-info</a>, sign in, and click <strong>Add sign-in
+                      method</strong>
+                    (if you don't see it on the page, click 'Security info').</li>
+                  <li>Select <strong>Microsoft Authenticator</strong> → <strong>Set up a different authentication
+                      app</strong>
+                    → <strong>Next</strong> → <strong>Can't scan the QR code?</strong> → copy the secret key.</li>
+                  <li>In Phone-Free 2FA, <strong>Add account</strong> → paste the secret key → codes appear.</li>
+                  <li>On your Microsoft account page, click <strong>Next</strong> → enter a code Phone-Free 2FA generates. Done.</li>
+                </ol>
+                <div class="callout-box">
+                  <span class="callout-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4" />
+                      <path d="M12 8h.01" />
+                    </svg>
+                  </span>
+                  <p>Next time you log in, Microsoft may still default to the Authenticator app. Click <strong>"I can't use my Microsoft Authenticator app right now"</strong> → <strong>Use
+                      a verification code</strong>.</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-panel-use-general" class="help-subtab-panel" role="tabpanel" aria-labelledby="tab-use-general"
+              style="display: none;">
+              <div class="account-help-timeline">
+                <article class="timeline-step">
+                  <div class="timeline-marker" aria-hidden="true">1</div>
+                  <div class="timeline-content">
+                    <h4>Get a secret key from your service</h4>
+                    <p>From e.g. your Microsoft account, add a new sign-in route and get a
+                      'secret key' (sometimes shown as a QR code; if so, click 'Can't scan the QR code?').</p>
+                    <img class="timeline-image" src="step1.png" alt="Illustration for getting a secret key from a service">
+                  </div>
+                </article>
+                <article class="timeline-step">
+                  <div class="timeline-marker" aria-hidden="true">2</div>
+                  <div class="timeline-content">
+                    <h4>Add the secret key to Phone-Free 2FA</h4>
+                    <p>In Phone-Free 2FA, click 'Add account', give it a name like 'My University 2FA' and paste in the secret key.
+                    </p>
+                    <img class="timeline-image" src="step2.png" alt="Illustration for adding the secret key to Phone-Free 2FA">
+                  </div>
+                </article>
+                <article class="timeline-step">
+                  <div class="timeline-marker" aria-hidden="true">3</div>
+                  <div class="timeline-content">
+                    <h4>Give a code from Phone-Free 2FA to your service</h4>
+                    <p>Copy a generated code back into e.g. your Microsoft sign-in setup page. Done! 🥳</p>
+                    <img class="timeline-image" src="step3.png"
+                      alt="Illustration for confirming setup with a generated code">
+                  </div>
+                </article>
+              </div>
             </div>
           </div>
-          <h4 class="account-help-subheading">General process</h4>
-          <div class="account-help-timeline">
-            <article class="timeline-step">
-              <div class="timeline-marker" aria-hidden="true">1</div>
-              <div class="timeline-content">
-                <h4>Get a secret key from your service</h4>
-                <p>From e.g. your Microsoft account, add a new sign-in route and get a
-                  'secret key' (this key is sometimes shown as a QR code; if so, click 'Can't scan the QR code?').</p>
-                <img class="timeline-image" src="step1.png" alt="Illustration for getting a secret key from a service">
-              </div>
-            </article>
-            <article class="timeline-step">
-              <div class="timeline-marker" aria-hidden="true">2</div>
-              <div class="timeline-content">
-                <h4>Add the secret key to Phone-Free 2FA</h4>
-                <p>In Phone-Free 2FA, click 'Add account', name it e.g. 'My University 2FA' and paste the secret key.
-                </p>
-                <img class="timeline-image" src="step2.png" alt="Illustration for adding the secret key to Phone-Free 2FA">
-              </div>
-            </article>
-            <article class="timeline-step">
-              <div class="timeline-marker" aria-hidden="true">3</div>
-              <div class="timeline-content">
-                <h4>Give a code from Phone-Free 2FA to your service</h4>
-                <p>Copy a generated code back into e.g. your Microsoft account's setup page for new sign-ins, and you're
-                  done! 🥳</p>
-                <img class="timeline-image" src="step3.png"
-                  alt="Illustration for confirming setup with a generated code">
-              </div>
-            </article>
-          </div>
         </div>
+      </div>
 
-        <div id="tab-panel-works" class="help-tab-panel" role="tabpanel" aria-labelledby="tab-works"
-          style="display: none;">
-          <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
-            more secure, because a hacker cannot get into your accounts with your password alone.</p>
-          <p>Phone-Free 2FA uses the most common approach to 2FA, namely <strong>time-based one-time passwords</strong>
-            (TOTP).
-            You get a secret key from e.g. your Microsoft account, pass
-            it to Phone-Free 2FA, and it will generate a unique 6-digit code for you every 30 seconds.
-            You can then copy this code and paste it into your (e.g.) Microsoft account to log in.
-          <p>Phone-Free 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your
-            secret keys with your master passphrase / touch ID. This never leaves your device. Phone-Free 2FA is developed by
-            computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
-            Kollnig, Henry Tari), as
-            part of their work with the <a href="https://www.reddproject.org">Reduce Digital Distraction Project</a>.
-            The code is available at <a
-              href="https://github.com/ulyngs/redd-phone-free-2fa">https://github.com/ulyngs/redd-phone-free-2fa</a>.
-          </p>
+      <div class="help-section help-section-spaced">
+        <div class="help-header-row">
+          <h3 class="help-header-title">How does it work?</h3>
+          <button id="how-works-toggle-btn" class="help-toggle-btn" type="button">show</button>
+        </div>
+        <div id="how-works-content" class="help-collapsible" style="display: none;">
+          <div class="help-works-panel">
+            <p>2-factor authentication (2FA) adds a security layer beyond your password. This makes digital life much
+              more secure, because a hacker cannot get into your accounts with your password alone.</p>
+            <p>Phone-Free 2FA uses the most common approach to 2FA, namely <strong>time-based one-time passwords</strong>
+              (TOTP).
+              You get a secret key from e.g. your Microsoft account, pass
+              it to Phone-Free 2FA, and it will generate a unique 6-digit code for you every 30 seconds.
+              You can then copy this code and paste it into your (e.g.) Microsoft account to log in.</p>
+            <p>Phone-Free 2FA is safe, secure, and open-source. It runs completely locally on your device, and encrypts your
+              secret keys with your master passphrase / touch ID. This never leaves your device.</p>
+            <p>Phone-Free 2FA is developed by
+              computer scientists at the University of Oxford (Dr Ulrik Lyngs) and University of Maastricht (Dr Konrad
+              Kollnig, Henry Tari), as
+              part of their work with the <a href="https://www.reddproject.org" target="_blank" rel="noopener noreferrer"
+                class="eula-link">Reduce Digital Distraction Project</a>.
+              The code is available at <a href="https://github.com/ulyngs/redd-phone-free-2fa" target="_blank"
+                rel="noopener noreferrer" class="eula-link">https://github.com/ulyngs/redd-phone-free-2fa</a>.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -324,7 +350,6 @@
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
-        <p class="settings-kicker">Security and backup</p>
         <h3>Settings</h3>
         <div class="settings-item">
           <label for="theme-select">Light / dark theme</label>
