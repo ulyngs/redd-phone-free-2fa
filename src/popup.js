@@ -640,13 +640,14 @@ function initEventListeners() {
     document.addEventListener('click', () => touchActivity());
     document.addEventListener('keydown', () => touchActivity());
 
-    // Best-effort: flush a pending clipboard clear before the panel goes
-    // away, so a copied code doesn't linger forever if the side panel is
-    // closed within the clear window.
+    // Chrome side panels often keep this document alive when "closed".
+    // Lock + wipe on hide so the AES key and decrypted secrets do not
+    // linger in memory. Skip while a biometric tab owns the ceremony —
+    // that flow takes focus away from the panel and needs pending state.
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') flushClipboardClear();
+        if (document.visibilityState === 'hidden') lockOnPanelHide();
     });
-    window.addEventListener('pagehide', flushClipboardClear);
+    window.addEventListener('pagehide', lockOnPanelHide);
 
     // Open external links in a new tab. The rel="noopener noreferrer" on the
     // <a> doesn't carry through when we intercept the click and call
@@ -1076,12 +1077,31 @@ function handleBiometricTabClosedUnexpectedly() {
     }
 }
 
+/**
+ * True only for the tab we opened for the current WebAuthn ceremony.
+ * Fail closed: no tracked tab, missing sender.tab, or ID mismatch → reject.
+ */
+function isTrustedBiometricSender(sender) {
+    if (!biometricTab || sender?.tab?.id !== biometricTab.id) return false;
+    if (sender.url) {
+        const extensionOrigin = browser.runtime.getURL('');
+        if (!sender.url.startsWith(extensionOrigin)) return false;
+    }
+    return true;
+}
+
 function initBiometricMessaging() {
     if (!browser.runtime?.onMessage) return;
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (!message?.type) return;
         // Defence in depth: only honour messages from our currently-tracked tab.
-        if (sender?.tab && biometricTab && sender.tab.id !== biometricTab.id) return;
+        if (!isTrustedBiometricSender(sender)) {
+            if (message.type === 'biometric-setup-request-passphrase') {
+                sendResponse({ error: 'unauthorized' });
+                return false;
+            }
+            return;
+        }
 
         switch (message.type) {
             case 'biometric-setup-request-passphrase':
@@ -1987,6 +2007,26 @@ async function importMerge(imported, key) {
 // ========================================
 // Helpers
 // ========================================
+
+/**
+ * Lock when the side panel is hidden/closed. Chrome often keeps the
+ * document alive after close, so visibility/pagehide is the signal we get.
+ * Skip during an in-flight biometric tab ceremony (it steals focus).
+ */
+function lockOnPanelHide() {
+    if (biometricTab) {
+        flushClipboardClear();
+        return;
+    }
+    if (!isUnlocked()) {
+        flushClipboardClear();
+        return;
+    }
+    lock();
+    wipeSensitiveState();
+    showScreen('lock');
+    setupLockScreen();
+}
 
 /**
  * Wipe every piece of decrypted state held in the popup on lock.
