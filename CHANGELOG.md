@@ -14,6 +14,17 @@ and this project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/release.yml), which checks the tag matches `manifest.json`, builds `phone-free-2fa-redd-vX.Y.zip`, and publishes a GitHub Release with that zip attached.
 
+## [2.5] - 2026-07-20
+
+### Changed
+
+- Updated in-app attribution, store copy, and privacy contact to Centre for Digital Habits ([digitalhabits.org](https://digitalhabits.org)).
+
+### Security
+
+- Lock and wipe decrypted vault state when the side panel is hidden/closed (Chrome often keeps the panel document alive after close).
+- Fail closed on biometric passphrase handoff: only accept messages from the tracked biometric tab.
+
 ## [2.4] - 2026-07-04
 
 ### Changed
@@ -119,6 +130,7 @@ Pushing a `v*` tag triggers [`.github/workflows/release.yml`](.github/workflows/
 - Configurable auto-lock timeout and clipboard auto-clear after 30 seconds.
 - Zero-dependency implementation using Web Crypto API only.
 
+[2.5]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.5
 [2.4]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.4
 [2.3]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.3
 [2.2]: https://github.com/ulyngs/redd-phone-free-2fa/releases/tag/v2.2
