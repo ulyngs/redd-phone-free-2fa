@@ -4,7 +4,7 @@ Use your computer browser for 2FA so you don't need to reach for your phone ever
 
 **Phone-Free 2FA** runs in your browser's sidebar, so your codes stay visible next to the page you're logging into — no hunting through pinned tabs or toolbar popups.
 
-Phone-Free 2FA by ReDD is developed by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction Project (reddfocus.org).
+Phone-Free 2FA by ReDD is developed by computer scientists at the University of Oxford (Dr Ulrik Lyngs) and the University of Maastricht (Dr Konrad Kollnig, Henry Tari), as part of the Reduce Digital Distraction project (digitalhabits.org).
 
 ⚙️ **How it works**
 Two-factor authentication (2FA) makes digital life much more secure — a hacker can't get in with your password alone. Phone-Free 2FA is an authenticator that uses the most common method: time-based one-time passwords (TOTP). You add a 2FA secret key from any service that supports TOTP (e.g. a university Microsoft account). Phone-Free 2FA encrypts it locally and generates a fresh 6-digit login code every 30 seconds.
