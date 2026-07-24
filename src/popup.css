@@ -698,6 +698,46 @@ body {
   display: none;
 }
 
+/* Copy button for the secret key field (edit mode only). Sits left of the
+   eye toggle; copies without needing to reveal the masked value. */
+.copy-secret-btn {
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--icon-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.copy-secret-btn:hover {
+  color: var(--icon-hover);
+  background-color: var(--bg-hover);
+}
+
+.copy-secret-btn.is-copied,
+.copy-secret-btn.is-copied:hover {
+  background-color: var(--bg-accent-soft);
+  border-color: var(--accent-secondary);
+  color: var(--accent-primary);
+}
+
+.copy-secret-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.input-with-toggle.has-copy input {
+  padding-right: 72px;
+}
+
 .toggle-visibility {
   position: absolute;
   right: 5px;

@@ -88,6 +88,7 @@ const accountModalOverlay = $('account-modal-overlay');
 const modalTitle = $('modal-title');
 const manualLabel = $('manual-label');
 const manualSecret = $('manual-secret');
+const copySecretBtn = $('copy-secret-btn');
 const secretValidation = $('secret-validation');
 const modalError = $('modal-error');
 const modalSaveBtn = $('modal-save-btn');
@@ -546,6 +547,21 @@ function initEventListeners() {
         if (e.target === accountModalOverlay) closeAccountModal();
     });
     modalSaveBtn.addEventListener('click', handleSaveAccount);
+
+    // Copy the secret key without revealing it. Programmatic clipboard
+    // writes are allowed even while the input is type="password" (the
+    // browser only blocks selection-copy from password fields).
+    copySecretBtn.addEventListener('click', async () => {
+        const secret = manualSecret.value.trim();
+        if (!secret) return;
+        try {
+            await navigator.clipboard.writeText(secret);
+            flashCopyButton(copySecretBtn);
+            scheduleClipboardClear();
+        } catch {
+            showToast('Failed to copy');
+        }
+    });
 
     // Secret validation
     manualSecret.addEventListener('input', () => {
@@ -1643,6 +1659,10 @@ function openAccountModal(editId) {
         modalTitle.textContent = 'Edit Account';
         manualLabel.value = account.issuer || account.accountName;
         manualSecret.value = account.secret;
+        // Copy button only makes sense in edit mode (migration flow) —
+        // in add mode the user just pasted the secret themselves.
+        copySecretBtn.style.display = 'flex';
+        copySecretBtn.parentElement.classList.add('has-copy');
     } else {
         modalTitle.textContent = 'Add Account';
     }
@@ -1661,6 +1681,8 @@ function resetModal() {
     manualLabel.value = '';
     manualSecret.value = '';
     manualSecret.type = 'password';
+    copySecretBtn.style.display = 'none';
+    copySecretBtn.parentElement.classList.remove('has-copy');
     updateAllVisibilityToggles();
     hideElement(secretValidation);
     hideElement(modalError);

@@ -424,6 +424,14 @@
         <div class="input-with-toggle">
           <input type="password" id="manual-secret" placeholder="e.g. JBSWY3DPEHPK3PXP" autocomplete="off"
             spellcheck="false">
+          <button type="button" id="copy-secret-btn" class="copy-secret-btn" title="Copy secret key"
+            aria-label="Copy secret key" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+            </svg>
+          </button>
           <button type="button" class="toggle-visibility" data-target="manual-secret" title="Show/hide secret key">
             <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
