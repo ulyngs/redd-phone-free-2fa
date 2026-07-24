@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Storage manager
+ * Phone-Free 2FA — Storage manager
  *
  * Manages encrypted account data in browser.storage.local.
  * All data is stored as a single encrypted JSON blob.

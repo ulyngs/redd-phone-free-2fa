@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Main popup controller
+ * Phone-Free 2FA — Main popup controller
  *
  * Manages all popup UI: setup, lock/unlock, account list,
  * TOTP code generation, modals, search, clipboard, and settings.

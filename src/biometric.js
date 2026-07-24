@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Biometric unlock via WebAuthn
+ * Phone-Free 2FA — Biometric unlock via WebAuthn
  *
  * Uses WebAuthn PRF extension (Chrome 118+, Edge 118+) to derive a key
  * from the biometric gesture itself.

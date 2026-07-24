@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Biometric setup/unlock tab
+ * Phone-Free 2FA — Biometric setup/unlock tab
  *
  * Chrome doesn't show WebAuthn prompts from extension side panels — the
  * navigator.credentials.create()/get() call hangs silently. This page is

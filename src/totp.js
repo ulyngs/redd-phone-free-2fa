@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — TOTP engine
+ * Phone-Free 2FA — TOTP engine
  *
  * Pure Web Crypto API implementation — no external dependencies.
  * Implements RFC 6238 (TOTP) and RFC 4226 (HOTP).

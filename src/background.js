@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Background service worker
+ * Phone-Free 2FA — Background service worker
  *
  * Opens popup.html in a sidebar panel when the extension icon is clicked.
  * - Chrome: uses the Side Panel API (chrome.sidePanel)

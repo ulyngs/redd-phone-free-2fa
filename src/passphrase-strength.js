@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Passphrase strength check
+ * Phone-Free 2FA — Passphrase strength check
  *
  * Pure, auditable passphrase-strength heuristics. Designed to be readable
  * end-to-end in a few minutes. No external data, no network, no async.

@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Phone-Free 2FA by ReDD",
+    "name": "Phone-Free 2FA",
     "description": "Open-source, local-only authenticator for time-based one-time passwords (TOTP).",
     "version": "2.5",
     "icons": {

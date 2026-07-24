@@ -61,6 +61,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "v${{ steps.meta.outputs.version }} — Phone-Free 2FA by ReDD"
+          name: "v${{ steps.meta.outputs.version }} — Phone-Free 2FA"
           body_path: release-notes.md
           files: ${{ steps.meta.outputs.zip_name }}

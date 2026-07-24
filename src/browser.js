@@ -1,5 +1,5 @@
 /**
- * Phone-Free 2FA by ReDD — Minimal browser API shim
+ * Phone-Free 2FA — Minimal browser API shim
  *
  * Zero-dependency replacement for webextension-polyfill.
  * In MV3, both Chrome and Firefox support promise-based APIs natively.
